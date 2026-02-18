@@ -258,16 +258,20 @@
       line-height: 1.7;
       tab-size: 2;
     }
-    /* Syntax highlight classes */
-    .hl-tag { color: #7dd3fc; }
-    .hl-attr { color: #a78bfa; }
-    .hl-str { color: #4ade80; }
-    .hl-kw { color: #f472b6; }
-    .hl-comment { color: #475569; font-style: italic; }
-    .hl-fn { color: #fbbf24; }
-    .hl-num { color: #fb923c; }
-    .hl-prop { color: #e2e8f0; }
-    .hl-punct { color: #64748b; }
+    /* Prism.js syntax highlight overrides */
+    code[class*="language-"], pre[class*="language-"] { color: var(--text); text-shadow: none; background: none; }
+    pre > code[class*="language-"] { padding: 0; }
+    .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #475569; font-style: italic; }
+    .token.punctuation { color: #64748b; }
+    .token.tag { color: #7dd3fc; }
+    .token.attr-name { color: #a78bfa; }
+    .token.attr-value { color: #4ade80; }
+    .token.string { color: #4ade80; }
+    .token.keyword { color: #f472b6; }
+    .token.function { color: #fbbf24; }
+    .token.number, .token.boolean { color: #fb923c; }
+    .token.operator { color: #64748b; }
+    .token.property { color: #e2e8f0; }
 
     /* ── Quick Start ── */
     .quickstart { border-top: 1px solid var(--border); }
@@ -478,11 +482,11 @@
         <div class="pkg-card">
           <span class="pkg-name" style="background:rgba(251,146,60,.1); color:var(--orange)">@wcstack/state</span>
           <h3>Reactive State</h3>
-          <p>Reactive state management with Mustache syntax, path getters for computed properties, 37 built-in filters, two-way binding, and structural directives — no virtual DOM or compilation.</p>
+          <p>Reactive state management with Mustache syntax, path getters for computed properties, 40 built-in filters, two-way binding, and structural directives — no virtual DOM or compilation.</p>
           <ul class="pkg-features">
             <li>Mustache Syntax</li>
             <li>Path Getters</li>
-            <li>37 Filters</li>
+            <li>40 Filters</li>
             <li>Two-way Binding</li>
             <li>for / if / else</li>
           </ul>
@@ -509,21 +513,21 @@
             <span class="filename">index.html</span>
             <span>Autoloader</span>
           </div>
-<pre><span class="hl-comment">&lt;!-- Define your import maps --&gt;</span>
-<span class="hl-tag">&lt;script</span> <span class="hl-attr">type</span>=<span class="hl-str">"importmap"</span><span class="hl-tag">&gt;</span>
-  <span class="hl-punct">{</span>
-    <span class="hl-str">"imports"</span><span class="hl-punct">:</span> <span class="hl-punct">{</span>
-      <span class="hl-str">"@components/ui/"</span><span class="hl-punct">:</span> <span class="hl-str">"./components/ui/"</span><span class="hl-punct">,</span>
-      <span class="hl-str">"@components/ui|lit/"</span><span class="hl-punct">:</span> <span class="hl-str">"./components/ui-lit/"</span>
-    <span class="hl-punct">}</span>
-  <span class="hl-punct">}</span>
-<span class="hl-tag">&lt;/script&gt;</span>
+<pre><code class="language-html">&lt;!-- Define your import maps --&gt;
+&lt;script type="importmap"&gt;
+  {
+    "imports": {
+      "@components/ui/": "./components/ui/",
+      "@components/ui|lit/": "./components/ui-lit/"
+    }
+  }
+&lt;/script&gt;
 
-<span class="hl-comment">&lt;!-- Auto-loaded from ./components/ui/button.js --&gt;</span>
-<span class="hl-tag">&lt;ui-button&gt;&lt;/ui-button&gt;</span>
+&lt;!-- Auto-loaded from ./components/ui/button.js --&gt;
+&lt;ui-button&gt;&lt;/ui-button&gt;
 
-<span class="hl-comment">&lt;!-- Auto-loaded with Lit loader --&gt;</span>
-<span class="hl-tag">&lt;ui-lit-card&gt;&lt;/ui-lit-card&gt;</span></pre>
+&lt;!-- Auto-loaded with Lit loader --&gt;
+&lt;ui-lit-card&gt;&lt;/ui-lit-card&gt;</code></pre>
         </div>
         <!-- Router -->
         <div class="code-panel" id="panel-router">
@@ -531,31 +535,31 @@
             <span class="filename">index.html</span>
             <span>Router</span>
           </div>
-<pre><span class="hl-tag">&lt;wcs-router&gt;</span>
-  <span class="hl-tag">&lt;template&gt;</span>
-    <span class="hl-tag">&lt;wcs-route</span> <span class="hl-attr">path</span>=<span class="hl-str">"/"</span><span class="hl-tag">&gt;</span>
-      <span class="hl-tag">&lt;wcs-layout</span> <span class="hl-attr">layout</span>=<span class="hl-str">"main-layout"</span><span class="hl-tag">&gt;</span>
-        <span class="hl-tag">&lt;nav</span> <span class="hl-attr">slot</span>=<span class="hl-str">"header"</span><span class="hl-tag">&gt;</span>
-          <span class="hl-tag">&lt;wcs-link</span> <span class="hl-attr">to</span>=<span class="hl-str">"/"</span><span class="hl-tag">&gt;</span>Home<span class="hl-tag">&lt;/wcs-link&gt;</span>
-          <span class="hl-tag">&lt;wcs-link</span> <span class="hl-attr">to</span>=<span class="hl-str">"/products"</span><span class="hl-tag">&gt;</span>Products<span class="hl-tag">&lt;/wcs-link&gt;</span>
-        <span class="hl-tag">&lt;/nav&gt;</span>
-        <span class="hl-tag">&lt;wcs-route</span> <span class="hl-attr">index</span><span class="hl-tag">&gt;</span>
-          <span class="hl-tag">&lt;wcs-head&gt;&lt;title&gt;</span>Home<span class="hl-tag">&lt;/title&gt;&lt;/wcs-head&gt;</span>
-          <span class="hl-tag">&lt;app-home&gt;&lt;/app-home&gt;</span>
-        <span class="hl-tag">&lt;/wcs-route&gt;</span>
-        <span class="hl-tag">&lt;wcs-route</span> <span class="hl-attr">path</span>=<span class="hl-str">"products"</span><span class="hl-tag">&gt;</span>
-          <span class="hl-tag">&lt;wcs-route</span> <span class="hl-attr">path</span>=<span class="hl-str">":id(int)"</span><span class="hl-tag">&gt;</span>
-            <span class="hl-tag">&lt;product-detail</span> <span class="hl-attr">data-bind</span>=<span class="hl-str">"props"</span><span class="hl-tag">&gt;&lt;/product-detail&gt;</span>
-          <span class="hl-tag">&lt;/wcs-route&gt;</span>
-        <span class="hl-tag">&lt;/wcs-route&gt;</span>
-      <span class="hl-tag">&lt;/wcs-layout&gt;</span>
-    <span class="hl-tag">&lt;/wcs-route&gt;</span>
-    <span class="hl-tag">&lt;wcs-route</span> <span class="hl-attr">fallback</span><span class="hl-tag">&gt;</span>
-      <span class="hl-tag">&lt;error-404&gt;&lt;/error-404&gt;</span>
-    <span class="hl-tag">&lt;/wcs-route&gt;</span>
-  <span class="hl-tag">&lt;/template&gt;</span>
-<span class="hl-tag">&lt;/wcs-router&gt;</span>
-<span class="hl-tag">&lt;wcs-outlet&gt;&lt;/wcs-outlet&gt;</span></pre>
+<pre><code class="language-html">&lt;wcs-router&gt;
+  &lt;template&gt;
+    &lt;wcs-route path="/"&gt;
+      &lt;wcs-layout layout="main-layout"&gt;
+        &lt;nav slot="header"&gt;
+          &lt;wcs-link to="/"&gt;Home&lt;/wcs-link&gt;
+          &lt;wcs-link to="/products"&gt;Products&lt;/wcs-link&gt;
+        &lt;/nav&gt;
+        &lt;wcs-route index&gt;
+          &lt;wcs-head&gt;&lt;title&gt;Home&lt;/title&gt;&lt;/wcs-head&gt;
+          &lt;app-home&gt;&lt;/app-home&gt;
+        &lt;/wcs-route&gt;
+        &lt;wcs-route path="products"&gt;
+          &lt;wcs-route path=":id(int)"&gt;
+            &lt;product-detail data-bind="props"&gt;&lt;/product-detail&gt;
+          &lt;/wcs-route&gt;
+        &lt;/wcs-route&gt;
+      &lt;/wcs-layout&gt;
+    &lt;/wcs-route&gt;
+    &lt;wcs-route fallback&gt;
+      &lt;error-404&gt;&lt;/error-404&gt;
+    &lt;/wcs-route&gt;
+  &lt;/template&gt;
+&lt;/wcs-router&gt;
+&lt;wcs-outlet&gt;&lt;/wcs-outlet&gt;</code></pre>
         </div>
         <!-- State -->
         <div class="code-panel" id="panel-state">
@@ -563,33 +567,36 @@
             <span class="filename">index.html</span>
             <span>State</span>
           </div>
-<pre><span class="hl-tag">&lt;wcs-state&gt;</span>
-  <span class="hl-tag">&lt;script</span> <span class="hl-attr">type</span>=<span class="hl-str">"module"</span><span class="hl-tag">&gt;</span>
-    <span class="hl-kw">export default</span> <span class="hl-punct">{</span>
-      <span class="hl-prop">taxRate</span><span class="hl-punct">:</span> <span class="hl-num">0.1</span><span class="hl-punct">,</span>
-      <span class="hl-prop">cart</span><span class="hl-punct">:</span> <span class="hl-punct">{</span>
-        <span class="hl-prop">items</span><span class="hl-punct">:</span> <span class="hl-punct">[</span>
-          <span class="hl-punct">{</span> <span class="hl-prop">name</span><span class="hl-punct">:</span> <span class="hl-str">"Widget"</span><span class="hl-punct">,</span> <span class="hl-prop">price</span><span class="hl-punct">:</span> <span class="hl-num">500</span><span class="hl-punct">,</span> <span class="hl-prop">quantity</span><span class="hl-punct">:</span> <span class="hl-num">2</span> <span class="hl-punct">}</span><span class="hl-punct">,</span>
-          <span class="hl-punct">{</span> <span class="hl-prop">name</span><span class="hl-punct">:</span> <span class="hl-str">"Gadget"</span><span class="hl-punct">,</span> <span class="hl-prop">price</span><span class="hl-punct">:</span> <span class="hl-num">1200</span><span class="hl-punct">,</span> <span class="hl-prop">quantity</span><span class="hl-punct">:</span> <span class="hl-num">1</span> <span class="hl-punct">}</span>
-        <span class="hl-punct">]</span>
-      <span class="hl-punct">}</span><span class="hl-punct">,</span>
-      <span class="hl-kw">get</span> <span class="hl-str">"cart.total"</span><span class="hl-punct">()</span> <span class="hl-punct">{</span>
-        <span class="hl-kw">return</span> <span class="hl-kw">this</span>.<span class="hl-fn">$getAll</span><span class="hl-punct">(</span><span class="hl-str">"cart.items.*.subtotal"</span><span class="hl-punct">,</span> <span class="hl-punct">[])</span>
-          .<span class="hl-fn">reduce</span><span class="hl-punct">((</span><span class="hl-prop">a</span><span class="hl-punct">,</span> <span class="hl-prop">b</span><span class="hl-punct">)</span> <span class="hl-kw">=&gt;</span> <span class="hl-prop">a</span> + <span class="hl-prop">b</span><span class="hl-punct">,</span> <span class="hl-num">0</span><span class="hl-punct">)</span>;
-      <span class="hl-punct">}</span>
-    <span class="hl-punct">}</span>;
-  <span class="hl-tag">&lt;/script&gt;</span>
-<span class="hl-tag">&lt;/wcs-state&gt;</span>
+<pre><code class="language-html">&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      taxRate: 0.1,
+      cart: {
+        items: [
+          { name: "Widget", price: 500, quantity: 2 },
+          { name: "Gadget", price: 1200, quantity: 1 }
+        ]
+      },
+      get "cart.items.*.subtotal"() {
+        return this["cart.items.*.price"] * this["cart.items.*.quantity"];
+      },
+      get "cart.total"() {
+        return this.$getAll("cart.items.*.subtotal", [])
+          .reduce((a, b) =&gt; a + b, 0);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
 
-<span class="hl-comment">&lt;!-- Declarative rendering with Mustache syntax --&gt;</span>
-<span class="hl-tag">&lt;template</span> <span class="hl-attr">data-wcs</span>=<span class="hl-str">"for: cart.items"</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>
+&lt;!-- Declarative rendering with Mustache syntax --&gt;
+&lt;template data-wcs="for: cart.items"&gt;
+  &lt;div&gt;
     {{ .name }} &amp;times;
-    <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-str">"number"</span> <span class="hl-attr">data-wcs</span>=<span class="hl-str">"value: .quantity"</span><span class="hl-tag">&gt;</span>
-    = <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-wcs</span>=<span class="hl-str">"textContent: .subtotal|locale"</span><span class="hl-tag">&gt;&lt;/span&gt;</span>
-  <span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/template&gt;</span>
-<span class="hl-tag">&lt;p&gt;</span>Total: <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-wcs</span>=<span class="hl-str">"textContent: cart.total|locale(ja-JP)"</span><span class="hl-tag">&gt;&lt;/span&gt;&lt;/p&gt;</span></pre>
+    &lt;input type="number" data-wcs="valueAsNumber: .quantity"&gt;
+    = &lt;span data-wcs="textContent: .subtotal|locale"&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+&lt;p&gt;Total: &lt;span data-wcs="textContent: cart.total|locale(ja-JP)"&gt;&lt;/span&gt;&lt;/p&gt;</code></pre>
         </div>
       </div>
     </div>
@@ -606,10 +613,10 @@
           <span class="filename">index.html</span>
           <span>CDN via jsdelivr</span>
         </div>
-<pre><span class="hl-comment">&lt;!-- Load from jsdelivr CDN --&gt;</span>
-<span class="hl-tag">&lt;script</span> <span class="hl-attr">src</span>=<span class="hl-str">"https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/autoloader/dist/auto.min.js"</span><span class="hl-tag">&gt;&lt;/script&gt;</span>
-<span class="hl-tag">&lt;script</span> <span class="hl-attr">src</span>=<span class="hl-str">"https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/router/dist/auto.min.js"</span><span class="hl-tag">&gt;&lt;/script&gt;</span>
-<span class="hl-tag">&lt;script</span> <span class="hl-attr">src</span>=<span class="hl-str">"https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/state/dist/auto.min.js"</span><span class="hl-tag">&gt;&lt;/script&gt;</span></pre>
+<pre><code class="language-html">&lt;!-- Load from jsdelivr CDN --&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/autoloader/dist/auto.min.js"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/router/dist/auto.min.js"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/gh/wcstack/wcstack@main/packages/state/dist/auto.min.js"&gt;&lt;/script&gt;</code></pre>
       </div>
       <div class="steps fade-in">
         <div class="step">
@@ -624,8 +631,8 @@
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <h3>Write HTML</h3>
-          <p>Use custom elements directly in your HTML. The autoloader handles the rest — just write <code>&lt;my-component&gt;</code>.</p>
+          <h3>Define in HTML</h3>
+          <p>Define loading rules in <code>&lt;script type="importmap"&gt;</code>, route maps in <code>&lt;wcs-router&gt;</code>, and reactive state in <code>&lt;wcs-state&gt;</code> — everything starts automatically from your HTML definitions.</p>
         </div>
       </div>
     </div>
@@ -636,7 +643,7 @@
     <div class="container">
       <div class="footer-links">
         <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.npmjs.com/org/wcstack" target="_blank" rel="noopener">npm</a>
+
         <a href="https://github.com/wcstack/wcstack/issues" target="_blank" rel="noopener">Issues</a>
         <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
       </div>
@@ -645,6 +652,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
   <script>
     // Tab switching
     document.querySelectorAll('.code-tab').forEach(tab => {
