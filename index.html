@@ -407,7 +407,7 @@
       <div class="keywords">
         <span class="keyword">Custom Elements</span>
         <span class="keyword">Single CDN import</span>
-        <span class="keyword">HTML-native syntax</span>
+        <span class="keyword">HTML-semantic syntax</span>
         <span class="keyword">Zero dependencies</span>
       </div>
       <div class="cta-group">
@@ -556,26 +556,32 @@
           { name: "Gadget", price: 1200, quantity: 1 }
         ]
       },
+      removeItem(event, index) {
+        this["cart.items"] = this["cart.items"].toSpliced(index, 1);
+      },
       get "cart.items.*.subtotal"() {
         return this["cart.items.*.price"] * this["cart.items.*.quantity"];
       },
       get "cart.total"() {
         return this.$getAll("cart.items.*.subtotal", [])
           .reduce((a, b) =&gt; a + b, 0);
+      },
+      get "cart.grandTotal"() {
+        return this["cart.total"] * (1 + this.taxRate);
       }
     };
   &lt;/script&gt;
 &lt;/wcs-state&gt;
 
-&lt;!-- Declarative rendering with Mustache syntax --&gt;
 &lt;template data-wcs="for: cart.items"&gt;
   &lt;div&gt;
     {{ .name }} &amp;times;
-    &lt;input type="number" data-wcs="valueAsNumber: .quantity"&gt;
+    &lt;input type="number" data-wcs="value: .quantity"&gt;
     = &lt;span data-wcs="textContent: .subtotal|locale"&gt;&lt;/span&gt;
+    &lt;button data-wcs="onclick: removeItem"&gt;Delete&lt;/button&gt;
   &lt;/div&gt;
 &lt;/template&gt;
-&lt;p&gt;Total: &lt;span data-wcs="textContent: cart.total|locale(ja-JP)"&gt;&lt;/span&gt;&lt;/p&gt;</code></pre>
+&lt;p&gt;Grand Total: &lt;span data-wcs="textContent: cart.grandTotal|locale(ja-JP)"&gt;&lt;/span&gt;&lt;/p&gt;</code></pre>
         </div>
       </div>
     </div>
@@ -616,9 +622,9 @@
         <div class="rule">
           <div class="rule-num" style="background:rgba(212,136,114,.1); color:var(--rule-4)">4</div>
           <div>
-            <h3>HTML-native syntax</h3>
-            <p>No DSL, no special template syntax. If it doesn't look like regular HTML, we find another way.</p>
-            <p class="ja">DSLなし、特別なテンプレート構文なし。普通のHTMLに見えなければ、別の方法を探す。</p>
+            <h3>Respect HTML semantics</h3>
+            <p>Expressions live in <code>data-*</code> attributes and text nodes &mdash; places HTML already allows extension. The DOM structure and semantics stay intact.</p>
+            <p class="ja">式は<code>data-*</code>属性とテキストノードに配置 &mdash; HTMLが拡張を許可する場所のみ。DOM構造とセマンティクスはそのまま。</p>
           </div>
         </div>
         <div class="rule">
@@ -630,8 +636,8 @@
           </div>
         </div>
       </div>
-      <p class="rules-epilogue fade-in">These rules sound simple. They're not. Constraining yourself to HTML-native syntax means you need to deeply understand how HTML was designed. Building everything as custom tags means solving lifecycle, ordering, and communication within the Custom Elements spec. No dependencies means every algorithm is yours to write. And it all has to feel like it <em>could</em> be a browser built-in.</p>
-      <p class="rules-epilogue-ja fade-in">シンプルに聞こえるルールだが、実際は違う。HTML-nativeな構文に縛られるなら、HTMLの設計を深く理解する必要がある。すべてをカスタムタグで構築するなら、Custom Elementsの仕様の中でライフサイクル・順序・通信を解決しなければならない。依存ゼロなら、あらゆるアルゴリズムを自分で書く。そしてそのすべてが「ブラウザ組み込みかもしれない」と感じさせなければならない。</p>
+      <p class="rules-epilogue fade-in">These rules sound simple. They're not. Respecting HTML semantics means you need to deeply understand where the spec allows extension &mdash; and where it doesn't. Building everything as custom tags means solving lifecycle, ordering, and communication within the Custom Elements spec. No dependencies means every algorithm is yours to write. And it all has to feel like it <em>could</em> be a browser built-in.</p>
+      <p class="rules-epilogue-ja fade-in">シンプルに聞こえるルールだが、実際は違う。HTMLセマンティクスを尊重するなら、仕様が拡張を許す場所と許さない場所を深く理解する必要がある。すべてをカスタムタグで構築するなら、Custom Elementsの仕様の中でライフサイクル・順序・通信を解決しなければならない。依存ゼロなら、あらゆるアルゴリズムを自分で書く。そしてそのすべてが「ブラウザ組み込みかもしれない」と感じさせなければならない。</p>
     </div>
   </section>
 
