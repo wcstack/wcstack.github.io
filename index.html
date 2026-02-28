@@ -645,12 +645,12 @@
       <div class="cdn-block">
         <div class="code-header">
           <span class="filename">index.html</span>
-          <span>CDN via jsdelivr</span>
+          <span>CDN via esm.run</span>
         </div>
 <pre><code class="language-html">&lt;!-- Pick one, two, or all three --&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state/dist/auto.min.js"&gt;&lt;/script&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/router/dist/auto.min.js"&gt;&lt;/script&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/autoloader/dist/auto.min.js"&gt;&lt;/script&gt;</code></pre>
+&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/router/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/autoloader/auto"&gt;&lt;/script&gt;</code></pre>
       </div>
       <p class="cdn-note">Each script registers its custom elements and does nothing else. No initialization, no bootstrap &mdash; tags activate when the browser parses them.</p>
       <p class="cdn-note-ja">各スクリプトはカスタム要素を登録するだけ。初期化もブートストラップもなし &mdash; ブラウザがパースした時にタグが起動する。</p>
