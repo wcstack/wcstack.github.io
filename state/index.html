@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>&lt;wcs-state&gt; — Reactive State · wcstack</title>
+  <meta name="description" content="Deep dive into &lt;wcs-state&gt;: path-string data binding, path getters, 40 built-in filters, structural directives, command/event tokens, $streams, the wc-bindable protocol, SSR, and TypeScript support.">
+  <meta property="og:title" content="&lt;wcs-state&gt; — Reactive State · wcstack">
+  <meta property="og:description" content="The HTML-first reactive core of wcstack. The only contract between UI and state is a path string.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/state/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #060a10;
+      --bg-card: #0c121a;
+      --bg-code: #080d14;
+      --border: #182230;
+      --border-subtle: #101823;
+      --text: #d3d9e0;
+      --text-bright: #f7fafc;
+      --text-dim: #6f7d8e;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, .12);
+      --accent-hover: #6dd2fc;
+      --c-cyan: #38bdf8;
+      --c-violet: #a78bfa;
+      --c-green: #5bb98c;
+      --c-salmon: #d48872;
+      --c-gold: #d4a017;
+      --font: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--accent-hover); }
+    code, pre { font-family: var(--mono); }
+    .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(6, 10, 16, .9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    header .container {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em; color: var(--text-dim); }
+    .logo span { color: var(--accent); }
+    nav { display: flex; gap: 22px; }
+    nav a {
+      font-size: .8rem; font-weight: 500;
+      color: var(--text-dim); letter-spacing: .02em;
+    }
+    nav a:hover { color: var(--text); }
+    nav a.active { color: var(--accent); }
+
+    /* ── Doc hero ── */
+    .doc-hero {
+      padding: 150px 0 20px;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, var(--accent-glow), transparent 70%);
+    }
+    .section-label {
+      font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .15em; color: var(--accent); margin-bottom: 16px;
+    }
+    .pkg-title {
+      font-family: var(--mono);
+      font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+      font-weight: 500; letter-spacing: -.02em;
+      color: var(--text-bright);
+    }
+    .pkg-sub {
+      margin-top: 12px;
+      font-size: clamp(.95rem, 2vw, 1.1rem);
+      color: var(--text-dim);
+      max-width: 700px;
+    }
+    .pkg-sub-ja { margin-top: 8px; font-size: .84rem; color: var(--text-dim); opacity: .5; }
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+    .pill {
+      font-family: var(--mono); font-size: .7rem; font-weight: 500;
+      padding: 3px 10px; border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-dim); background: var(--bg-card);
+    }
+    .pill.accent { color: var(--accent); border-color: rgba(56,189,248,.3); }
+
+    /* ── TOC ── */
+    .toc {
+      margin-top: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      padding: 22px 26px;
+    }
+    .toc-title {
+      font-size: .7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--text-dim); margin-bottom: 10px;
+    }
+    .toc ol {
+      list-style: none;
+      columns: 2; column-gap: 40px;
+      counter-reset: toc;
+    }
+    .toc li { counter-increment: toc; break-inside: avoid; }
+    .toc li a {
+      display: block; padding: 3px 0;
+      font-size: .84rem; color: var(--text);
+    }
+    .toc li a::before {
+      content: counter(toc, decimal-leading-zero);
+      font-family: var(--mono);
+      font-size: .7rem; color: var(--text-dim);
+      margin-right: 10px;
+    }
+    .toc li a:hover { color: var(--accent); }
+    @media (max-width: 640px) { .toc ol { columns: 1; } }
+
+    /* ── Doc sections ── */
+    section.doc { padding: 64px 0 8px; }
+    section.doc + section.doc { border-top: 1px solid var(--border-subtle); margin-top: 56px; }
+    .doc h2 {
+      font-size: clamp(1.3rem, 3vw, 1.7rem);
+      font-weight: 700; letter-spacing: -.02em;
+      color: var(--text-bright);
+    }
+    .doc h2 a.anchor { color: var(--border); margin-left: 10px; font-weight: 400; }
+    .doc h2 a.anchor:hover { color: var(--accent); }
+    .doc h3 {
+      margin-top: 40px; margin-bottom: 4px;
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-bright);
+    }
+    .doc h3 code { font-size: .9em; color: var(--accent); }
+    .doc p { margin-top: 12px; font-size: .92rem; }
+    .doc p.ja { margin-top: 8px; font-size: .82rem; color: var(--text-dim); opacity: .55; }
+    .doc p code, .doc li code, .doc td code {
+      font-size: .84em;
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--accent);
+    }
+    .doc ul.list, .doc ol.list { margin: 12px 0 0 22px; font-size: .9rem; }
+    .doc ul.list li, .doc ol.list li { margin-top: 6px; }
+    .doc strong { color: var(--text-bright); }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; margin-top: 18px; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th {
+      text-align: left; padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: .68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .1em;
+      white-space: nowrap;
+    }
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    td.mono, td:first-child code { white-space: nowrap; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      margin-top: 18px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 18px;
+      background: rgba(12, 18, 26, .8);
+      border-bottom: 1px solid var(--border);
+      font-size: .72rem; color: var(--text-dim);
+    }
+    .code-header .filename { font-family: var(--mono); font-weight: 500; }
+    pre {
+      padding: 18px 22px;
+      background: var(--bg-code);
+      overflow-x: auto;
+      font-size: .8rem;
+      line-height: 1.7;
+      tab-size: 2;
+    }
+    code[class*="language-"], pre[class*="language-"] { color: var(--text); text-shadow: none; background: none; }
+    pre > code[class*="language-"] { padding: 0; }
+    .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #45566b; font-style: italic; }
+    .token.punctuation { color: #566b84; }
+    .token.tag { color: #38bdf8; }
+    .token.attr-name { color: #a78bfa; }
+    .token.attr-value { color: #5bb98c; }
+    .token.string { color: #5bb98c; }
+    .token.keyword { color: #d48872; }
+    .token.function { color: #d4a017; }
+    .token.number, .token.boolean { color: #d48872; }
+    .token.operator { color: #566b84; }
+    .token.property { color: #d3d9e0; }
+
+    /* ── Callout ── */
+    .note {
+      margin-top: 20px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 16px 22px;
+    }
+    .note p { margin-top: 0; font-size: .85rem; color: var(--text-dim); }
+    .note p + p { margin-top: 6px; }
+    .note p.ja { font-size: .78rem; opacity: .55; }
+
+    /* ── Compare cards ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px; margin-top: 24px;
+    }
+    .compare-card {
+      padding: 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .compare-card.current { border-color: rgba(56,189,248,.4); }
+    .compare-card .tag-name {
+      font-family: var(--mono); font-size: .82rem; font-weight: 500;
+      color: var(--accent); display: block; margin-bottom: 8px;
+    }
+    .compare-card h3 { margin: 0; font-size: 1rem; color: var(--text-bright); }
+    .compare-card ul { list-style: none; margin-top: 12px; }
+    .compare-card li {
+      font-size: .82rem; color: var(--text-dim);
+      padding-left: 16px; position: relative; margin-top: 5px;
+    }
+    .compare-card li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
+    .compare-card .go { display: inline-block; margin-top: 14px; font-size: .78rem; font-weight: 600; }
+
+    /* ── Filter groups ── */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px; margin-top: 20px;
+    }
+    .filter-group {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-card);
+      padding: 16px 18px;
+    }
+    .filter-group h4 {
+      font-size: .72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--text-dim); margin-bottom: 10px;
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips code {
+      font-size: .72rem; padding: 2px 8px; border-radius: 4px;
+      background: var(--bg-code); border: 1px solid var(--border-subtle);
+      color: var(--accent);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 80px;
+      padding: 40px 0;
+      text-align: center;
+    }
+    footer p { font-size: .8rem; color: var(--text-dim); }
+    .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .footer-links a { font-size: .8rem; font-weight: 500; color: var(--text-dim); }
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 560px) {
+      nav { gap: 14px; }
+      nav a { font-size: .72rem; }
+      pre { font-size: .74rem; padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <a class="logo" href="../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../">Home</a>
+        <a href="./" class="active">state</a>
+        <a href="../signals/">signals</a>
+        <a href="https://github.com/wcstack/wcstack/tree/main/packages/state" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label">Core Package · Reactive Core (HTML-first)</p>
+      <h1 class="pkg-title">&lt;wcs-state&gt;</h1>
+      <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
+      <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
+      <div class="pill-row">
+        <span class="pill accent">v1.21.7</span>
+        <span class="pill">@wcstack/state</span>
+        <span class="pill">0 dependencies</span>
+        <span class="pill">buildless</span>
+        <span class="pill">MIT</span>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>CDN via esm.run</span></div>
+<pre><code class="language-html">&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;</code></pre>
+      </div>
+
+      <div class="toc">
+        <p class="toc-title">On this page</p>
+        <ol>
+          <li><a href="#which-core">Which core?</a></li>
+          <li><a href="#contract">The contract: paths</a></li>
+          <li><a href="#defining">Defining state</a></li>
+          <li><a href="#getters">Path getters</a></li>
+          <li><a href="#binding">Binding: data-wcs</a></li>
+          <li><a href="#directives">Structural directives</a></li>
+          <li><a href="#filters">Filters (40 built-in)</a></li>
+          <li><a href="#events">Events &amp; tokens</a></li>
+          <li><a href="#streams">Streams ($streams)</a></li>
+          <li><a href="#components">Building components</a></li>
+          <li><a href="#bindable">wc-bindable protocol</a></li>
+          <li><a href="#ssr-svg">SSR &amp; SVG</a></li>
+          <li><a href="#typescript">TypeScript &amp; config</a></li>
+          <li><a href="#performance">Performance</a></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Which core -->
+  <section class="doc" id="which-core">
+    <div class="container">
+      <h2>Which core? <a class="anchor" href="#which-core">#</a></h2>
+      <p>wcstack ships <strong>two reactive cores</strong> that drive the same <a href="#bindable"><code>wc-bindable</code></a> I/O nodes. Pick the one that matches where your logic lives.</p>
+      <p class="ja">wcstackには同じwc-bindableタグ群を駆動する2つのリアクティブコアがある。ロジックの置き場所で選ぶ。</p>
+      <div class="compare-grid">
+        <div class="compare-card current">
+          <span class="tag-name">&lt;wcs-state&gt;</span>
+          <h3>HTML-first &mdash; this page</h3>
+          <ul>
+            <li>State declared in a tag; bindings are path strings in <code>data-wcs</code></li>
+            <li>Mustache syntax, 40 filters, <code>for</code> / <code>if</code> directives</li>
+            <li>SSR + hydration, in-page DevTools integration</li>
+            <li>Best when the app is <em>written in HTML</em></li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <span class="tag-name">@wcstack/signals</span>
+          <h3>JS-first</h3>
+          <ul>
+            <li><code>signal</code> / <code>computed</code> / <code>effect</code> in plain modules</li>
+            <li>Fine-grained <code>h()</code> DOM, keyed <code>For</code> / <code>Index</code></li>
+            <li>&asymp;2.5&thinsp;KB core, TC39-shaped API</li>
+            <li>Best when logic lives in TypeScript</li>
+          </ul>
+          <a class="go" href="../signals/">Read the signals docs &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The contract -->
+  <section class="doc" id="contract">
+    <div class="container">
+      <h2>The contract: paths <a class="anchor" href="#contract">#</a></h2>
+      <p>A <code>&lt;wcs-state&gt;</code> element manages reactive state. <code>data-wcs</code> attributes bind DOM to paths like <code>user.name</code> or <code>cart.items.*.subtotal</code>. The component's JavaScript never references the DOM; the HTML alone describes every data dependency.</p>
+      <p class="ja">&lt;wcs-state&gt;が状態を管理し、data-wcs属性がDOMをパスに結びつける。JavaScriptはDOMを一切参照しない。</p>
+
+      <h3>The update rule</h3>
+      <p>Reactivity is driven by <strong>path assignment</strong>. Assign to a path via <code>this["path.to.value"]</code> or a top-level property &mdash; deep in-place mutation is not detected.</p>
+      <p class="ja">更新は「パスへの代入」で検出される。オブジェクトの深い直接変更は検出されない。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>Update rule</span></div>
+<pre><code class="language-javascript">this.count = 10;                    // ✓ detected
+this["user.name"] = "Bob";          // ✓ detected
+this.user.name = "Bob";             // ✗ NOT detected — no path assignment
+
+// Arrays: non-destructive reassignment
+this.items = this.items.concat({ id: 4 });   // ✓
+this.items = this.items.toSpliced(0, 1);     // ✓
+this.items.push({ id: 4 });                  // ✗ in-place mutation not detected</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Defining state -->
+  <section class="doc" id="defining">
+    <div class="container">
+      <h2>Defining state <a class="anchor" href="#defining">#</a></h2>
+
+      <h3>State sources (resolution order)</h3>
+      <ol class="list">
+        <li><code>state="id"</code> &rarr; a <code>&lt;script type="application/json" id&gt;</code> element</li>
+        <li><code>src="*.json"</code> or <code>src="*.js"</code> &rarr; external file</li>
+        <li><code>json='{ }'</code> &rarr; inline JSON attribute</li>
+        <li>Inner <code>&lt;script type="module"&gt;</code> &rarr; <code>export default</code></li>
+        <li><code>setInitialState()</code> &rarr; programmatic API</li>
+      </ol>
+
+      <h3>Named state</h3>
+      <p>Give a state a <code>name</code> and address it from anywhere with <code>path@name</code>.</p>
+      <p class="ja">nameを付けると、どこからでもpath@nameで参照できる。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Named state</span></div>
+<pre><code class="language-html">&lt;wcs-state name="cart"&gt;...&lt;/wcs-state&gt;
+
+&lt;div data-wcs="textContent: total@cart"&gt;&lt;/div&gt;</code></pre>
+      </div>
+
+      <h3>Lifecycle hooks</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>Lifecycle</span></div>
+<pre><code class="language-javascript">export default {
+  async $connectedCallback() {        // on connect (awaited)
+    const res = await fetch("/api/items");
+    this.items = await res.json();
+  },
+  $disconnectedCallback() {           // on disconnect (sync)
+    clearInterval(this.timer);
+  },
+  $updatedCallback(paths, indexes) {  // after updates (async, not awaited)
+    console.log("updated:", paths);
+  }
+};</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Path getters -->
+  <section class="doc" id="getters">
+    <div class="container">
+      <h2>Path getters <a class="anchor" href="#getters">#</a></h2>
+      <p>Computed properties are defined with <strong>dot-path string keys</strong>, flat at the top level, regardless of how deep the data nests. The wildcard <code>*</code> abstracts the loop index away.</p>
+      <p class="ja">算出プロパティはドットパス文字列のキーで、データの深さに関係なくフラットに定義する。ワイルドカード*がインデックスを抽象化する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>Virtual properties</span></div>
+<pre><code class="language-javascript">export default {
+  users: [
+    { id: 1, firstName: "Alice", lastName: "Smith" },
+    { id: 2, firstName: "Bob",   lastName: "Jones" }
+  ],
+  get "users.*.fullName"() {
+    return this["users.*.firstName"] + " " + this["users.*.lastName"];
+  },
+  // Path setters — split a write back into its parts
+  set "users.*.fullName"(value) {
+    const [first, ...rest] = value.split(" ");
+    this["users.*.firstName"] = first;
+    this["users.*.lastName"]  = rest.join(" ");
+  },
+  // Top-level aggregation over a wildcard
+  get totalUsers() {
+    return this.$getAll("users.*.id", []).length;
+  }
+};</code></pre>
+      </div>
+
+      <h3>Nested wildcards</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>Multi-level arrays</span></div>
+<pre><code class="language-javascript">get "categories.*.items.*.label"() {
+  return this["categories.*.name"] + " / " + this["categories.*.items.*.name"];
+}</code></pre>
+      </div>
+
+      <h3>Proxy APIs (inside state)</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>API</th><th>Purpose</th></tr>
+          <tr><td><code>this.$getAll("path.*", [])</code></td><td>Collect all values for a wildcard path</td></tr>
+          <tr><td><code>this.$resolve("path.*", [i], value?)</code></td><td>Read / write at an explicit index</td></tr>
+          <tr><td><code>this.$postUpdate("path")</code></td><td>Manually trigger an update notification</td></tr>
+          <tr><td><code>this.$trackDependency(path)</code></td><td>Register a dependency for cache invalidation</td></tr>
+          <tr><td><code>this.$untrackDependency(fn)</code></td><td>Read values without registering dependencies</td></tr>
+          <tr><td><code>this.$1</code>, <code>this.$2</code>, &hellip;</td><td>Loop iteration index (0-based value, 1-based naming)</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Binding -->
+  <section class="doc" id="binding">
+    <div class="container">
+      <h2>Binding: <code style="font-family:var(--mono)">data-wcs</code> <a class="anchor" href="#binding">#</a></h2>
+      <p>General form &mdash; multiple bindings separated by <code>;</code>:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">syntax</span><span>General form</span></div>
+<pre><code class="language-none">property[#modifier]: path[@state][|filter[|filter(args)...]]</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Multiple bindings</span></div>
+<pre><code class="language-html">&lt;div data-wcs="textContent: count; class.over: count|gt(10)"&gt;&lt;/div&gt;</code></pre>
+      </div>
+
+      <h3>Bindable properties</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Property</th><th>Behavior</th></tr>
+          <tr><td><code>value</code></td><td>Two-way for <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code></td></tr>
+          <tr><td><code>checked</code></td><td>Two-way for checkbox / radio</td></tr>
+          <tr><td><code>textContent</code> / <code>text</code></td><td>DOM text</td></tr>
+          <tr><td><code>html</code></td><td>innerHTML</td></tr>
+          <tr><td><code>class.NAME</code></td><td>CSS class toggle</td></tr>
+          <tr><td><code>style.PROP</code></td><td>CSS property</td></tr>
+          <tr><td><code>attr.NAME</code></td><td>HTML attribute (SVG-safe)</td></tr>
+          <tr><td><code>radio</code></td><td>Radio group binding</td></tr>
+          <tr><td><code>checkbox</code></td><td>Checkbox array binding</td></tr>
+          <tr><td><code>onclick</code>, <code>on*</code></td><td>Event handlers</td></tr>
+        </table>
+      </div>
+
+      <h3>Modifiers</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Modifiers</span></div>
+<pre><code class="language-html">&lt;input  data-wcs="value#ro: path"&gt;             &lt;!-- read-only, disables two-way --&gt;
+&lt;button data-wcs="onclick#prevent: handler"&gt;   &lt;!-- preventDefault() --&gt;
+&lt;div    data-wcs="onclick#stop: handler"&gt;      &lt;!-- stopPropagation() --&gt;
+&lt;select data-wcs="value#onchange: path"&gt;       &lt;!-- use 'change' event --&gt;
+&lt;my-el  data-wcs="value#init=element: path"&gt;   &lt;!-- element-owned authority --&gt;
+&lt;my-el  data-wcs="value#sync=connect: path"&gt;   &lt;!-- defer snapshot until DOM connect --&gt;</code></pre>
+      </div>
+      <p>Two-way binding is <strong>automatic</strong> for <code>&lt;input&gt;</code> (all types), <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>, checkbox and radio. Use <code>#ro</code> to disable it, <code>#onchange</code> to switch the event.</p>
+      <p class="ja">双方向バインディングはフォーム要素で自動。#roで無効化、#onchangeでイベント切替。</p>
+
+      <h3>Mustache syntax</h3>
+      <p>With <code>enableMustache: true</code> (the default), text interpolation works anywhere &mdash; internally converted to comment-based bindings.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Mustache</span></div>
+<pre><code class="language-html">&lt;p&gt;Hello, {{ user.name }}!&lt;/p&gt;
+&lt;p&gt;Count: {{ count|locale }}&lt;/p&gt;</code></pre>
+      </div>
+
+      <h3>Spread binding (<code>...</code>)</h3>
+      <p>Wire <em>all</em> properties and inputs of a <code>wc-bindable</code> element in one line. Expands to individual bindings per member; later bindings win; <code>undefined</code> skips the write (only <code>null</code> and defined values are written).</p>
+      <p class="ja">wc-bindable要素の全メンバーを1行で結線。後勝ちの上書き、undefinedは書き込みスキップ。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Spread binding</span></div>
+<pre><code class="language-html">&lt;wcs-fetch data-wcs="...: usersFetch"&gt;&lt;/wcs-fetch&gt;
+
+&lt;!-- Inside a loop --&gt;
+&lt;template data-wcs="for: storesFetches"&gt;
+  &lt;wcs-fetch data-wcs="...: storesFetches.*"&gt;&lt;/wcs-fetch&gt;
+&lt;/template&gt;
+
+&lt;!-- Last-wins override --&gt;
+&lt;wcs-fetch data-wcs="...: usersFetch; status: alternateStatus"&gt;&lt;/wcs-fetch&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directives -->
+  <section class="doc" id="directives">
+    <div class="container">
+      <h2>Structural directives <a class="anchor" href="#directives">#</a></h2>
+
+      <h3>Loop: <code>for</code></h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>for</span></div>
+<pre><code class="language-html">&lt;template data-wcs="for: users"&gt;
+  &lt;div data-wcs="textContent: users.*.name"&gt;&lt;/div&gt;  &lt;!-- full path --&gt;
+  &lt;div data-wcs="textContent: .name"&gt;&lt;/div&gt;          &lt;!-- dot shorthand --&gt;
+&lt;/template&gt;</code></pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Shorthand</th><th>Expands to</th></tr>
+          <tr><td><code>.name</code></td><td><code>users.*.name</code></td></tr>
+          <tr><td><code>.</code></td><td><code>users.*</code> (current element)</td></tr>
+          <tr><td><code>.name|uc</code></td><td><code>users.*.name|uc</code> (filters preserved)</td></tr>
+          <tr><td><code>.name@state</code></td><td><code>users.*.name@state</code> (state name preserved)</td></tr>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Nested loops</span></div>
+<pre><code class="language-html">&lt;template data-wcs="for: regions"&gt;
+  &lt;template data-wcs="for: .states"&gt;
+    &lt;span data-wcs="textContent: .name"&gt;&lt;/span&gt;
+  &lt;/template&gt;
+&lt;/template&gt;</code></pre>
+      </div>
+      <p>Lists use a <strong>value-based diff</strong>: elements are matched by value and DOM nodes are reused for unchanged items.</p>
+      <p class="ja">リストは値ベースの差分。変化のない要素のDOMノードは再利用される。</p>
+
+      <h3>Conditional: <code>if</code> / <code>elseif</code> / <code>else</code></h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Conditionals</span></div>
+<pre><code class="language-html">&lt;template data-wcs="if: count|gt(0)"&gt;
+  &lt;p&gt;Positive&lt;/p&gt;
+&lt;/template&gt;
+&lt;template data-wcs="elseif: count|lt(0)"&gt;
+  &lt;p&gt;Negative&lt;/p&gt;
+&lt;/template&gt;
+&lt;template data-wcs="else:"&gt;
+  &lt;p&gt;Zero&lt;/p&gt;
+&lt;/template&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="doc" id="filters">
+    <div class="container">
+      <h2>Filters (40 built-in) <a class="anchor" href="#filters">#</a></h2>
+      <p>Chain with <code>|</code>: <code>price|mul(1.1)|round(2)|locale(ja-JP)</code></p>
+      <p class="ja">パイプで連結できる。</p>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <h4>Comparison</h4>
+          <div class="chips"><code>eq(v)</code><code>ne(v)</code><code>not</code><code>lt(n)</code><code>le(n)</code><code>gt(n)</code><code>ge(n)</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>Arithmetic</h4>
+          <div class="chips"><code>inc(n)</code><code>dec(n)</code><code>mul(n)</code><code>div(n)</code><code>mod(n)</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>Number formatting</h4>
+          <div class="chips"><code>fix(n)</code><code>round(n?)</code><code>floor</code><code>ceil</code><code>locale(loc?)</code><code>percent(n?)</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>String</h4>
+          <div class="chips"><code>uc</code><code>lc</code><code>cap</code><code>trim</code><code>slice(n)</code><code>substr(s,l)</code><code>pad(n,c?)</code><code>rep(n)</code><code>rev</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>Type conversion</h4>
+          <div class="chips"><code>int</code><code>float</code><code>boolean</code><code>number</code><code>string</code><code>null</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>Date / time</h4>
+          <div class="chips"><code>date(loc?)</code><code>time(loc?)</code><code>datetime(loc?)</code><code>ymd(sep?)</code></div>
+        </div>
+        <div class="filter-group">
+          <h4>Boolean / default</h4>
+          <div class="chips"><code>truthy</code><code>falsy</code><code>defaults(v)</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events & tokens -->
+  <section class="doc" id="events">
+    <div class="container">
+      <h2>Events &amp; tokens <a class="anchor" href="#events">#</a></h2>
+
+      <h3>Event handling</h3>
+      <p>Handler signature: <code>handler(event, ...listIndexes)</code> &mdash; loop indexes arrive as extra arguments.</p>
+      <p class="ja">ハンドラにはイベントに続いてループのインデックスが渡される。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html + state.js</span><span>Events</span></div>
+<pre><code class="language-html">&lt;button data-wcs="onclick: handleClick"&gt;Click&lt;/button&gt;
+&lt;form data-wcs="onsubmit#prevent: handleSubmit"&gt;...&lt;/form&gt;</code></pre>
+<pre><code class="language-javascript">handleClick(event) { console.log("clicked"); }
+removeItem(event, index) {
+  this.items = this.items.toSpliced(index, 1);
+}</code></pre>
+      </div>
+
+      <h3>Command tokens (state &rarr; element)</h3>
+      <p>Pub/sub channels for invoking element methods from state. Declare channels in <code>$commandTokens</code>, emit arguments with <code>this.$command.&lt;name&gt;.emit()</code>.</p>
+      <p class="ja">状態から要素のメソッドを呼ぶpub/subチャンネル。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js + index.html</span><span>Command tokens</span></div>
+<pre><code class="language-javascript">export default {
+  $commandTokens: ["fetchUsers", "refreshOrders"],
+
+  onClickFetch() {
+    this.$command.fetchUsers.emit("/api/users", { method: "GET" });
+  }
+};</code></pre>
+<pre><code class="language-html">&lt;!-- Subscribe a wc-bindable command to the token --&gt;
+&lt;wcs-fetch data-wcs="command.fetch: $command.fetchUsers"&gt;&lt;/wcs-fetch&gt;
+
+&lt;!-- Or emit the token directly from an event --&gt;
+&lt;button data-wcs="onclick: $command.refreshList"&gt;Refresh&lt;/button&gt;</code></pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Token API</th><th>Purpose</th></tr>
+          <tr><td><code>emit(...args)</code></td><td>Invoke subscribed methods; returns array of results</td></tr>
+          <tr><td><code>subscribe(fn)</code></td><td>Add subscriber; returns unsubscribe function</td></tr>
+          <tr><td><code>unsubscribe(fn)</code></td><td>Remove subscriber</td></tr>
+          <tr><td><code>name</code> / <code>size</code></td><td>Token name / current subscriber count</td></tr>
+        </table>
+      </div>
+
+      <h3>Event tokens (element &rarr; state)</h3>
+      <p>The dual of command tokens: elements fire events, state receives them in <code>$on</code>. Signature is <code>(state, event, ...listIndexes)</code> &mdash; state is the first argument, not <code>this</code>.</p>
+      <p class="ja">コマンドトークンの双対。要素のイベントを状態が$onで受け取る。第一引数がstate。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js + index.html</span><span>Event tokens</span></div>
+<pre><code class="language-javascript">export default {
+  $eventTokens: ["userCreated", "createFailed"],
+  $on: {
+    userCreated(state, event) {
+      state.users = state.users.concat(event.detail);
+    },
+    createFailed(state, event) {
+      state.error = event.detail;
+    }
+  }
+};</code></pre>
+<pre><code class="language-html">&lt;my-form data-wcs="eventToken.created: userCreated; eventToken.error: createFailed"&gt;&lt;/my-form&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Streams -->
+  <section class="doc" id="streams">
+    <div class="container">
+      <h2>Streams: <code style="font-family:var(--mono)">$streams</code> <a class="anchor" href="#streams">#</a></h2>
+      <p>Fold async producers &mdash; async iterables, generators, <code>ReadableStream</code> &mdash; into reactive properties. When a dependency captured by <code>args</code> changes, the running source is <strong>aborted and restarted</strong>: switchMap semantics, declared.</p>
+      <p class="ja">非同期プロデューサをリアクティブなプロパティに畳み込む。argsの依存が変わると実行中のソースは中断されて再スタート(switchMap)。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>$streams</span></div>
+<pre><code class="language-javascript">export default {
+  prompt: "",
+
+  $streams: {
+    tokens: {
+      args:    (state) =&gt; state.prompt,               // dependency captured here
+      source:  (prompt, signal) =&gt; llmStream(prompt, signal),
+      fold:    (acc, chunk) =&gt; acc + chunk,           // accumulate
+      initial: ""
+    },
+    ticker: {
+      source: (_args, signal) =&gt; priceStream(signal)  // no args → start once, latest value
+    }
+  }
+};</code></pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Field</th><th>Required</th><th>Purpose</th></tr>
+          <tr><td><code>source</code></td><td>&#10004;</td><td><code>(args, signal) &rarr; AsyncIterable | ReadableStream</code>. <strong>Must honor the AbortSignal</strong></td></tr>
+          <tr><td><code>args</code></td><td>&mdash;</td><td>Pure function capturing dependencies; omit to start once</td></tr>
+          <tr><td><code>fold</code></td><td>&mdash;</td><td><code>(acc, chunk) &rarr; next</code>. Omit for latest-value (replace) mode</td></tr>
+          <tr><td><code>initial</code></td><td>with <code>fold</code></td><td>Seed value</td></tr>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Status companions (read-only)</span></div>
+<pre><code class="language-html">&lt;p data-wcs="textContent: $streamStatus.tokens"&gt;&lt;/p&gt;  &lt;!-- "idle" | "active" | "done" | "error" --&gt;
+&lt;p data-wcs="textContent: $streamError.tokens"&gt;&lt;/p&gt;   &lt;!-- null or last error --&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Components -->
+  <section class="doc" id="components">
+    <div class="container">
+      <h2>Building components <a class="anchor" href="#components">#</a></h2>
+
+      <h3>Shadow DOM component</h3>
+      <p><code>bind-component="state"</code> binds the element's own <code>state</code> field as the state source.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">my-component.js</span><span>Shadow DOM</span></div>
+<pre><code class="language-javascript">class MyComponent extends HTMLElement {
+  state = { message: "" };
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot.innerHTML = `
+      &lt;wcs-state bind-component="state"&gt;&lt;/wcs-state&gt;
+      &lt;div&gt;{{ message }}&lt;/div&gt;
+      &lt;input type="text" data-wcs="value: message" /&gt;
+    `;
+  }
+}
+customElements.define("my-component", MyComponent);</code></pre>
+      </div>
+
+      <h3>Light DOM component</h3>
+      <p>Light DOM shares the namespace with the parent, so a <code>name</code> attribute is required and bindings use <code>@name</code>.</p>
+      <p class="ja">Light DOMは親と名前空間を共有するため、name属性が必須。@nameで参照する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">my-light-component.js</span><span>Light DOM</span></div>
+<pre><code class="language-javascript">class MyLightComponent extends HTMLElement {
+  state = { message: "" };
+
+  connectedCallback() {
+    this.innerHTML = `
+      &lt;wcs-state bind-component="state" name="my-light"&gt;&lt;/wcs-state&gt;
+      &lt;div data-wcs="text: message@my-light"&gt;&lt;/div&gt;
+      &lt;input type="text" data-wcs="value: message@my-light" /&gt;
+    `;
+  }
+}
+customElements.define("my-light-component", MyLightComponent);</code></pre>
+      </div>
+
+      <h3>Host binding</h3>
+      <p>The parent page binds into a component's state from outside &mdash; still just paths.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>Host binding</span></div>
+<pre><code class="language-html">&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default { user: { name: "Alice" } };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;my-component data-wcs="state.message: user.name"&gt;&lt;/my-component&gt;</code></pre>
+      </div>
+      <p>A standalone component can await readiness with <code>async $stateReadyCallback(stateProp)</code>.</p>
+
+      <h3>Declarative Custom Components (DCC)</h3>
+      <p>Define a reusable custom element <strong>entirely in HTML</strong> with <code>data-wc-definition</code>. Each instance gets its own state; <code>$bindables</code> declares the properties exposed through the <code>wc-bindable</code> protocol (with <code>CustomEvent</code> dispatch like <code>my-counter:count-changed</code>).</p>
+      <p class="ja">data-wc-definitionでHTMLだけの再利用可能コンポーネントを定義。各インスタンスは独立した状態を持ち、$bindablesで公開プロパティを宣言。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>DCC</span></div>
+<pre><code class="language-html">&lt;my-counter data-wc-definition&gt;
+  &lt;template shadowrootmode="open"&gt;
+    &lt;p&gt;{{ count }}&lt;/p&gt;
+    &lt;button data-wcs="onclick: increment"&gt;+1&lt;/button&gt;
+    &lt;wcs-state&gt;
+      &lt;script type="module"&gt;
+        export default {
+          count: 0,
+          increment() { this.count++; },
+          $bindables: ["count"]
+        };
+      &lt;/script&gt;
+    &lt;/wcs-state&gt;
+  &lt;/template&gt;
+&lt;/my-counter&gt;
+
+&lt;my-counter&gt;&lt;/my-counter&gt;
+&lt;my-counter&gt;&lt;/my-counter&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- wc-bindable -->
+  <section class="doc" id="bindable">
+    <div class="container">
+      <h2>The wc-bindable protocol <a class="anchor" href="#bindable">#</a></h2>
+      <p>Custom elements expose a static manifest &mdash; observable <em>properties</em>, settable <em>inputs</em>, invocable <em>commands</em> &mdash; so any binding core can discover and wire them generically. All 30+ wcstack I/O nodes speak it; so can yours.</p>
+      <p class="ja">静的マニフェスト(properties / inputs / commands)を公開すれば、どのバインディングコアからも汎用的に結線できる。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">my-chip.js</span><span>Manifest</span></div>
+<pre><code class="language-javascript">class MyChip extends HTMLElement {
+  static wcBindable = {
+    protocol: "wc-bindable",
+    version: 1,
+    properties: [
+      { name: "data", event: "thing-error" }
+    ],
+    inputs: [
+      { name: "data", attribute: "data" },
+      { name: "labelText", attribute: "label-text" },
+      { name: "internal" }
+    ],
+    commands: [
+      { name: "fetch", async: true },
+      { name: "reset" }
+    ]
+  };
+}</code></pre>
+      </div>
+
+      <h3>Attribute mirroring</h3>
+      <p>When an input declares <code>attribute</code>, the framework writes both the property and the attribute:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Value type</th><th>Attribute value</th></tr>
+          <tr><td>string / number / boolean / bigint</td><td><code>String(value)</code></td></tr>
+          <tr><td>null / undefined</td><td>attribute removed</td></tr>
+          <tr><td>object / array</td><td><code>JSON.stringify(value)</code></td></tr>
+        </table>
+      </div>
+
+      <h3>Binding authority (<code>#init=</code> / <code>#sync=</code>)</h3>
+      <p>For <code>wc-bindable</code> elements, the modifier decides which side owns the wire:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Authority</th><th>Effect</th></tr>
+          <tr><td><code>init=state</code></td><td>State writes to element; element events update state (two-way)</td></tr>
+          <tr><td><code>init=element</code></td><td>Element snapshot + events &rarr; state; state writes suppressed</td></tr>
+          <tr><td><code>init=auto</code></td><td>Element-owned if uninitialized, else state-owned</td></tr>
+          <tr><td><code>init=none</code></td><td>No initial sync (event bindings only)</td></tr>
+        </table>
+      </div>
+      <p><code>sync=call</code> (default) reads the snapshot immediately; <code>sync=connect</code> defers until DOM connection.</p>
+      <div class="note">
+        <p><strong>Directional initial sync rule:</strong> declare every settable member in both <em>properties</em> and <em>inputs</em> for two-way. Output-only members declared <strong>only</strong> in <em>properties</em> become element-owned &mdash; state writes are suppressed.</p>
+        <p class="ja">双方向にしたいメンバーはpropertiesとinputsの両方に宣言する。propertiesのみのメンバーは出力専用(要素側が所有)。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SSR & SVG -->
+  <section class="doc" id="ssr-svg">
+    <div class="container">
+      <h2>SSR &amp; SVG <a class="anchor" href="#ssr-svg">#</a></h2>
+
+      <h3>Server-side rendering</h3>
+      <p>Add <code>enable-ssr</code> to <code>&lt;wcs-state&gt;</code> and render the same HTML with <code>@wcstack/server</code>. The client hydrates automatically from the <code>&lt;wcs-ssr&gt;</code> JSON snapshot and skips <code>$connectedCallback</code> &mdash; zero flicker.</p>
+      <p class="ja">enable-ssrを付けて同じHTMLをサーバーでレンダリング。クライアントは&lt;wcs-ssr&gt;スナップショットから自動ハイドレーションし、$connectedCallbackはスキップされる。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">server.js</span><span>SSR</span></div>
+<pre><code class="language-javascript">import { renderToString } from "@wcstack/server";
+
+const html = await renderToString(template, {
+  baseUrl: "http://localhost:3000"
+});</code></pre>
+      </div>
+
+      <h3>SVG support</h3>
+      <p>All bindings work inside <code>&lt;svg&gt;</code> &mdash; use <code>attr.NAME</code> for SVG attributes.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>SVG</span></div>
+<pre><code class="language-html">&lt;svg width="200" height="100"&gt;
+  &lt;template data-wcs="for: points"&gt;
+    &lt;circle data-wcs="attr.cx: .x; attr.cy: .y; attr.fill: .color" r="5" /&gt;
+  &lt;/template&gt;
+&lt;/svg&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- TypeScript & config -->
+  <section class="doc" id="typescript">
+    <div class="container">
+      <h2>TypeScript &amp; configuration <a class="anchor" href="#typescript">#</a></h2>
+
+      <h3><code>defineState()</code></h3>
+      <p>Zero-cost type safety, including dot-path resolution. Utility types: <code>WcsPaths&lt;T&gt;</code>, <code>WcsPathValue&lt;T, P&gt;</code>. The <a href="https://github.com/wcstack/wcstack/tree/main/packages/vscode-wcs" target="_blank" rel="noopener">wcstack-intellisense</a> VS Code extension brings completion / diagnostics / hover to inline scripts in HTML.</p>
+      <p class="ja">ドットパス解決込みのゼロコスト型安全。VS Code拡張がHTML内インラインスクリプトに補完・診断を提供。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.ts</span><span>defineState</span></div>
+<pre><code class="language-javascript">import { defineState } from "@wcstack/state";
+
+export default defineState({
+  count: 0,
+  users: [] as { name: string; age: number }[],
+
+  increment() {
+    this.count++;                       // ✓ number
+    this["users.*.name"];               // ✓ string (dot-path resolution)
+    this.$getAll("users.*.age", []);    // ✓ API method
+  },
+
+  get "users.*.ageCategory"() {
+    return this["users.*.age"] &lt; 25 ? "Young" : "Adult";
+  }
+});</code></pre>
+      </div>
+
+      <h3><code>bootstrapState()</code></h3>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">main.js</span><span>Configuration</span></div>
+<pre><code class="language-javascript">import { bootstrapState } from "@wcstack/state";
+
+bootstrapState({
+  bindAttributeName: "data-wcs",
+  tagNames: { state: "wcs-state" },
+  locale: "en",
+  debug: false,
+  enableMustache: true,
+  enableDirectionalInitialSync: true,   // default ON (near-zero cost)
+  enablePropagationContext: true,       // default ON (near-zero cost)
+  enableContractAnalyzer: false         // opt-in
+});</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Performance -->
+  <section class="doc" id="performance">
+    <div class="container">
+      <h2>Performance <a class="anchor" href="#performance">#</a></h2>
+      <p>Measured against 1,000 / 10,000-row benchmark tables in headless Chromium (drivers in <code>e2e/bench/</code> reproduce the numbers on your hardware):</p>
+      <ul class="list">
+        <li><strong>Interactive ops</strong> (select / swap / remove): milliseconds or less.</li>
+        <li><strong>Bulk ops</strong>: &asymp;2.5&ndash;3.5&times; slower than <a href="../signals/">@wcstack/signals</a> &mdash; the per-row declarative binding ledger is what funds the DevTools timeline and SSR hydration.</li>
+        <li><strong>Memory</strong>: a bounded row pool keeps list repopulation efficient.</li>
+      </ul>
+      <p class="ja">対話的操作はミリ秒以下。バルク操作はsignals比で約2.5〜3.5倍遅いが、その分の帳簿がDevToolsタイムラインとSSRハイドレーションを支えている。</p>
+      <div class="note">
+        <p>Need raw throughput with the same tags? The JS-first core <a href="../signals/"><code>@wcstack/signals</code></a> drives the same <code>wc-bindable</code> I/O nodes with a &asymp;2.5&thinsp;KB fine-grained runtime.</p>
+        <p class="ja">スループット最優先なら、同じタグ群を駆動できるJSファーストの@wcstack/signalsへ。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../">Home</a>
+        <a href="../signals/">signals docs</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/packages/state/README.md" target="_blank" rel="noopener">Full README</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

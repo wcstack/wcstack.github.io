@@ -105,6 +105,23 @@
       color: var(--text-dim);
       opacity: .5;
     }
+    .release-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-family: var(--mono);
+      font-size: .74rem; font-weight: 500;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      transition: border-color .2s, color .2s;
+    }
+    .release-pill:hover { border-color: rgba(56,189,248,.35); color: var(--text); }
+    .release-pill .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--c-green);
+      box-shadow: 0 0 8px rgba(91,185,140,.7);
+    }
     .hero .stats {
       display: flex; gap: 0; justify-content: center;
       margin-top: 44px; flex-wrap: wrap;
@@ -275,6 +292,12 @@
     .tag-card .ja {
       font-size: .78rem; color: var(--text-dim); opacity: .5;
       margin-top: 6px;
+    }
+    .card-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: .78rem; font-weight: 600;
+      letter-spacing: .02em;
     }
     .tag-features {
       list-style: none; margin-top: 14px;
@@ -553,6 +576,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.21.7</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -588,7 +612,7 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.18 &rarr; v1.21</h2>
+      <h2 class="section-title">Shipped in v1.18 &rarr; v1.21.7</h2>
       <p class="section-sub">The thought experiment keeps shipping. Four changes worth closing up on.</p>
       <p class="section-sub-ja">思考実験は動き続けている。特にクローズアップしたい4つの変更。</p>
       <div class="topics-grid fade-in">
@@ -694,6 +718,7 @@
             <li>Two-way Binding</li>
             <li>for / if / else</li>
           </ul>
+          <a class="card-link" href="state/">Learn more &rarr;</a>
         </div>
         <div class="tag-card">
           <span class="tag-name">&lt;wcs-router&gt;</span>
@@ -734,6 +759,7 @@
             <li>Keyed For / Index</li>
             <li>bindNode Adapter</li>
           </ul>
+          <a class="card-link" href="signals/">Learn more &rarr;</a>
         </div>
         <div class="tag-card">
           <span class="tag-name">@wcstack/server</span>
@@ -809,7 +835,7 @@
       </div>
       <div class="protocol-note fade-in">
         <h3>One protocol behind them all: <code>wc-bindable</code></h3>
-        <p>Every I/O node exposes a static manifest &mdash; observable <em>properties</em>, settable <em>inputs</em>, invocable <em>commands</em> &mdash; so any binding core can discover and wire it generically. <code>&lt;wcs-state&gt;</code> and <code>@wcstack/signals</code> speak it natively; thin adapters connect React, Vue, Svelte, and Solid.</p>
+        <p>Every I/O node exposes a static manifest &mdash; observable <em>properties</em>, settable <em>inputs</em>, invocable <em>commands</em> &mdash; so any binding core can discover and wire it generically. <a href="state/"><code>&lt;wcs-state&gt;</code></a> and <a href="signals/"><code>@wcstack/signals</code></a> speak it natively; thin adapters connect React, Vue, Svelte, and Solid.</p>
         <p class="ja">すべてのI/Oノードは静的マニフェスト(properties / inputs / commands)を公開。stateとsignalsはネイティブ対応、薄いアダプタでReact / Vue / Svelte / Solidからも使える。</p>
       </div>
     </div>
