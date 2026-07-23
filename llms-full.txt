@@ -1,9 +1,9 @@
 # wcstack — complete authoring guide for LLMs
 
-> Everything needed to generate correct wcstack (v1.22.0) apps: workflow, exact data-wcs
+> Everything needed to generate correct wcstack (v1.22.1) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
 > silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
-> whose content is verified against the wcstack monorepo at v1.22.0.
+> whose content is verified against the wcstack monorepo at v1.22.1.
 
 Note: the guide below refers to three reference files (references/state-binding.md,
 router-and-scaffold.md, io-node-catalog.md). All three are included IN THIS FILE after
@@ -18,7 +18,7 @@ the main guide — no external fetches are needed.
 
 wcstack is a family of "standards-first, zero-config, buildless" Web Components packages. An app is correctly a **single HTML file + one-line CDN loads** — do not introduce bundlers, build steps, or npm install unless the user explicitly asks for them.
 
-Content verified against **wcstack v1.22.0** (READMEs, examples, and source as of 2026-07). If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
+Content verified against **wcstack v1.22.1** (READMEs, examples, and source as of 2026-07). If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
 
 Generated-code accuracy lives in the exact syntax. **This file holds only the workflow, a cheat sheet, and the failure-mode matrix**; full syntax is split into references/ next to this file. Read the matching reference before entering each phase:
 
@@ -71,7 +71,7 @@ Positive rules with no failure-mode row below: use `<wcs-link to="...">` instead
 
 ### 5. Server and verification
 
-- **Lint first (v1.22+)**: `wcs-validate` machine-checks the generated HTML against the real contracts — `data-wcs` syntax / filters / state paths, wcs-* tag members (`command.` / `eventToken.` keys included, with typo suggestions), `trigger` slots seeded `true`, storage seed clobber, missing `<base href>`, signals dual-entry. Stable `wcs/*` codes; messages ja/en (`--lang=en`; default follows the environment); exit 1 = errors. It is NOT on npm — run it from a wcstack monorepo checkout (one-time build: `cd packages/vscode-wcs && npm install && npm run build`), then `node <wcstack>/packages/vscode-wcs/dist/cli.cjs [--lang=en] index.html`. In VS Code, the WcStack IntelliSense extension shows the same diagnostics (same codes) inline; if neither is available, skip to the matrix below.
+- **Lint first**: run `npx @wcstack/lint index.html` on every generated page and iterate until exit code 0. It machine-checks the real contracts — `data-wcs` syntax / filters / state paths, wcs-* tag members (`command.` / `eventToken.` keys included, with typo suggestions), `trigger` slots seeded `true`, storage seed clobber, missing `<base href>`, signals dual-entry. Stable `wcs/*` codes; messages follow the environment locale (`--lang=ja|en` to force); `--errors-only` for CI gates. In VS Code, the WcStack IntelliSense extension shows the same diagnostics (same codes) inline.
 - A static single page needs no server (recommend a tiny server if it fetches).
 - An SPA needs the fallback "every extensionless non-API GET returns index.html" (implementation in router-and-scaffold.md §7).
 - After finishing, do a minimal run in a browser or via a tiny server. For working references, see `examples/` (multi-package demos) and `packages/*/examples/` (single-package demos) in the wcstack repo.
@@ -111,7 +111,7 @@ Full syntax (modifiers, 40 built-in filters, nested loops, `$getAll` / `$resolve
 
 ## Silent-failure matrix (these break without an error)
 
-Run `wcs-validate` first when available (§5) — it machine-checks most rows. Then self-review against this table:
+Run `npx @wcstack/lint` first (§5) — it machine-checks most rows. Then self-review against this table:
 
 | Mistake / combination | Symptom | Correct form |
 |---|---|---|
@@ -909,7 +909,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 
 # wcstack I/O Node Catalog + signals Quick Reference
 
-Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, and `examples/signals-live-search`. All 35 tags are cross-checked against source at v1.21.7 (contracts unchanged in v1.22.0) — attribute spellings, properties, commands, and the timing notes below are source-verified.
+Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, and `examples/signals-live-search`. All 35 tags are cross-checked against source at v1.21.7 (contracts unchanged through v1.22.1) — attribute spellings, properties, commands, and the timing notes below are source-verified.
 
 ## 0. Common Conventions (all I/O nodes)
 

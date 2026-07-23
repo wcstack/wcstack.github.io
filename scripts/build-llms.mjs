@@ -19,7 +19,7 @@ const wcstackDir = process.env.WCSTACK_DIR ?? path.resolve(siteRoot, "..", "wcst
 const skillDir = process.env.WCSTACK_SKILL_DIR ?? path.resolve(siteRoot, "..", "wcstack-skill");
 
 const CORE = ["state", "router", "signals"];
-const TOOLING = ["devtools", "autoloader", "server", "vscode-wcs"];
+const TOOLING = ["devtools", "autoloader", "server", "lint", "vscode-wcs"];
 const SKIP = new Set(["poc-visual-editor"]);
 
 // --- monorepo からパッケージ情報を収集 ---
@@ -79,6 +79,8 @@ ${TOOLING.filter((d) => pkgs.has(d)).map(pkgLine).join("\n")}
 
 - [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, silent-failure matrix) in one file — use this when generating wcstack apps
 - [wcstack-app skill](https://github.com/wcstack/wcstack-skill): the same content as an installable Claude Code Agent Skill (\`/plugin marketplace add wcstack/wcstack-skill\`)
+- Validate generated HTML with \`npx @wcstack/lint index.html\` and iterate until exit code 0
+- [AGENTS.md](${raw("AGENTS.md")}): guidance for AI agents working inside the wcstack monorepo itself
 - Japanese docs: every package also ships README.ja.md next to its README.md
 `;
 
