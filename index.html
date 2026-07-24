@@ -576,7 +576,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.22.5</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.22.6</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -612,65 +612,64 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.18 &rarr; v1.22.5</h2>
-      <p class="section-sub">The thought experiment keeps shipping. Four changes worth closing up on.</p>
-      <p class="section-sub-ja">思考実験は動き続けている。特にクローズアップしたい4つの変更。</p>
+      <h2 class="section-title">Shipped in v1.22.0 &rarr; v1.22.6</h2>
+      <p class="section-sub">Four refinements that make buildless apps easier to verify and harder to break.</p>
+      <p class="section-sub-ja">ビルドレスなアプリを、より検証しやすく、より壊れにくくする4つの進化。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.21</span>
-          <span class="tag-name">&lt;wcs-devtools&gt;</span>
-          <h3>DevTools, as a tag</h3>
-          <p class="what-if">What if the inspector shipped as a custom element?</p>
-          <p>Inspect the live state tree and edit values inline &mdash; through the real reactive pipeline, so your edit shows up in the timeline. See exactly which DOM nodes each path is wired to, and watch every write, update batch, and command/event emission scroll by, including zero-subscriber &ldquo;empty emits.&rdquo; One script tag, and zero cost when you leave it out.</p>
-          <p class="ja">ライブな状態ツリーをその場で編集(本物のリアクティブ経路を通る)。各パスがどのDOMノードに繋がっているか、書き込み・バッチ・コマンド/イベント発火のすべてをタイムラインで観察。スクリプト1つ、外せばコストゼロ。</p>
+          <span class="topic-ver">v1.22.1</span>
+          <span class="tag-name">@wcstack/lint</span>
+          <h3>Contracts, checked from the CLI</h3>
+          <p class="what-if">What if buildless did not mean validation-less?</p>
+          <p>Run <code>npx @wcstack/lint index.html</code> with no install or project setup. The standalone validator checks <code>data-wcs</code> syntax, state paths, filters, I/O-node members, command and event tokens, sidecar manifests, and document-level requirements. Stable <code>wcs/*</code> codes and precise source ranges work in English or Japanese.</p>
+          <p class="ja">インストールもプロジェクト設定もなく、<code>npx @wcstack/lint index.html</code>で検証。<code>data-wcs</code>構文、状態パス、フィルタ、I/Oノード契約、コマンド／イベントトークン、サイドカーマニフェストまで、安定した診断コードと正確な位置情報で確認できる。</p>
           <ul class="tag-features">
-            <li>State Tree</li>
-            <li>Binding Map</li>
-            <li>Live Timeline</li>
-            <li>Alt+Shift+D</li>
-            <li>Zero-cost in Prod</li>
+            <li>Zero-install CLI</li>
+            <li>Stable wcs/* Codes</li>
+            <li>ja / en Messages</li>
+            <li>CI-ready Exit Codes</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.21</span>
-          <span class="tag-name">&lt;wcs-raf&gt;</span>
-          <h3>The render loop, declared</h3>
-          <p class="what-if">What if requestAnimationFrame was a tag?</p>
-          <p>A vsync-aligned frame loop with a first-class delta. <code>dt</code> is normalized to <code>0</code> across pauses and tab-hidden gaps &mdash; an interruption-spanning jump never reaches your physics step, so motion stays frame-rate independent. Hidden tabs stop completely and say so through <code>suspended</code>.</p>
-          <p class="ja">vsyncに揃ったフレームループと第一級のデルタ。dtは一時停止やタブ非表示をまたぐと0に正規化され、物理ステップにジャンプが漏れない。非表示タブは完全停止し、suspendedで通知。</p>
+          <span class="topic-ver">v1.22.3</span>
+          <span class="tag-name">wcs/* diagnostics</span>
+          <h3>Stale state gets a warning</h3>
+          <p class="what-if">What if the linter caught writes the reactive runtime cannot see?</p>
+          <p>Mutating <code>this.items</code> with <code>push</code>, <code>splice</code>, or <code>sort</code>, assigning <code>this.items[0]</code>, and writing through <code>this.user.name</code> now produce actionable diagnostics. The fix is shown in place: reassign an immutable array or use a reactive path such as <code>this["items.0"]</code>.</p>
+          <p class="ja"><code>push</code>／<code>splice</code>／<code>sort</code>、<code>this.items[0]</code>への代入、<code>this.user.name</code>経由の書き込みなど、リアクティブ更新が追跡できない操作を検出。新しい配列の再代入や<code>this["items.0"]</code>のような正しい修正方法もその場で提示する。</p>
           <ul class="tag-features">
-            <li>First-class dt</li>
-            <li>vsync-aligned</li>
-            <li>tick / elapsed</li>
-            <li>Tab-aware</li>
+            <li>Array Mutations</li>
+            <li>Index Assignments</li>
+            <li>Nested Writes</li>
+            <li>Actionable Fixes</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.19</span>
-          <span class="tag-name">$streams</span>
-          <h3>Streaming, folded into state</h3>
-          <p class="what-if">What if an async stream folded straight into a path?</p>
-          <p>Declare an async iterable, generator, or <code>ReadableStream</code> as a <code>$streams</code> entry, and each chunk folds into one reactive property &mdash; with <code>$streamStatus</code> and <code>$streamError</code> companions. Change a dependency and the run aborts and restarts from scratch: switchMap semantics, declared.</p>
-          <p class="ja">非同期イテラブル・ジェネレータ・ReadableStreamを$streamsに宣言すると、各チャンクが1つのリアクティブなプロパティに畳み込まれる。依存が変われば中断して再スタート &mdash; 宣言的なswitchMap。</p>
+          <span class="topic-ver">v1.22.5 &rarr; v1.22.6</span>
+          <span class="tag-name">for / if</span>
+          <h3>Structural rendering holds its order</h3>
+          <p class="what-if">What if incremental DOM updates stayed boringly predictable?</p>
+          <p>Re-applying a still-true <code>if</code> no longer rotates multi-node content, and a <code>for</code> row ending in a nested structural directive now moves as one closed DOM range. Sequential appends and reorders preserve visual order, including wrapper-free <code>for &gt; if</code> and <code>for &gt; for</code> templates.</p>
+          <p class="ja">真のまま再評価された<code>if</code>で複数ノードの順序が回転する問題と、構造ディレクティブで終わる<code>for</code>行の範囲が途中で切れる問題を修正。ラッパーのない<code>for &gt; if</code>や<code>for &gt; for</code>でも、逐次追加と並べ替えの表示順を保つ。</p>
           <ul class="tag-features">
-            <li>Async Iterables</li>
-            <li>Fold Pipeline</li>
-            <li>Dependency Restart</li>
-            <li>$streamStatus / $streamError</li>
+            <li>Idempotent Remounts</li>
+            <li>Closed Row Ranges</li>
+            <li>Stable Appends</li>
+            <li>Correct Reorders</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.21</span>
-          <span class="tag-name">wc-bindable</span>
-          <h3>A spec you can machine-check</h3>
-          <p class="what-if">What if the protocol proved its own conformance?</p>
-          <p>The <code>wc-bindable</code> manifest &mdash; <em>properties</em>, <em>inputs</em>, <em>commands</em> &mdash; is now verified by a CI-gated conformance suite across all 41 packages. Add an <code>errorInfo</code> error taxonomy on 27 I/O nodes and an <code>OperationLane</code> guarding every async command, and the thought experiment has the rigor of a real platform.</p>
-          <p class="ja">wc-bindableマニフェスト(properties / inputs / commands)を、41全パッケージにわたるCIゲート付き適合性スイートが検証。27のI/OノードにerrorInfoエラー分類、各非同期コマンドをOperationLaneが保護。思考実験に本物のプラットフォームの厳密さを。</p>
+          <span class="topic-ver">v1.22.6</span>
+          <span class="tag-name">#init=element</span>
+          <h3>Initial authority, made explicit</h3>
+          <p class="what-if">What if the element could win the first sync without winning forever?</p>
+          <p><code>value#init=element</code> is now the canonical pattern when an element owns the real initial value. It prevents persisted storage from being clobbered and captures monitor snapshots that fired before binding attached. Authority applies only to initial sync; later state writes continue to flow normally.</p>
+          <p class="ja">要素が本当の初期値を持つ場合の正解を<code>value#init=element</code>に統一。永続ストレージの上書きを防ぎ、バインド前に発火したモニターの初期スナップショットも取り込む。要素側の権威は初期同期だけで、その後の状態更新は通常どおり流れる。</p>
           <ul class="tag-features">
-            <li>CI Conformance</li>
-            <li>errorInfo Taxonomy</li>
-            <li>OperationLane</li>
-            <li>wcs-validate CLI</li>
+            <li>No Storage Clobber</li>
+            <li>No Missed Snapshot</li>
+            <li>Initial-only Authority</li>
+            <li>Explicit Semantics</li>
           </ul>
         </div>
       </div>
