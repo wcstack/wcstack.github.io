@@ -1,9 +1,9 @@
 # wcstack — complete authoring guide for LLMs
 
-> Everything needed to generate correct wcstack (v1.22.1) apps: workflow, exact data-wcs
+> Everything needed to generate correct wcstack (v1.22.2) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
 > silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
-> whose content is verified against the wcstack monorepo at v1.22.1.
+> whose content is verified against the wcstack monorepo at v1.22.2.
 
 Note: the guide below refers to three reference files (references/state-binding.md,
 router-and-scaffold.md, io-node-catalog.md). All three are included IN THIS FILE after
@@ -18,7 +18,7 @@ the main guide — no external fetches are needed.
 
 wcstack is a family of "standards-first, zero-config, buildless" Web Components packages. An app is correctly a **single HTML file + one-line CDN loads** — do not introduce bundlers, build steps, or npm install unless the user explicitly asks for them.
 
-Content verified against **wcstack v1.22.1** (READMEs, examples, and source as of 2026-07). If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
+Content verified against **wcstack v1.22.2** (READMEs, examples, and source as of 2026-07). If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
 
 Generated-code accuracy lives in the exact syntax. **This file holds only the workflow, a cheat sheet, and the failure-mode matrix**; full syntax is split into references/ next to this file. Read the matching reference before entering each phase:
 
@@ -909,7 +909,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 
 # wcstack I/O Node Catalog + signals Quick Reference
 
-Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, and `examples/signals-live-search`. All 35 tags are cross-checked against source at v1.21.7 (contracts unchanged through v1.22.1) — attribute spellings, properties, commands, and the timing notes below are source-verified.
+Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, and `examples/signals-live-search`. All 35 tags are cross-checked against source at v1.21.7 (contracts unchanged through v1.22.2) — attribute spellings, properties, commands, and the timing notes below are source-verified.
 
 ## 0. Common Conventions (all I/O nodes)
 
