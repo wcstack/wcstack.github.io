@@ -932,7 +932,14 @@
     &lt;button data-wcs="onclick: removeItem"&gt;Delete&lt;/button&gt;
   &lt;/div&gt;
 &lt;/template&gt;
-&lt;p&gt;Grand Total: &lt;span data-wcs="textContent: cart.grandTotal|locale(ja-JP)"&gt;&lt;/span&gt;&lt;/p&gt;</code></pre>
+&lt;p&gt;Grand Total: &lt;span data-wcs="textContent: cart.grandTotal|locale(ja-JP)"&gt;&lt;/span&gt;&lt;/p&gt;
+
+&lt;!-- Filters transform VALUES only. An event handler never takes a filter.
+     BAD:  data-wcs="onkeydown: addTodo|enter"   &lt;- no such filter exists
+     GOOD: data-wcs="onkeydown: addTodo"         &lt;- inspect event.key in the method
+     Mutating state in place is not reactive either.
+     BAD:  this.cart.items.push(x)
+     GOOD: this["cart.items"] = [...this["cart.items"], x] --&gt;</code></pre>
         </div>
         <!-- Router -->
         <div class="code-panel" id="panel-router">
@@ -1151,6 +1158,19 @@ const html = await renderToString(`
 
 &lt;!-- Dev builds only: in-page DevTools overlay --&gt;
 &lt;script type="module" src="https://esm.run/@wcstack/devtools/auto"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <div class="cdn-block">
+        <div class="code-header">
+          <span class="filename">terminal</span>
+          <span>Verify what you wrote</span>
+        </div>
+<pre><code class="language-bash"># Check any HTML against the data-wcs contract. No install, no config.
+# Exit code 0 means clean — iterate until it exits 0.
+npx @wcstack/lint index.html
+
+# Print the full authoring guide as plain text:
+# binding syntax, filters, tokens, and the mistakes to avoid.
+npm view wcstack readme</code></pre>
       </div>
       <p class="cdn-note">Each script registers its custom elements and does nothing else. No initialization, no bootstrap &mdash; tags activate when the browser parses them.</p>
       <p class="cdn-note-ja">各スクリプトはカスタム要素を登録するだけ。初期化もブートストラップもなし &mdash; ブラウザがパースした時にタグが起動する。</p>
