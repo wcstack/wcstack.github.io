@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@wcstack/signals — Signals Core · wcstack</title>
-  <meta name="description" content="Deep dive into @wcstack/signals: signal / computed / effect, async resources with switchMap semantics, streamResource folds, the fine-grained h() DOM layer, keyed For / Index, and the bindNode adapter for wc-bindable elements.">
+  <meta name="description" content="Deep dive into @wcstack/signals: signal / computed / effect, async resources, the fine-grained h() DOM layer, keyed For / Index, mountNode, and direct I/O Core binding.">
   <meta property="og:title" content="@wcstack/signals — Signals Core · wcstack">
-  <meta property="og:description" content="The JS-first reactive core of wcstack. Fine-grained signals, ≈2.5 KB, zero dependencies — driving the same wc-bindable tags.">
+  <meta property="og:description" content="The JS-first reactive core of wcstack. Fine-grained signals, ≈3.1 KB, zero dependencies — binding elements or headless I/O Cores.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://wcstack.github.io/signals/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -305,13 +305,13 @@
     <div class="container">
       <p class="section-label">Core Package · Reactive Core (JS-first)</p>
       <h1 class="pkg-title">@wcstack/signals</h1>
-      <p class="pkg-sub">A signals-based, <strong>fine-grained</strong> reactive core &mdash; <code style="font-family:var(--mono)">signal</code> / <code style="font-family:var(--mono)">computed</code> / <code style="font-family:var(--mono)">effect</code>, async resources, a no-VDOM DOM layer, and a bridge to every <code style="font-family:var(--mono)">wc-bindable</code> tag. Zero runtime dependencies, buildless, standards-first.</p>
-      <p class="pkg-sub-ja">シグナルベースの細粒度リアクティブコア。TC39形のAPI、非同期resource、VDOMなしのDOM層、wc-bindableブリッジ。ランタイム依存ゼロ。</p>
+      <p class="pkg-sub">A signals-based, <strong>fine-grained</strong> reactive core &mdash; <code style="font-family:var(--mono)">signal</code> / <code style="font-family:var(--mono)">computed</code> / <code style="font-family:var(--mono)">effect</code>, async resources, a no-VDOM DOM layer, and bridges for wc-bindable elements or their headless Cores. Zero runtime dependencies, buildless, standards-first.</p>
+      <p class="pkg-sub-ja">シグナルベースの細粒度リアクティブコア。TC39形のAPI、非同期resource、VDOMなしのDOM層、wc-bindable要素とヘッドレスCoreのブリッジ。ランタイム依存ゼロ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.22.6</span>
+        <span class="pill accent">v1.23.0</span>
         <span class="pill">@wcstack/signals</span>
-        <span class="pill">core &asymp;2.5 KB gz</span>
-        <span class="pill">dom +&asymp;2.1 KB gz</span>
+        <span class="pill">core &asymp;3.1 KB gz</span>
+        <span class="pill">dom +&asymp;3.8 KB gz</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">MIT</span>
       </div>
@@ -369,7 +369,7 @@
           <ul>
             <li><code>signal</code> / <code>computed</code> / <code>effect</code> in plain modules</li>
             <li>Fine-grained <code>h()</code> DOM, keyed <code>For</code> / <code>Index</code></li>
-            <li>&asymp;2.5&thinsp;KB core, TC39-shaped API</li>
+            <li>&asymp;3.1&thinsp;KB core, TC39-shaped API</li>
             <li>Best when logic lives in TypeScript</li>
           </ul>
         </div>
@@ -475,6 +475,7 @@ const log = streamResource(
           <tr><td><code>Fragment</code></td><td>Groups children without a wrapper element</td></tr>
           <tr><td><code>SignalsElement</code></td><td>Abstract <code>HTMLElement</code> base; implement <code>render()</code>, optionally <code>getMountPoint()</code></td></tr>
           <tr><td><code>createSignalsElement()</code></td><td>Builds the base class at call time &mdash; SSR-safe, clear error if no DOM</td></tr>
+          <tr><td><code>mountNode(tagName, options?)</code></td><td>Creates, binds, then connects a defined I/O element; returns the BoundNode plus <code>el</code> / <code>unmount()</code></td></tr>
         </table>
       </div>
 
@@ -560,9 +561,9 @@ render(view, document.body);</code></pre>
   <!-- bindNode -->
   <section class="doc" id="bindnode">
     <div class="container">
-      <h2>Binding I/O nodes: <code style="font-family:var(--mono)">bindNode</code> <a class="anchor" href="#bindnode">#</a></h2>
-      <p><code>bindNode(target, descriptor?)</code> bridges any <code>wc-bindable</code> element &mdash; all 30+ wcstack I/O nodes &mdash; into signals. <strong>IO is the node, reactivity is the core</strong>: the element has no signal awareness.</p>
-      <p class="ja">bindNodeがwc-bindable要素をシグナルに橋渡しする。要素側はシグナルを一切知らない。</p>
+      <h2>Binding I/O nodes: <code style="font-family:var(--mono)">bindNode</code> / <code style="font-family:var(--mono)">mountNode</code> <a class="anchor" href="#bindnode">#</a></h2>
+      <p><code>bindNode(target, descriptor?)</code> bridges any wc-bindable element or I/O Core into signals. <strong>IO is the node, reactivity is the core</strong>: neither target needs signal awareness.</p>
+      <p class="ja">bindNodeがwc-bindable要素またはI/O Coreをシグナルへ橋渡しする。対象側はシグナルを一切知らない。</p>
       <div class="table-wrap">
         <table>
           <tr><th>Member</th><th>Purpose</th></tr>
@@ -576,6 +577,39 @@ render(view, document.body);</code></pre>
         </table>
       </div>
       <p><code>nodeSource(bound, run, { abort? })</code> wraps a node as a <code>resource</code> source, wiring the resource's <code>AbortSignal</code> to the node's cancel command (default <code>"abort"</code>).</p>
+
+      <h3><code>mountNode</code>: create, bind, and connect safely</h3>
+      <p>When your app owns a headless element, import its defining module and let <code>mountNode()</code> enforce the safe order: attributes before connection, subscriptions before connection, then append to <code>document.body</code> (or <code>parent</code>). An undefined tag throws immediately. <code>unmount()</code> and its <code>dispose()</code> alias are idempotent and remove the owned element.</p>
+      <p class="ja">アプリがヘッドレス要素を所有する場合、定義モジュールをimportして<code>mountNode()</code>へ。属性設定、購読、DOM接続の順序が保証され、未定義タグは即時エラー。<code>unmount()</code>（<code>dispose()</code>の別名）は何度呼んでも安全に購読と要素を破棄する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">headless-fetch.ts</span><span>mountNode</span></div>
+<pre><code class="language-javascript">import "@wcstack/fetch/auto";
+import { mountNode } from "@wcstack/signals/dom";
+
+const fetcher = mountNode("wcs-fetch", {
+  attrs: { url: "/api/people" },
+});
+
+fetcher.signals.value.get();
+fetcher.el;        // created and connected
+fetcher.unmount(); // dispose bindings and remove the element</code></pre>
+      </div>
+
+      <h3>Bind an I/O Core directly</h3>
+      <p>Every I/O Core is itself a wc-bindable <code>EventTarget</code>, so definition timing disappears entirely: no element, upgrade, or <code>customElements</code> registry. You give up attributes, <code>:state()</code> reflection, and connected lifecycle; drive the Core's commands and cleanup explicitly.</p>
+      <p class="ja">すべてのI/O Coreは、それ自体がwc-bindableな<code>EventTarget</code>。要素・upgrade・<code>customElements</code>レジストリがなく、定義タイミングの問題も消える。属性、<code>:state()</code>反映、connectedライフサイクルの代わりに、コマンドと後始末を明示的に管理する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">core-fetch.ts</span><span>no custom element</span></div>
+<pre><code class="language-javascript">import { FetchCore } from "@wcstack/fetch";
+import { bindNode } from "@wcstack/signals";
+
+const core = new FetchCore();
+const bound = bindNode(core);
+
+core.fetch("/api/user");
+bound.signals.value.get();
+core.dispose();</code></pre>
+      </div>
 
       <h3>Example: a search UI over <code>&lt;wcs-fetch&gt;</code></h3>
       <div class="code-block">
@@ -678,7 +712,7 @@ bound.command("fetch", "/api");</code></pre>
           <tr><td>Error contract (<code>DisposedError</code>, <code>isDisposedError</code>)</td><td><span class="badge stable">Stable</span></td></tr>
           <tr><td>Resources (<code>resource</code>, <code>streamResource</code>)</td><td><span class="badge stable">Stable</span></td></tr>
           <tr><td>wc-bindable adapter (<code>bindNode</code>, <code>nodeSource</code>)</td><td><span class="badge evolving">Evolving</span></td></tr>
-          <tr><td>DOM layer (<code>h</code>, <code>render</code>, <code>For</code>, <code>Index</code>, <code>SignalsElement</code>)</td><td><span class="badge evolving">Evolving</span></td></tr>
+          <tr><td>DOM layer (<code>h</code>, <code>render</code>, <code>For</code>, <code>Index</code>, <code>SignalsElement</code>, <code>mountNode</code>)</td><td><span class="badge evolving">Evolving</span></td></tr>
           <tr><td>Development mode (<code>__WCS_DEV__</code>)</td><td><span class="badge experimental">Experimental</span></td></tr>
         </table>
       </div>
@@ -688,7 +722,7 @@ bound.command("fetch", "/api");</code></pre>
       <ul class="list">
         <li><strong>Language target:</strong> ES2022 &mdash; Chrome/Edge 94+, Firefox 90+, Safari 16.4+.</li>
         <li><strong>Required runtime features:</strong> <code>queueMicrotask</code>, <code>AbortController</code>, <code>WeakMap</code> / <code>WeakSet</code>; <code>ReadableStream</code> + async iteration for <code>streamResource</code> only.</li>
-        <li><strong>Non-DOM safe:</strong> the <code>.</code> entry is fully non-DOM; <code>./dom</code> evaluates without a DOM (SSR pre-pass safe) but its DOM-touching surface needs DOM globals when used &mdash; <code>createSignalsElement()</code> gives a clear error otherwise.</li>
+        <li><strong>Non-DOM safe:</strong> the <code>.</code> entry is fully non-DOM; <code>./dom</code> evaluates without a DOM (SSR pre-pass safe) but its DOM-touching surface, including <code>mountNode()</code>, needs DOM globals when used &mdash; <code>createSignalsElement()</code> gives a clear error otherwise.</li>
         <li><strong>Not in v1:</strong> SSR hydration, deep reactivity, stream backpressure.</li>
       </ul>
       <p class="ja">コアは非DOM環境で完全動作。./domエントリの評価自体はSSRセーフ。v1にはSSRハイドレーション・深いリアクティビティ・バックプレッシャはない。</p>
@@ -698,7 +732,7 @@ bound.command("fetch", "/api");</code></pre>
         <div class="code-header"><span class="filename">terminal</span><span>npm</span></div>
 <pre><code class="language-javascript">npm install @wcstack/signals</code></pre>
       </div>
-      <p>Entry points: <code>@wcstack/signals</code> (core, resources, adapter) and <code>@wcstack/signals/dom</code> (<code>h</code>, <code>render</code>, <code>Fragment</code>, <code>For</code>, <code>Index</code>, <code>SignalsElement</code>, plus re-exported core).</p>
+      <p>Entry points: <code>@wcstack/signals</code> (core, resources, adapter) and <code>@wcstack/signals/dom</code> (<code>h</code>, <code>render</code>, <code>Fragment</code>, <code>For</code>, <code>Index</code>, <code>SignalsElement</code>, <code>mountNode</code>, plus re-exported core).</p>
     </div>
   </section>
 

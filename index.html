@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.22.6</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.23.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,64 +647,64 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.22.0 &rarr; v1.22.6</h2>
-      <p class="section-sub">Four refinements that make buildless apps easier to verify and harder to break.</p>
-      <p class="section-sub-ja">ビルドレスなアプリを、より検証しやすく、より壊れにくくする4つの進化。</p>
+      <h2 class="section-title">Shipped in v1.23.0</h2>
+      <p class="section-sub">A clearer entry point, deterministic definition timing, and two ways to own headless I/O.</p>
+      <p class="section-sub-ja">入口をより明確にし、定義タイミングを決定的にし、ヘッドレスI/Oを扱う2つの方法を追加。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.22.1</span>
-          <span class="tag-name">@wcstack/lint</span>
-          <h3>Contracts, checked from the CLI</h3>
-          <p class="what-if">What if buildless did not mean validation-less?</p>
-          <p>Run <code>npx @wcstack/lint index.html</code> with no install or project setup. The standalone validator checks <code>data-wcs</code> syntax, state paths, filters, I/O-node members, command and event tokens, sidecar manifests, and document-level requirements. Stable <code>wcs/*</code> codes and precise source ranges work in English or Japanese.</p>
-          <p class="ja">インストールもプロジェクト設定もなく、<code>npx @wcstack/lint index.html</code>で検証。<code>data-wcs</code>構文、状態パス、フィルタ、I/Oノード契約、コマンド／イベントトークン、サイドカーマニフェストまで、安定した診断コードと正確な位置情報で確認できる。</p>
+          <span class="topic-ver">v1.23.0</span>
+          <span class="tag-name">wcstack</span>
+          <h3>A package you read, not install</h3>
+          <p class="what-if">What if npm had a self-contained entry point for humans and agents?</p>
+          <p>The new unscoped <code>wcstack</code> package is documentation-only. Run <code>npm view wcstack readme</code> to get the complete guide without cloning a repository. Apps still load only the individual <code>@wcstack/*</code> packages they use.</p>
+          <p class="ja">新しい非スコープ版<code>wcstack</code>は、インストールしないドキュメント専用パッケージ。<code>npm view wcstack readme</code>で、リポジトリをcloneせずに自己完結したガイドを読める。アプリは従来どおり、使う<code>@wcstack/*</code>だけを読み込む。</p>
           <ul class="tag-features">
-            <li>Zero-install CLI</li>
-            <li>Stable wcs/* Codes</li>
-            <li>ja / en Messages</li>
-            <li>CI-ready Exit Codes</li>
+            <li>Documentation-only</li>
+            <li>npm view Ready</li>
+            <li>Agent-friendly Guide</li>
+            <li>No Runtime Payload</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.22.3</span>
-          <span class="tag-name">wcs/* diagnostics</span>
-          <h3>Stale state gets a warning</h3>
-          <p class="what-if">What if the linter caught writes the reactive runtime cannot see?</p>
-          <p>Mutating <code>this.items</code> with <code>push</code>, <code>splice</code>, or <code>sort</code>, assigning <code>this.items[0]</code>, and writing through <code>this.user.name</code> now produce actionable diagnostics. The fix is shown in place: reassign an immutable array or use a reactive path such as <code>this["items.0"]</code>.</p>
-          <p class="ja"><code>push</code>／<code>splice</code>／<code>sort</code>、<code>this.items[0]</code>への代入、<code>this.user.name</code>経由の書き込みなど、リアクティブ更新が追跡できない操作を検出。新しい配列の再代入や<code>this["items.0"]</code>のような正しい修正方法もその場で提示する。</p>
+          <span class="topic-ver">v1.23.0</span>
+          <span class="tag-name">mountNode</span>
+          <h3>Create, bind, connect — in one call</h3>
+          <p class="what-if">What if a headless custom element could never miss its first event?</p>
+          <p><code>mountNode()</code> creates a defined I/O element, applies attributes, binds signals, then connects it. Configuration and subscriptions are in place before <code>connectedCallback</code> runs; undefined tags fail immediately, and <code>unmount()</code> owns cleanup.</p>
+          <p class="ja"><code>mountNode()</code>は、定義済みI/O要素の作成、属性設定、Signalsの購読、DOM接続を順序保証つきで実行。<code>connectedCallback</code>より前に設定と購読が完了し、未定義タグは即座にエラー、後始末は<code>unmount()</code>に集約される。</p>
           <ul class="tag-features">
-            <li>Array Mutations</li>
-            <li>Index Assignments</li>
-            <li>Nested Writes</li>
-            <li>Actionable Fixes</li>
+            <li>Attrs Before Connect</li>
+            <li>Subscribe Before Connect</li>
+            <li>Loud Definition Errors</li>
+            <li>Owned Teardown</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.22.5 &rarr; v1.22.6</span>
-          <span class="tag-name">for / if</span>
-          <h3>Structural rendering holds its order</h3>
-          <p class="what-if">What if incremental DOM updates stayed boringly predictable?</p>
-          <p>Re-applying a still-true <code>if</code> no longer rotates multi-node content, and a <code>for</code> row ending in a nested structural directive now moves as one closed DOM range. Sequential appends and reorders preserve visual order, including wrapper-free <code>for &gt; if</code> and <code>for &gt; for</code> templates.</p>
-          <p class="ja">真のまま再評価された<code>if</code>で複数ノードの順序が回転する問題と、構造ディレクティブで終わる<code>for</code>行の範囲が途中で切れる問題を修正。ラッパーのない<code>for &gt; if</code>や<code>for &gt; for</code>でも、逐次追加と並べ替えの表示順を保つ。</p>
+          <span class="topic-ver">v1.23.0</span>
+          <span class="tag-name">XxxCore</span>
+          <h3>I/O without a custom element</h3>
+          <p class="what-if">What if the Core itself were the complete node?</p>
+          <p>Every I/O Core is now a first-class wc-bindable <code>EventTarget</code>. Pass <code>new FetchCore()</code> or <code>new WebSocketCore()</code> straight to <code>bindNode()</code>: no element, no registry, and no definition timing. The tradeoff is explicit lifecycle management.</p>
+          <p class="ja">すべてのI/O Coreを、wc-bindableな<code>EventTarget</code>として直接利用可能に。<code>new FetchCore()</code>や<code>new WebSocketCore()</code>を<code>bindNode()</code>へ渡せば、要素もレジストリも定義待ちも不要。代わりにライフサイクルは明示的に管理する。</p>
           <ul class="tag-features">
-            <li>Idempotent Remounts</li>
-            <li>Closed Row Ranges</li>
-            <li>Stable Appends</li>
-            <li>Correct Reorders</li>
+            <li>No Element</li>
+            <li>No Registry Timing</li>
+            <li>Self-dispatching Core</li>
+            <li>Explicit Lifecycle</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.22.6</span>
-          <span class="tag-name">#init=element</span>
-          <h3>Initial authority, made explicit</h3>
-          <p class="what-if">What if the element could win the first sync without winning forever?</p>
-          <p><code>value#init=element</code> is now the canonical pattern when an element owns the real initial value. It prevents persisted storage from being clobbered and captures monitor snapshots that fired before binding attached. Authority applies only to initial sync; later state writes continue to flow normally.</p>
-          <p class="ja">要素が本当の初期値を持つ場合の正解を<code>value#init=element</code>に統一。永続ストレージの上書きを防ぎ、バインド前に発火したモニターの初期スナップショットも取り込む。要素側の権威は初期同期だけで、その後の状態更新は通常どおり流れる。</p>
+          <span class="topic-ver">v1.23.0</span>
+          <span class="tag-name">state/auto last</span>
+          <h3>Definition order becomes deterministic</h3>
+          <p class="what-if">What if a fast first click could never disappear into an undefined node?</p>
+          <p>Load I/O packages before <code>@wcstack/state/auto</code>. Property writes can wait for an element definition, but command-token emissions are not replayed; State-last removes that zero-subscriber window. If script order is outside your control, gate the action with <code>customElements.whenDefined()</code>.</p>
+          <p class="ja">I/Oパッケージを<code>@wcstack/state/auto</code>より先に読み込む。プロパティ書き込みは要素定義を待てる一方、コマンドトークンは再送されないため、Stateを最後にすることで購読者ゼロの隙間をなくす。順序を制御できない場合は<code>customElements.whenDefined()</code>で待機する。</p>
           <ul class="tag-features">
-            <li>No Storage Clobber</li>
-            <li>No Missed Snapshot</li>
-            <li>Initial-only Authority</li>
-            <li>Explicit Semantics</li>
+            <li>I/O Before State</li>
+            <li>No Lost Commands</li>
+            <li>Latest Value Replay</li>
+            <li>whenDefined Gate</li>
           </ul>
         </div>
       </div>
@@ -785,13 +785,13 @@
           <span class="tag-name">@wcstack/signals</span>
           <h3>Signals Core</h3>
           <p class="what-if">What if TC39 signals were already here &mdash; and drove the same tags?</p>
-          <p>A fine-grained reactive core &mdash; <code>signal</code> / <code>computed</code> / <code>effect</code>, async resources, keyed <code>For</code> / <code>Index</code> &mdash; the JS-first counterpart to <code>&lt;wcs-state&gt;</code>, driving the same bindable tags.</p>
-          <p class="ja">signal / computed / effect、非同期resource、キー付きFor/Indexを備えたシグナルベースのリアクティブコア。stateのJSファースト版。</p>
+          <p>A fine-grained reactive core &mdash; <code>signal</code> / <code>computed</code> / <code>effect</code>, async resources, keyed <code>For</code> / <code>Index</code> &mdash; the JS-first counterpart to <code>&lt;wcs-state&gt;</code>, binding the same elements or their headless Cores.</p>
+          <p class="ja">signal / computed / effect、非同期resource、キー付きFor/Indexを備えたシグナルベースのリアクティブコア。同じ要素やヘッドレスCoreを束縛できるstateのJSファースト版。</p>
           <ul class="tag-features">
             <li>TC39-shaped</li>
             <li>Async Resources</li>
             <li>Keyed For / Index</li>
-            <li>bindNode Adapter</li>
+            <li>bindNode / mountNode</li>
           </ul>
           <a class="card-link" href="signals/">Learn more &rarr;</a>
         </div>
@@ -1142,22 +1142,24 @@ const html = await renderToString(`
   <section class="quickstart" id="quickstart">
     <div class="container">
       <p class="section-label">Quick Start</p>
-      <h2 class="section-title">One script tag. That's the rule.</h2>
-      <p class="section-sub">Pick what you need. Every package works standalone and ships an <code>/auto</code> entry.</p>
-      <p class="section-sub-ja">必要なものだけ選ぶ。全パッケージが単独で動作し、/autoエントリを持つ。</p>
+      <h2 class="section-title">One package, one script tag.</h2>
+      <p class="section-sub">Pick only the scoped packages you need. Element packages ship an <code>/auto</code> entry.</p>
+      <p class="section-sub-ja">必要なスコープ付きパッケージだけを選ぶ。要素パッケージは<code>/auto</code>エントリを持つ。</p>
       <div class="cdn-block">
         <div class="code-header">
           <span class="filename">index.html</span>
           <span>CDN via esm.run</span>
         </div>
-<pre><code class="language-html">&lt;!-- Pick any of the 41 packages — same pattern for all --&gt;
-&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;
+<pre><code class="language-html">&lt;!-- Load the individual @wcstack/* packages your app uses --&gt;
 &lt;script type="module" src="https://esm.run/@wcstack/router/auto"&gt;&lt;/script&gt;
 &lt;script type="module" src="https://esm.run/@wcstack/fetch/auto"&gt;&lt;/script&gt;
 &lt;script type="module" src="https://esm.run/@wcstack/autoloader/auto"&gt;&lt;/script&gt;
 
 &lt;!-- Dev builds only: in-page DevTools overlay --&gt;
-&lt;script type="module" src="https://esm.run/@wcstack/devtools/auto"&gt;&lt;/script&gt;</code></pre>
+&lt;script type="module" src="https://esm.run/@wcstack/devtools/auto"&gt;&lt;/script&gt;
+
+&lt;!-- State last: command-token emissions are not replayed --&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;</code></pre>
       </div>
       <div class="cdn-block">
         <div class="code-header">

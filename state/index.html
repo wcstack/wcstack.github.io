@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.22.6</span>
+        <span class="pill accent">v1.23.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -376,7 +376,7 @@
           <ul>
             <li><code>signal</code> / <code>computed</code> / <code>effect</code> in plain modules</li>
             <li>Fine-grained <code>h()</code> DOM, keyed <code>For</code> / <code>Index</code></li>
-            <li>&asymp;2.5&thinsp;KB core, TC39-shaped API</li>
+            <li>&asymp;3.1&thinsp;KB core, TC39-shaped API</li>
             <li>Best when logic lives in TypeScript</li>
           </ul>
           <a class="go" href="../signals/">Read the signals docs &rarr;</a>
@@ -1002,7 +1002,7 @@ bootstrapState({
       </ul>
       <p class="ja">対話的操作はミリ秒以下。バルク操作はsignals比で約2.5〜3.5倍遅いが、その分の帳簿がDevToolsタイムラインとSSRハイドレーションを支えている。</p>
       <div class="note">
-        <p>Need raw throughput with the same tags? The JS-first core <a href="../signals/"><code>@wcstack/signals</code></a> drives the same <code>wc-bindable</code> I/O nodes with a &asymp;2.5&thinsp;KB fine-grained runtime.</p>
+        <p>Need raw throughput with the same tags? The JS-first core <a href="../signals/"><code>@wcstack/signals</code></a> drives the same <code>wc-bindable</code> I/O nodes with a &asymp;3.1&thinsp;KB fine-grained runtime.</p>
         <p class="ja">スループット最優先なら、同じタグ群を駆動できるJSファーストの@wcstack/signalsへ。</p>
       </div>
     </div>
