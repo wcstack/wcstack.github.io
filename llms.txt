@@ -2,84 +2,85 @@
 
 > Standards-first, zero-config, buildless Web Components packages for building web apps: reactive state with declarative `data-wcs` HTML bindings (@wcstack/state), SPA routing (@wcstack/router), TC39-style signals (@wcstack/signals), and 35 I/O node packages of declarative custom elements (`wcs-*` tags) that wrap browser APIs (fetch, storage, WebSocket, camera, sensors, ...) via the wc-bindable protocol.
 
-Current release: v1.23.0. An app is correctly a single HTML file plus one-line CDN loads
+Current release: v1.24.0. An app is correctly a single HTML file plus one-line CDN loads
 (`<script type="module" src="https://esm.run/@wcstack/<pkg>/auto"></script>`) — no bundler,
-no build step, no npm install. All links below are pinned to v1.23.0.
+no build step, no npm install. All links below are pinned to v1.24.0.
 
 ## Entry guide
 
-- [wcstack](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/wcstack/README.md): Entry point for wcstack - 41 zero-dependency Web Components packages. Reactive data binding, declarative routing and 30+ Web APIs as HTML tags. Buildless: one CDN script tag per package. Run `npm view wcstack readme` for the full authoring guide.
+- [wcstack](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/wcstack/README.md): Entry point for wcstack - 41 zero-dependency Web Components packages. Reactive data binding, declarative routing and 30+ Web APIs as HTML tags. Buildless: one CDN script tag per package. Run `npm view wcstack readme` for the full authoring guide.
 
 The unscoped `wcstack` package is documentation-only: read it with
 `npm view wcstack readme`; load or install the individual `@wcstack/*` packages an app uses.
 
 ## Core
 
-- [@wcstack/state](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/state/README.md): Reactive state management with declarative data binding for Web Components. Zero dependencies, buildless.
-- [@wcstack/router](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/router/README.md): Declarative SPA routing for Web Components with Navigation API support. Zero dependencies, buildless.
-- [@wcstack/signals](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/signals/README.md): Signals-based lightweight reactive core with async-IO resource adapters and a wc-bindable → signal bridge for Web Components. Zero runtime dependencies.
+- [@wcstack/state](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/state/README.md): Reactive state management with declarative data binding for Web Components. Zero dependencies, buildless.
+- [@wcstack/router](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/router/README.md): Declarative SPA routing for Web Components with Navigation API support. Zero dependencies, buildless.
+- [@wcstack/signals](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/signals/README.md): Signals-based lightweight reactive core with async-IO resource adapters and a wc-bindable → signal bridge for Web Components. Zero runtime dependencies.
 
 ## Machine-readable contracts
 
-- [wcs-manifest.json](https://cdn.jsdelivr.net/npm/@wcstack/state@1.23.0/dist/wcs-manifest.json): the data-wcs binding grammar and all built-in filters (names, arity, argument types) as JSON — the single source of truth for tooling
-- [Timing and firing contract](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/docs/timing-and-firing-contract.md): when bindings attach, when writes fire, initial-sync authority
-- [Sidecar manifest schema](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/docs/wcstack-manifest-schema.md): wcstack.manifest.json format for declaring custom tag contracts to the wcs-validate linter and IDE
+- [wcs-manifest.json](https://cdn.jsdelivr.net/npm/@wcstack/state@1.24.0/dist/wcs-manifest.json): the data-wcs binding grammar and all built-in filters (names, arity, argument types) as JSON — the single source of truth for tooling
+- [Timing and firing contract](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/docs/timing-and-firing-contract.md): when bindings attach, when writes fire, initial-sync authority
+- [Sidecar manifest schema](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/docs/wcstack-manifest-schema.md): wcstack.manifest.json format for declaring custom tag contracts to the wcs-validate linter and IDE
+- [Framework adapter integration](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/docs/framework-adapter-integration.md): using `<wcs-*>` from React / Vue / Svelte / Solid / Angular — definition gating, object inputs as properties, raw values across the structured-clone boundary
 
 ## I/O node packages (wcs-* tags)
 
-- [@wcstack/accelerometer](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/accelerometer/README.md): Declarative Accelerometer component for Web Components. Framework-agnostic Generic Sensor API (Accelerometer) monitor via wc-bindable-protocol.
-- [@wcstack/ambient-light-sensor](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/ambient-light-sensor/README.md): Declarative AmbientLightSensor component for Web Components. Framework-agnostic Generic Sensor API (AmbientLightSensor) monitor via wc-bindable-protocol.
-- [@wcstack/broadcast](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/broadcast/README.md): Declarative cross-tab messaging component for Web Components. Framework-agnostic BroadcastChannel primitive via wc-bindable-protocol.
-- [@wcstack/camera](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/camera/README.md): Declarative camera capture and media recording for Web Components. Binds live MediaStream handles directly to elements (never through serializable state) via getUserMedia + MediaRecorder.
-- [@wcstack/clipboard](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/clipboard/README.md): Declarative clipboard component for Web Components. Framework-agnostic Clipboard API primitive via wc-bindable-protocol.
-- [@wcstack/contacts](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/contacts/README.md): Declarative Contact Picker component for Web Components. Framework-agnostic navigator.contacts.select() wrapper via wc-bindable-protocol.
-- [@wcstack/credential](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/credential/README.md): Declarative Credential Management component for Web Components. Framework-agnostic navigator.credentials get/store wrapper (password/federated only) via wc-bindable-protocol.
-- [@wcstack/debounce](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/debounce/README.md): Declarative debounce/throttle components for Web Components. Framework-agnostic signal coalescing via wc-bindable-protocol.
-- [@wcstack/defined](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/defined/README.md): Declarative custom-element readiness gate for Web Components. Waits on customElements.whenDefined with timeout-based load-failure detection via wc-bindable-protocol.
-- [@wcstack/eyedropper](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/eyedropper/README.md): Declarative EyeDropper component for Web Components. Framework-agnostic EyeDropper.open() primitive via wc-bindable-protocol.
-- [@wcstack/fetch](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/fetch/README.md): Declarative fetch component for Web Components. Framework-agnostic async data fetching via wc-bindable-protocol.
-- [@wcstack/fullscreen](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/fullscreen/README.md): Declarative Fullscreen API component for Web Components. Framework-agnostic requestFullscreen()/exitFullscreen() control via wc-bindable-protocol.
-- [@wcstack/geolocation](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/geolocation/README.md): Declarative geolocation component for Web Components. Framework-agnostic Geolocation API primitive via wc-bindable-protocol.
-- [@wcstack/gyroscope](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/gyroscope/README.md): Declarative Gyroscope component for Web Components. Framework-agnostic Generic Sensor API (Gyroscope) monitor via wc-bindable-protocol.
-- [@wcstack/idle](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/idle/README.md): Declarative Idle Detection component for Web Components. Framework-agnostic IdleDetector wrapper via wc-bindable-protocol.
-- [@wcstack/intersection](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/intersection/README.md): Declarative IntersectionObserver component for Web Components. Framework-agnostic visibility primitive via wc-bindable-protocol.
-- [@wcstack/magnetometer](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/magnetometer/README.md): Declarative Magnetometer component for Web Components. Framework-agnostic Generic Sensor API (Magnetometer) monitor via wc-bindable-protocol.
-- [@wcstack/network](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/network/README.md): Declarative Network Information component for Web Components. Framework-agnostic navigator.connection monitor via wc-bindable-protocol.
-- [@wcstack/notification](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/notification/README.md): Declarative desktop-notification component for Web Components. Framework-agnostic Notifications API wrapper via wc-bindable-protocol, with Service Worker support.
-- [@wcstack/permission](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/permission/README.md): Declarative permission-state component for Web Components. Framework-agnostic Permissions API monitor via wc-bindable-protocol.
-- [@wcstack/picture-in-picture](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/picture-in-picture/README.md): Declarative Picture-in-Picture component for Web Components. Framework-agnostic <video> Picture-in-Picture control via wc-bindable-protocol.
-- [@wcstack/pointer-lock](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/pointer-lock/README.md): Declarative Pointer Lock component for Web Components. Framework-agnostic Pointer Lock API control via wc-bindable-protocol.
-- [@wcstack/raf](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/raf/README.md): Declarative requestAnimationFrame component for Web Components. Framework-agnostic frame-source primitive (tick/dt/suspended) via wc-bindable-protocol.
-- [@wcstack/resize](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/resize/README.md): Declarative ResizeObserver component for Web Components. Framework-agnostic element-size primitive via wc-bindable-protocol.
-- [@wcstack/screen-orientation](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/screen-orientation/README.md): Declarative Screen Orientation component for Web Components. Framework-agnostic screen.orientation monitor + lock/unlock commands via wc-bindable-protocol.
-- [@wcstack/share](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/share/README.md): Declarative Web Share component for Web Components. Framework-agnostic navigator.share primitive via wc-bindable-protocol.
-- [@wcstack/speech](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/speech/README.md): Declarative Web Speech components for Web Components. Framework-agnostic SpeechSynthesis (TTS) and SpeechRecognition (STT) primitives via wc-bindable-protocol.
-- [@wcstack/sse](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/sse/README.md): Declarative Server-Sent Events (EventSource) component for Web Components. Framework-agnostic one-way streaming via wc-bindable-protocol.
-- [@wcstack/storage](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/storage/README.md): Declarative persistent storage component for Web Components. Framework-agnostic localStorage/sessionStorage via wc-bindable-protocol.
-- [@wcstack/tilt](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/tilt/README.md): Declarative Device Orientation component for Web Components. Framework-agnostic deviceorientation wrapper via wc-bindable-protocol.
-- [@wcstack/timer](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/timer/README.md): Declarative timer component for Web Components. Framework-agnostic interval/timeout primitive via wc-bindable-protocol.
-- [@wcstack/upload](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/upload/README.md): Declarative file upload component for Web Components. Framework-agnostic upload with progress tracking via wc-bindable-protocol.
-- [@wcstack/wakelock](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/wakelock/README.md): Declarative Screen Wake Lock component for Web Components. Framework-agnostic, holds the screen awake while a bound state is true via wc-bindable-protocol.
-- [@wcstack/websocket](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/websocket/README.md): Declarative WebSocket component for Web Components. Framework-agnostic real-time communication via wc-bindable-protocol.
-- [@wcstack/worker](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/worker/README.md): Declarative Web Worker component for Web Components. Framework-agnostic Dedicated Worker primitive via wc-bindable-protocol.
+- [@wcstack/accelerometer](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/accelerometer/README.md): Declarative Accelerometer component for Web Components. Framework-agnostic Generic Sensor API (Accelerometer) monitor via wc-bindable-protocol.
+- [@wcstack/ambient-light-sensor](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/ambient-light-sensor/README.md): Declarative AmbientLightSensor component for Web Components. Framework-agnostic Generic Sensor API (AmbientLightSensor) monitor via wc-bindable-protocol.
+- [@wcstack/broadcast](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/broadcast/README.md): Declarative cross-tab messaging component for Web Components. Framework-agnostic BroadcastChannel primitive via wc-bindable-protocol.
+- [@wcstack/camera](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/camera/README.md): Declarative camera capture and media recording for Web Components. Binds live MediaStream handles directly to elements (never through serializable state) via getUserMedia + MediaRecorder.
+- [@wcstack/clipboard](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/clipboard/README.md): Declarative clipboard component for Web Components. Framework-agnostic Clipboard API primitive via wc-bindable-protocol.
+- [@wcstack/contacts](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/contacts/README.md): Declarative Contact Picker component for Web Components. Framework-agnostic navigator.contacts.select() wrapper via wc-bindable-protocol.
+- [@wcstack/credential](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/credential/README.md): Declarative Credential Management component for Web Components. Framework-agnostic navigator.credentials get/store wrapper (password/federated only) via wc-bindable-protocol.
+- [@wcstack/debounce](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/debounce/README.md): Declarative debounce/throttle components for Web Components. Framework-agnostic signal coalescing via wc-bindable-protocol.
+- [@wcstack/defined](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/defined/README.md): Declarative custom-element readiness gate for Web Components. Waits on customElements.whenDefined with timeout-based load-failure detection via wc-bindable-protocol.
+- [@wcstack/eyedropper](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/eyedropper/README.md): Declarative EyeDropper component for Web Components. Framework-agnostic EyeDropper.open() primitive via wc-bindable-protocol.
+- [@wcstack/fetch](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/fetch/README.md): Declarative fetch component for Web Components. Framework-agnostic async data fetching via wc-bindable-protocol.
+- [@wcstack/fullscreen](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/fullscreen/README.md): Declarative Fullscreen API component for Web Components. Framework-agnostic requestFullscreen()/exitFullscreen() control via wc-bindable-protocol.
+- [@wcstack/geolocation](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/geolocation/README.md): Declarative geolocation component for Web Components. Framework-agnostic Geolocation API primitive via wc-bindable-protocol.
+- [@wcstack/gyroscope](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/gyroscope/README.md): Declarative Gyroscope component for Web Components. Framework-agnostic Generic Sensor API (Gyroscope) monitor via wc-bindable-protocol.
+- [@wcstack/idle](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/idle/README.md): Declarative Idle Detection component for Web Components. Framework-agnostic IdleDetector wrapper via wc-bindable-protocol.
+- [@wcstack/intersection](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/intersection/README.md): Declarative IntersectionObserver component for Web Components. Framework-agnostic visibility primitive via wc-bindable-protocol.
+- [@wcstack/magnetometer](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/magnetometer/README.md): Declarative Magnetometer component for Web Components. Framework-agnostic Generic Sensor API (Magnetometer) monitor via wc-bindable-protocol.
+- [@wcstack/network](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/network/README.md): Declarative Network Information component for Web Components. Framework-agnostic navigator.connection monitor via wc-bindable-protocol.
+- [@wcstack/notification](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/notification/README.md): Declarative desktop-notification component for Web Components. Framework-agnostic Notifications API wrapper via wc-bindable-protocol, with Service Worker support.
+- [@wcstack/permission](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/permission/README.md): Declarative permission-state component for Web Components. Framework-agnostic Permissions API monitor via wc-bindable-protocol.
+- [@wcstack/picture-in-picture](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/picture-in-picture/README.md): Declarative Picture-in-Picture component for Web Components. Framework-agnostic <video> Picture-in-Picture control via wc-bindable-protocol.
+- [@wcstack/pointer-lock](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/pointer-lock/README.md): Declarative Pointer Lock component for Web Components. Framework-agnostic Pointer Lock API control via wc-bindable-protocol.
+- [@wcstack/raf](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/raf/README.md): Declarative requestAnimationFrame component for Web Components. Framework-agnostic frame-source primitive (tick/dt/suspended) via wc-bindable-protocol.
+- [@wcstack/resize](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/resize/README.md): Declarative ResizeObserver component for Web Components. Framework-agnostic element-size primitive via wc-bindable-protocol.
+- [@wcstack/screen-orientation](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/screen-orientation/README.md): Declarative Screen Orientation component for Web Components. Framework-agnostic screen.orientation monitor + lock/unlock commands via wc-bindable-protocol.
+- [@wcstack/share](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/share/README.md): Declarative Web Share component for Web Components. Framework-agnostic navigator.share primitive via wc-bindable-protocol.
+- [@wcstack/speech](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/speech/README.md): Declarative Web Speech components for Web Components. Framework-agnostic SpeechSynthesis (TTS) and SpeechRecognition (STT) primitives via wc-bindable-protocol.
+- [@wcstack/sse](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/sse/README.md): Declarative Server-Sent Events (EventSource) component for Web Components. Framework-agnostic one-way streaming via wc-bindable-protocol.
+- [@wcstack/storage](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/storage/README.md): Declarative persistent storage component for Web Components. Framework-agnostic localStorage/sessionStorage via wc-bindable-protocol.
+- [@wcstack/tilt](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/tilt/README.md): Declarative Device Orientation component for Web Components. Framework-agnostic deviceorientation wrapper via wc-bindable-protocol.
+- [@wcstack/timer](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/timer/README.md): Declarative timer component for Web Components. Framework-agnostic interval/timeout primitive via wc-bindable-protocol.
+- [@wcstack/upload](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/upload/README.md): Declarative file upload component for Web Components. Framework-agnostic upload with progress tracking via wc-bindable-protocol.
+- [@wcstack/wakelock](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/wakelock/README.md): Declarative Screen Wake Lock component for Web Components. Framework-agnostic, holds the screen awake while a bound state is true via wc-bindable-protocol.
+- [@wcstack/websocket](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/websocket/README.md): Declarative WebSocket component for Web Components. Framework-agnostic real-time communication via wc-bindable-protocol.
+- [@wcstack/worker](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/worker/README.md): Declarative Web Worker component for Web Components. Framework-agnostic Dedicated Worker primitive via wc-bindable-protocol.
 
 ## Tooling
 
-- [@wcstack/devtools](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/devtools/README.md): In-page DevTools overlay for wcstack. Inspect state trees, bindings/wiring and update timelines via the DevTools Hook Protocol - one script tag, no build step.
-- [@wcstack/autoloader](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/autoloader/README.md): Auto-detect and dynamically import undefined custom elements via Import Maps. Zero dependencies, buildless.
-- [@wcstack/server](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/server/README.md): Server-side rendering for wcstack Web Components.
-- [@wcstack/lint](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/lint/README.md): Static-contract validator CLI (wcs-validate) for wcstack data-wcs bindings and wcstack.manifest.json sidecars. Thin npm wrapper around the wcstack-intellisense validator core.
-- [wcstack-intellisense](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/packages/vscode-wcs/README.md): TypeScript language features for <wcs-state> inline scripts in HTML
+- [@wcstack/devtools](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/devtools/README.md): In-page DevTools overlay for wcstack. Inspect state trees, bindings/wiring and update timelines via the DevTools Hook Protocol - one script tag, no build step.
+- [@wcstack/autoloader](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/autoloader/README.md): Auto-detect and dynamically import undefined custom elements via Import Maps. Zero dependencies, buildless.
+- [@wcstack/server](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/server/README.md): Server-side rendering for wcstack Web Components.
+- [@wcstack/lint](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/lint/README.md): Static-contract validator CLI (wcs-validate) for wcstack data-wcs bindings and wcstack.manifest.json sidecars. Thin npm wrapper around the wcstack-intellisense validator core.
+- [wcstack-intellisense](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/packages/vscode-wcs/README.md): TypeScript language features for <wcs-state> inline scripts in HTML
 
 ## Examples
 
-- [Multi-package demos](https://github.com/wcstack/wcstack/tree/v1.23.0/examples): router SPA, signals live search, camera/record/upload, cross-tab todo, and more
-- [Per-package demos](https://github.com/wcstack/wcstack/tree/v1.23.0/packages): see each package's examples/ directory
+- [Multi-package demos](https://github.com/wcstack/wcstack/tree/v1.24.0/examples): router SPA, signals live search, camera/record/upload, cross-tab todo, and more
+- [Per-package demos](https://github.com/wcstack/wcstack/tree/v1.24.0/packages): see each package's examples/ directory
 
 ## Optional
 
 - [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, silent-failure matrix) in one file — use this when generating wcstack apps
 - [wcstack-app skill](https://github.com/wcstack/wcstack-skill): the same content as an installable Claude Code Agent Skill (`/plugin marketplace add wcstack/wcstack-skill`)
 - Validate generated HTML with `npx @wcstack/lint index.html` and iterate until exit code 0
-- [AGENTS.md](https://raw.githubusercontent.com/wcstack/wcstack/v1.23.0/AGENTS.md): guidance for AI agents working inside the wcstack monorepo itself
+- [AGENTS.md](https://raw.githubusercontent.com/wcstack/wcstack/v1.24.0/AGENTS.md): guidance for AI agents working inside the wcstack monorepo itself
 - Japanese docs: every package also ships README.ja.md next to its README.md

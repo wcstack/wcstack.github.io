@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.23.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.24.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,64 +647,64 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.23.0</h2>
-      <p class="section-sub">A clearer entry point, deterministic definition timing, and two ways to own headless I/O.</p>
-      <p class="section-sub-ja">入口をより明確にし、定義タイミングを決定的にし、ヘッドレスI/Oを扱う2つの方法を追加。</p>
+      <h2 class="section-title">Shipped in v1.24.0</h2>
+      <p class="section-sub">Values that used to disappear without a word &mdash; now declared, delivered, and documented.</p>
+      <p class="section-sub-ja">これまで無言で消えていた値が、宣言され、届き、明文化された。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.23.0</span>
-          <span class="tag-name">wcstack</span>
-          <h3>A package you read, not install</h3>
-          <p class="what-if">What if npm had a self-contained entry point for humans and agents?</p>
-          <p>The new unscoped <code>wcstack</code> package is documentation-only. Run <code>npm view wcstack readme</code> to get the complete guide without cloning a repository. Apps still load only the individual <code>@wcstack/*</code> packages they use.</p>
-          <p class="ja">新しい非スコープ版<code>wcstack</code>は、インストールしないドキュメント専用パッケージ。<code>npm view wcstack readme</code>で、リポジトリをcloneせずに自己完結したガイドを読める。アプリは従来どおり、使う<code>@wcstack/*</code>だけを読み込む。</p>
+          <span class="topic-ver">v1.24.0</span>
+          <span class="tag-name">wcBindable.semantics</span>
+          <h3>Every value says what it means</h3>
+          <p class="what-if">What if an observable could tell an adapter how to store it?</p>
+          <p>All 231 observable properties across the 41 surfaces now declare <code>semantics</code>: <code>state</code> for a current value, <code>event</code> for an occurrence, <code>handle</code> for a live object such as the camera's <code>streamReady</code>. The field is additive and optional &mdash; an absent declaration means <em>unspecified</em>, so existing adapters behave exactly as before.</p>
+          <p class="ja">41サーフェス231個のobservableプロパティすべてが<code>semantics</code>を宣言するようになった。現在値は<code>state</code>、発生は<code>event</code>、カメラの<code>streamReady</code>のようなライブオブジェクトは<code>handle</code>。追加のオプションフィールドで、未宣言は「未指定」を意味するため、既存アダプタの挙動は変わらない。</p>
           <ul class="tag-features">
-            <li>Documentation-only</li>
-            <li>npm view Ready</li>
-            <li>Agent-friendly Guide</li>
-            <li>No Runtime Payload</li>
+            <li>state / event / handle</li>
+            <li>231 Properties Annotated</li>
+            <li>Additive &amp; Optional</li>
+            <li>Locked by Tests</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.23.0</span>
-          <span class="tag-name">mountNode</span>
-          <h3>Create, bind, connect — in one call</h3>
-          <p class="what-if">What if a headless custom element could never miss its first event?</p>
-          <p><code>mountNode()</code> creates a defined I/O element, applies attributes, binds signals, then connects it. Configuration and subscriptions are in place before <code>connectedCallback</code> runs; undefined tags fail immediately, and <code>unmount()</code> owns cleanup.</p>
-          <p class="ja"><code>mountNode()</code>は、定義済みI/O要素の作成、属性設定、Signalsの購読、DOM接続を順序保証つきで実行。<code>connectedCallback</code>より前に設定と購読が完了し、未定義タグは即座にエラー、後始末は<code>unmount()</code>に集約される。</p>
+          <span class="topic-ver">v1.24.0</span>
+          <span class="tag-name">@wcstack/state</span>
+          <h3>The same value, twice, still counts</h3>
+          <p class="what-if">What if &ldquo;it happened again&rdquo; survived the equality check?</p>
+          <p><code>sameValueGuard</code> skipped any write <code>Object.is</code>-equal to the current value &mdash; right for a current value, wrong for an occurrence, so a repeated <code>message</code> or <code>copied</code> was dropped. Writes from a <code>semantics: "event"</code> property now bypass it. Separately, a rejecting async <code>$on</code> handler used to surface only as an unhandled rejection; it is now reported with the state and handler name.</p>
+          <p class="ja"><code>sameValueGuard</code>は現在値と同値の書き込みを飛ばしていた。現在値には正しいが発生には誤りで、同じ<code>message</code>や<code>copied</code>の繰り返しが落ちていた。<code>semantics: "event"</code>のプロパティからの書き込みはガードを迂回する。また、rejectした非同期<code>$on</code>ハンドラは未処理のrejectionになるだけだったが、state名とハンドラ名つきで報告されるようになった。</p>
           <ul class="tag-features">
-            <li>Attrs Before Connect</li>
-            <li>Subscribe Before Connect</li>
-            <li>Loud Definition Errors</li>
-            <li>Owned Teardown</li>
+            <li>Occurrences Delivered</li>
+            <li>One-shot Guard Bypass</li>
+            <li>Named Handler Errors</li>
+            <li>No Config Flag</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.23.0</span>
-          <span class="tag-name">XxxCore</span>
-          <h3>I/O without a custom element</h3>
-          <p class="what-if">What if the Core itself were the complete node?</p>
-          <p>Every I/O Core is now a first-class wc-bindable <code>EventTarget</code>. Pass <code>new FetchCore()</code> or <code>new WebSocketCore()</code> straight to <code>bindNode()</code>: no element, no registry, and no definition timing. The tradeoff is explicit lifecycle management.</p>
-          <p class="ja">すべてのI/O Coreを、wc-bindableな<code>EventTarget</code>として直接利用可能に。<code>new FetchCore()</code>や<code>new WebSocketCore()</code>を<code>bindNode()</code>へ渡せば、要素もレジストリも定義待ちも不要。代わりにライフサイクルは明示的に管理する。</p>
+          <span class="topic-ver">v1.24.0</span>
+          <span class="tag-name">upgradeProperties</span>
+          <h3>Properties set before upgrade survive</h3>
+          <p class="what-if">What if assigning to a not-yet-defined element didn&rsquo;t lose the value?</p>
+          <p>Writing <code>el.url = x</code> before the tag is defined creates an own property that shadows the prototype accessor forever: the setter never runs and the value disappears without an error. Every Shell now re-runs its declared inputs through their setters in <code>connectedCallback</code>, so Angular <code>[prop]</code>, Lit <code>.prop=</code>, and Solid <code>prop:</code> stay correct when the definition arrives late.</p>
+          <p class="ja">タグ定義前に<code>el.url = x</code>と代入すると、プロトタイプのアクセサを覆うownプロパティができ、setterは永久に呼ばれず、エラーもなく値が消える。すべてのShellが<code>connectedCallback</code>で宣言済みinputをsetter経由で再適用するようになり、Angularの<code>[prop]</code>、Litの<code>.prop=</code>、Solidの<code>prop:</code>が遅延定義でも正しく届く。</p>
           <ul class="tag-features">
-            <li>No Element</li>
-            <li>No Registry Timing</li>
-            <li>Self-dispatching Core</li>
-            <li>Explicit Lifecycle</li>
+            <li>Input Rescue</li>
+            <li>Idempotent</li>
+            <li>Accessor-only</li>
+            <li>Late Definition Safe</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.23.0</span>
-          <span class="tag-name">state/auto last</span>
-          <h3>Definition order becomes deterministic</h3>
-          <p class="what-if">What if a fast first click could never disappear into an undefined node?</p>
-          <p>Load I/O packages before <code>@wcstack/state/auto</code>. Property writes can wait for an element definition, but command-token emissions are not replayed; State-last removes that zero-subscriber window. If script order is outside your control, gate the action with <code>customElements.whenDefined()</code>.</p>
-          <p class="ja">I/Oパッケージを<code>@wcstack/state/auto</code>より先に読み込む。プロパティ書き込みは要素定義を待てる一方、コマンドトークンは再送されないため、Stateを最後にすることで購読者ゼロの隙間をなくす。順序を制御できない場合は<code>customElements.whenDefined()</code>で待機する。</p>
+          <span class="topic-ver">v1.24.0</span>
+          <span class="tag-name">framework adapters</span>
+          <h3>Three rules for framework apps</h3>
+          <p class="what-if">What if the silent failures at the boundary were written down?</p>
+          <p>A new integration guide carries three rules: wait for the definition before binding &mdash; every adapter checks <code>isWcBindable</code> once and never retries &mdash; pass object inputs as properties, and unwrap reactive proxies before handing them in. It also spells out what does <em>not</em> substitute for a definition gate, and the portable path for event names containing a colon.</p>
+          <p class="ja">新しい統合ガイドが3つの規則を示す。bindの前に定義を待つ（アダプタは<code>isWcBindable</code>を一度しか判定せず再試行しない）、objectのinputはプロパティとして渡す、reactive Proxyはrawにしてから渡す。定義ゲートの代用にならないものと、コロンを含むイベント名の移植性のある受け方も明記した。</p>
           <ul class="tag-features">
-            <li>I/O Before State</li>
-            <li>No Lost Commands</li>
-            <li>Latest Value Replay</li>
-            <li>whenDefined Gate</li>
+            <li>Definition Gate</li>
+            <li>Property Inputs</li>
+            <li>Raw Values</li>
+            <li>Colon Event Names</li>
           </ul>
         </div>
       </div>
@@ -869,8 +869,8 @@
       </div>
       <div class="protocol-note fade-in">
         <h3>One protocol behind them all: <code>wc-bindable</code></h3>
-        <p>Every I/O node exposes a static manifest &mdash; observable <em>properties</em>, settable <em>inputs</em>, invocable <em>commands</em> &mdash; so any binding core can discover and wire it generically. <a href="state/"><code>&lt;wcs-state&gt;</code></a> and <a href="signals/"><code>@wcstack/signals</code></a> speak it natively; thin adapters connect React, Vue, Svelte, and Solid.</p>
-        <p class="ja">すべてのI/Oノードは静的マニフェスト(properties / inputs / commands)を公開。stateとsignalsはネイティブ対応、薄いアダプタでReact / Vue / Svelte / Solidからも使える。</p>
+        <p>Every I/O node exposes a static manifest &mdash; observable <em>properties</em>, settable <em>inputs</em>, invocable <em>commands</em> &mdash; so any binding core can discover and wire it generically. Since v1.24.0 each observable also declares its <code>semantics</code> &mdash; <code>state</code>, <code>event</code>, or <code>handle</code> &mdash; so a generic adapter can tell a current value from an occurrence. <a href="state/"><code>&lt;wcs-state&gt;</code></a> and <a href="signals/"><code>@wcstack/signals</code></a> speak it natively; thin adapters connect React, Vue, Svelte, and Solid.</p>
+        <p class="ja">すべてのI/Oノードは静的マニフェスト(properties / inputs / commands)を公開。v1.24.0からは各observableが<code>semantics</code>(state / event / handle)も宣言し、汎用アダプタが現在値と発生を区別できる。stateとsignalsはネイティブ対応、薄いアダプタでReact / Vue / Svelte / Solidからも使える。</p>
       </div>
     </div>
   </section>

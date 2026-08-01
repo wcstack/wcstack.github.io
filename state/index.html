@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.23.0</span>
+        <span class="pill accent">v1.24.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -725,6 +725,10 @@ removeItem(event, index) {
   }
 };</code></pre>
 <pre><code class="language-html">&lt;my-form data-wcs="eventToken.created: userCreated; eventToken.error: createFailed"&gt;&lt;/my-form&gt;</code></pre>
+      </div>
+      <div class="note">
+        <p><strong><code>$on</code> handlers are never awaited.</strong> That is specified behaviour &mdash; do not sequence work on the return value; let async work write its own state slot when it settles. Since v1.24.0 a rejecting async handler is caught and reported through <code>console.error</code> naming the state and the handler, instead of surfacing as a bare unhandled rejection. Synchronous throws still propagate as programmer errors.</p>
+        <p class="ja"><code>$on</code>ハンドラはawaitされない(仕様)。戻り値に処理を連ねず、非同期処理は完了時に自分で状態を書く。v1.24.0以降、rejectした非同期ハンドラは握りつぶされず、state名とハンドラ名つきで<code>console.error</code>に報告される。同期的なthrowは従来どおり伝播する。</p>
       </div>
     </div>
   </section>
