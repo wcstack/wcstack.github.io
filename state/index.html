@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.24.0</span>
+        <span class="pill accent">v1.26.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -604,8 +604,33 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
   &lt;/template&gt;
 &lt;/template&gt;</code></pre>
       </div>
-      <p>Lists use a <strong>value-based diff</strong>: elements are matched by value and DOM nodes are reused for unchanged items.</p>
-      <p class="ja">リストは値ベースの差分。変化のない要素のDOMノードは再利用される。</p>
+      <p>Lists use a <strong>value-based diff</strong>: elements are matched by value and DOM nodes are reused for unchanged items. No <code>key</code> attribute is needed, because non-destructive array methods (<code>toSorted</code>, <code>toReversed</code>, <code>filter</code>, <code>with</code>) preserve element references &mdash; sorting and filtering are keyed by construction.</p>
+      <p class="ja">リストは値ベースの差分。変化のない要素のDOMノードは再利用される。<code>toSorted</code> / <code>toReversed</code> / <code>filter</code> / <code>with</code> は要素の参照を保つため、<code>key</code>属性は不要。</p>
+
+      <h3><code>$listKeys</code> &mdash; identity for refetched rows</h3>
+      <p>The exception, addressed in v1.26.0, is data that arrives as <strong>freshly created objects</strong> &mdash; <code>fetch(...).json()</code>, a WebSocket snapshot, <code>JSON.parse</code> from storage. Nothing matches by reference, so every row is rebuilt and the DOM state the bindings do not own goes with it: focus, an in-flight IME composition, <code>&lt;details&gt;</code> open state, inner scroll, <code>&lt;canvas&gt;</code> contents. Declare a key and rows are matched across the refresh instead.</p>
+      <p class="ja">例外は毎回新しいオブジェクトとして届くデータ(<code>fetch(...).json()</code>、WebSocketのスナップショット、ストレージからの<code>JSON.parse</code>)。参照が一致しないため全行が作り直され、バインディングが所有していないDOM状態 — フォーカス、変換中のIME入力、<code>&lt;details&gt;</code>の開閉、内側のスクロール、<code>&lt;canvas&gt;</code>の内容 — が失われる。キーを宣言すれば、リフレッシュを越えて行が突き合わせられる。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>$listKeys</span></div>
+<pre><code class="language-javascript">export default {
+  items: [],
+  $listKeys: {
+    "items": "id",                        // field name
+    "items.*.children": (row) =&gt; row.uid, // or a function, for composite keys
+  },
+  async load() {
+    // Every row object is new, but rows are matched by id: the DOM is reused
+    // and only the fields that actually differ are written.
+    this.items = await (await fetch("/api/items")).json();
+  },
+};</code></pre>
+      </div>
+      <ul class="list">
+        <li><strong>Opt-in and per-path.</strong> Undeclared lists behave exactly as before, at no cost &mdash; nesting is opt-in too, so you can adopt it one list at a time.</li>
+        <li><strong>A no-op refresh is free.</strong> If nothing changed, no field is written and no DOM work happens.</li>
+        <li><strong>Rows must be plain objects</strong> with present, unique keys. Duplicates, missing keys and class instances raise immediately rather than degrading silently.</li>
+        <li>Fields dropped from a row are cleared with <code>null</code>. The stored array is rebuilt from the matched row objects, so <code>this.items !== theArrayYouAssigned</code> afterwards.</li>
+      </ul>
 
       <h3>Conditional: <code>if</code> / <code>elseif</code> / <code>else</code></h3>
       <div class="code-block">
@@ -856,6 +881,44 @@ customElements.define("my-light-component", MyLightComponent);</code></pre>
 &lt;my-counter&gt;&lt;/my-counter&gt;
 &lt;my-counter&gt;&lt;/my-counter&gt;</code></pre>
       </div>
+      <p>Since v1.26.0, <code>$commands</code> does for methods what <code>$bindables</code> does for properties: each listed method becomes a <code>commands</code> entry in the generated manifest, so a parent can drive it with a command token exactly like an I/O node. Command entries are always <code>async: true</code> &mdash; a DCC method chains on the inner <code>&lt;wcs-state&gt;</code>'s initialization, so it returns a Promise whether or not it was written <code>async</code>.</p>
+      <p class="ja">v1.26.0以降、<code>$commands</code>はメソッドに対して<code>$bindables</code>と同じ役割を果たす。列挙したメソッドはマニフェストの<code>commands</code>エントリになり、親からI/Oノードと同じくコマンドトークンで駆動できる。エントリは常に<code>async: true</code>。DCCのメソッドは内側の<code>&lt;wcs-state&gt;</code>の初期化に連なるため、<code>async</code>で書いたかどうかに関わらずPromiseを返す。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html</span><span>$commands</span></div>
+<pre><code class="language-html">&lt;!-- inside the definition's template --&gt;
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      count: 0,
+      bumpBy(step) { this.count += step; },
+      $bindables: ["count"],
+      $commands: ["bumpBy"]
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;!-- the parent drives it; emit(3) calls bumpBy(3) --&gt;
+&lt;my-counter data-wcs="count: parentCount; command.bumpBy: $command.bump"&gt;&lt;/my-counter&gt;</code></pre>
+      </div>
+      <p>Both declarations are validated when the component is defined. A duplicated entry &mdash; which used to fail silently, leaving the element quietly no longer two-way bindable &mdash; now raises, as do an entry starting with <code>$</code>, an entry that does not exist on the state, a method listed in <code>$bindables</code>, and a value property listed in <code>$commands</code>.</p>
+      <p class="ja">どちらの宣言もコンポーネント定義時に検証される。重複エントリ(従来は無言で失敗し、要素が双方向バインド不能になっていた)、<code>$</code>で始まるエントリ、stateに存在しないエントリ、<code>$bindables</code>に挙げたメソッド、<code>$commands</code>に挙げた値プロパティは、いずれもエラーになる。</p>
+
+      <h3>Choosing between the two</h3>
+      <p>DCC and <code>bind-component</code> both give a custom element its own state, and they are <strong>mutually exclusive</strong> &mdash; pick one per component. The rule of thumb: if the component has no JavaScript class, use DCC; if you are already writing a class, use <code>bind-component</code>. Combining them raises: a <code>&lt;wcs-state bind-component&gt;</code> inside a <code>data-wc-definition</code> host is a configuration error, because DCC state belongs to the template and is loaded per instance.</p>
+      <p class="ja">DCCと<code>bind-component</code>はどちらもカスタム要素に独自の状態を与えるが、<strong>排他</strong>であり、コンポーネントごとにどちらか一方を選ぶ。目安は、JavaScriptのクラスを書かないならDCC、すでにクラスを書いているなら<code>bind-component</code>。併用はエラーになる。<code>data-wc-definition</code>ホストの中の<code>&lt;wcs-state bind-component&gt;</code>は設定エラーで、DCCの状態はテンプレートに属しインスタンスごとに読み込まれるため。</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th></th><th>DCC</th><th><code>bind-component</code></th></tr>
+          <tr><td>How the element is defined</td><td>HTML only (<code>data-wc-definition</code> + DSD)</td><td>A JS <code>class extends HTMLElement</code> you write</td></tr>
+          <tr><td>Where the state lives</td><td>An inline <code>&lt;script type="module"&gt;</code> in the template, per instance</td><td>A property on the instance (<code>this.state</code>)</td></tr>
+          <tr><td><code>static wcBindable</code></td><td>Generated from <code>$bindables</code> / <code>$commands</code></td><td>None &mdash; not a wc-bindable producer</td></tr>
+          <tr><td>Parent binds a value</td><td><code>count: parentCount</code> (two-way)</td><td><code>state.msg: user.name</code> (path mapping)</td></tr>
+          <tr><td>Parent invokes a method</td><td><code>command.bumpBy: $command.bump</code></td><td>Not available &mdash; expose it on the class</td></tr>
+          <tr><td>Spread (<code>...: obj</code>)</td><td>Available</td><td>Not available (needs a manifest)</td></tr>
+        </table>
+      </div>
+      <p><code>bind-component</code> components deliberately stay outside the wc-bindable protocol: they are wired by <strong>path</strong>, not by a declared property surface. That is why spread and command tokens, which both need a manifest, do not apply to them. A <code>bind-component</code> child placed inside a parent <code>for:</code> can, since v1.26.0, iterate a list handed to it from that row with a <code>for:</code> of its own.</p>
+      <p class="ja"><code>bind-component</code>のコンポーネントは意図的にwc-bindableプロトコルの外にいる。宣言されたプロパティ面ではなく<strong>パス</strong>で結線されるため、マニフェストを要するspreadとコマンドトークンは適用されない。v1.26.0以降、親の<code>for:</code>の中に置いた<code>bind-component</code>の子は、その行から渡されたリストを自分の<code>for:</code>で回せる。</p>
     </div>
   </section>
 

@@ -611,13 +611,13 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.24.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.26.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
       <div class="stats">
         <div class="stat">
-          <div class="num">41</div>
+          <div class="num">43</div>
           <div class="label">Packages</div>
         </div>
         <div class="stat">
@@ -647,64 +647,78 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.24.0</h2>
-      <p class="section-sub">Values that used to disappear without a word &mdash; now declared, delivered, and documented.</p>
-      <p class="section-sub-ja">これまで無言で消えていた値が、宣言され、届き、明文化された。</p>
+      <h2 class="section-title">Shipped in v1.25.0 &ndash; v1.26.0</h2>
+      <p class="section-sub">Sound as markup, list identity that survives a refetch, and one hash that covers every line wcstack runs.</p>
+      <p class="section-sub-ja">音をマークアップに、再取得を越えて残るリストの同一性、そして実行される全行を覆う1つのハッシュ。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.24.0</span>
-          <span class="tag-name">wcBindable.semantics</span>
-          <h3>Every value says what it means</h3>
-          <p class="what-if">What if an observable could tell an adapter how to store it?</p>
-          <p>All 231 observable properties across the 41 surfaces now declare <code>semantics</code>: <code>state</code> for a current value, <code>event</code> for an occurrence, <code>handle</code> for a live object such as the camera's <code>streamReady</code>. The field is additive and optional &mdash; an absent declaration means <em>unspecified</em>, so existing adapters behave exactly as before.</p>
-          <p class="ja">41サーフェス231個のobservableプロパティすべてが<code>semantics</code>を宣言するようになった。現在値は<code>state</code>、発生は<code>event</code>、カメラの<code>streamReady</code>のようなライブオブジェクトは<code>handle</code>。追加のオプションフィールドで、未宣言は「未指定」を意味するため、既存アダプタの挙動は変わらない。</p>
+          <span class="topic-ver">v1.25.0</span>
+          <span class="tag-name">@wcstack/audio &middot; @wcstack/midi</span>
+          <h3>The audio graph, written as HTML</h3>
+          <p class="what-if">What if a synth patch were markup you could read?</p>
+          <p>Two packages promoted out of the synth-playground demo. <code>@wcstack/audio</code> turns the Web Audio API into a modular graph you nest in markup &mdash; <code>&lt;wcs-osc&gt;</code> inside <code>&lt;wcs-biquad&gt;</code> inside <code>&lt;wcs-gain&gt;</code> &mdash; where <strong>nesting is the signal chain</strong> and <code>out="bus"</code> routes whatever nesting cannot express. Eleven tags in all, their numbers bound reactively from state. <code>@wcstack/midi</code> adds a single headless <code>&lt;wcs-midi&gt;</code> for both directions, so a controller drives state without a line of <code>requestMIDIAccess</code> glue.</p>
+          <p class="ja">synth-playgroundデモから2パッケージが昇格。<code>@wcstack/audio</code>はWeb Audio APIをマークアップで組むモジュラーグラフにする。<strong>入れ子が信号の流れ</strong>で、入れ子で表せない配線は<code>out="bus"</code>のidで指定する。タグは全部で11個、値はstateから反応的にバインドされる。<code>@wcstack/midi</code>はヘッドレスな<code>&lt;wcs-midi&gt;</code>1つで入出力の両方向を扱い、<code>requestMIDIAccess</code>のグルーコードなしにMIDIコントローラが状態を動かす。</p>
           <ul class="tag-features">
-            <li>state / event / handle</li>
-            <li>231 Properties Annotated</li>
-            <li>Additive &amp; Optional</li>
-            <li>Locked by Tests</li>
+            <li>11 Audio Tags</li>
+            <li>Nesting = Signal Chain</li>
+            <li>MIDI In &amp; Out, One Tag</li>
+            <li>Zero Build</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.24.0</span>
-          <span class="tag-name">@wcstack/state</span>
-          <h3>The same value, twice, still counts</h3>
-          <p class="what-if">What if &ldquo;it happened again&rdquo; survived the equality check?</p>
-          <p><code>sameValueGuard</code> skipped any write <code>Object.is</code>-equal to the current value &mdash; right for a current value, wrong for an occurrence, so a repeated <code>message</code> or <code>copied</code> was dropped. Writes from a <code>semantics: "event"</code> property now bypass it. Separately, a rejecting async <code>$on</code> handler used to surface only as an unhandled rejection; it is now reported with the state and handler name.</p>
-          <p class="ja"><code>sameValueGuard</code>は現在値と同値の書き込みを飛ばしていた。現在値には正しいが発生には誤りで、同じ<code>message</code>や<code>copied</code>の繰り返しが落ちていた。<code>semantics: "event"</code>のプロパティからの書き込みはガードを迂回する。また、rejectした非同期<code>$on</code>ハンドラは未処理のrejectionになるだけだったが、state名とハンドラ名つきで報告されるようになった。</p>
+          <span class="topic-ver">v1.26.0</span>
+          <span class="tag-name">$listKeys</span>
+          <h3>Refetched rows keep their DOM</h3>
+          <p class="what-if">What if a full refresh didn&rsquo;t take the cursor with it?</p>
+          <p><code>for:</code> keys rows by object reference &mdash; exactly right until the data arrives as freshly created objects from <code>fetch().json()</code>, a WebSocket snapshot, or <code>JSON.parse</code>. Every row was then torn down, and focus, an in-flight IME composition, <code>&lt;details&gt;</code> open state and inner scroll went with it. Declare <code>$listKeys: &#123; items: "id" &#125;</code> and rows are matched by key instead: the existing row objects are kept, only the fields that actually differ are written, and the DOM is reused. Opt-in per path, and a no-op refresh does no work at all.</p>
+          <p class="ja"><code>for:</code>は行をオブジェクト参照で同定する。参照が保たれる限り正しいが、<code>fetch().json()</code>やWebSocketのスナップショット、<code>JSON.parse</code>のように毎回新しいオブジェクトが来る場合は全行が作り直され、フォーカス・IME変換中の入力・<code>&lt;details&gt;</code>の開閉・内側のスクロール位置が消えていた。<code>$listKeys: &#123; items: "id" &#125;</code>と宣言すればキーで突き合わせ、既存の行オブジェクトを保持したまま差分フィールドだけを書き込み、DOMを再利用する。パス単位のopt-inで、変化がなければ何も起きない。</p>
           <ul class="tag-features">
-            <li>Occurrences Delivered</li>
-            <li>One-shot Guard Bypass</li>
-            <li>Named Handler Errors</li>
-            <li>No Config Flag</li>
+            <li>Per-path Opt-in</li>
+            <li>Field Name or Function</li>
+            <li>Only Changed Fields Written</li>
+            <li>Duplicate Keys Raise</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.24.0</span>
-          <span class="tag-name">upgradeProperties</span>
-          <h3>Properties set before upgrade survive</h3>
-          <p class="what-if">What if assigning to a not-yet-defined element didn&rsquo;t lose the value?</p>
-          <p>Writing <code>el.url = x</code> before the tag is defined creates an own property that shadows the prototype accessor forever: the setter never runs and the value disappears without an error. Every Shell now re-runs its declared inputs through their setters in <code>connectedCallback</code>, so Angular <code>[prop]</code>, Lit <code>.prop=</code>, and Solid <code>prop:</code> stay correct when the definition arrives late.</p>
-          <p class="ja">タグ定義前に<code>el.url = x</code>と代入すると、プロトタイプのアクセサを覆うownプロパティができ、setterは永久に呼ばれず、エラーもなく値が消える。すべてのShellが<code>connectedCallback</code>で宣言済みinputをsetter経由で再適用するようになり、Angularの<code>[prop]</code>、Litの<code>.prop=</code>、Solidの<code>prop:</code>が遅延定義でも正しく届く。</p>
+          <span class="topic-ver">v1.26.0</span>
+          <span class="tag-name">dist/auto.min.js</span>
+          <h3>One hash covers every line</h3>
+          <p class="what-if">What if <code>integrity</code> actually protected the whole framework?</p>
+          <p>With ESM on a CDN, <code>&lt;script type="module" integrity&gt;</code> protects <em>only the entry</em>; whatever it imports is a separate fetch outside the digest. <code>auto.min.js</code> is now a self-contained bundle with zero static imports, so one <code>integrity</code> attribute covers all of wcstack that runs. Each release publishes sha384 digests for every package in its GitHub Release body plus a machine-readable <code>sri.json</code> &mdash; computed from the published tree, not asked of the CDN. A new CSP guide prices each load path, including the <code>script-src blob:</code> an inline <code>&lt;wcs-state&gt;</code> script costs.</p>
+          <p class="ja">CDN上のESMでは<code>&lt;script type="module" integrity&gt;</code>は<em>エントリしか</em>守らず、その先の<code>import</code>は別フェッチでダイジェストの外に出る。<code>auto.min.js</code>は静的importゼロの自己完結バンドルになったので、<code>integrity</code>属性1個で実行されるwcstack全体を覆える。各リリースはGitHub Release本文に全パッケージのsha384を、機械可読な<code>sri.json</code>とともに公開する。値は公開treeから算出したもので、CDNの自己申告ではない。新しいCSPガイドはロード経路ごとの要求を明示し、インライン<code>&lt;wcs-state&gt;</code>が<code>script-src blob:</code>を要求することも書いた。</p>
           <ul class="tag-features">
-            <li>Input Rescue</li>
-            <li>Idempotent</li>
-            <li>Accessor-only</li>
-            <li>Late Definition Safe</li>
+            <li>Zero Static Imports</li>
+            <li>sri.json per Release</li>
+            <li>Not the CDN&rsquo;s Word</li>
+            <li>CSP Guide</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.24.0</span>
-          <span class="tag-name">framework adapters</span>
-          <h3>Three rules for framework apps</h3>
-          <p class="what-if">What if the silent failures at the boundary were written down?</p>
-          <p>A new integration guide carries three rules: wait for the definition before binding &mdash; every adapter checks <code>isWcBindable</code> once and never retries &mdash; pass object inputs as properties, and unwrap reactive proxies before handing them in. It also spells out what does <em>not</em> substitute for a definition gate, and the portable path for event names containing a colon.</p>
-          <p class="ja">新しい統合ガイドが3つの規則を示す。bindの前に定義を待つ（アダプタは<code>isWcBindable</code>を一度しか判定せず再試行しない）、objectのinputはプロパティとして渡す、reactive Proxyはrawにしてから渡す。定義ゲートの代用にならないものと、コロンを含むイベント名の移植性のある受け方も明記した。</p>
+          <span class="topic-ver">v1.26.0</span>
+          <span class="tag-name">$commands</span>
+          <h3>An HTML-only component can be called</h3>
+          <p class="what-if">What if a component with no class could still take a command?</p>
+          <p>A Declarative Custom Component lists its state's methods with <code>$commands: ["bumpBy"]</code>, and they become real <code>commands</code> entries in its generated <code>wcBindable</code> &mdash; invocable from a parent as <code>command.bumpBy: $command.bump</code>, exactly like an I/O node, with positional arguments passing through verbatim. The two component mechanisms are also explicitly exclusive now: a <code>&lt;wcs-state bind-component&gt;</code> inside a <code>data-wc-definition</code> host raises instead of half-working, and a duplicate entry in <code>$bindables</code> / <code>$commands</code> &mdash; which used to silently break two-way binding &mdash; is rejected at definition time.</p>
+          <p class="ja">DCC(Declarative Custom Component)がstateのメソッドを<code>$commands: ["bumpBy"]</code>で宣言すると、生成される<code>wcBindable</code>の<code>commands</code>エントリになる。I/Oノードと同じく親から<code>command.bumpBy: $command.bump</code>で呼べ、位置引数はそのまま渡る。2つのコンポーネント機構は明示的に排他になり、<code>data-wc-definition</code>ホストの中の<code>&lt;wcs-state bind-component&gt;</code>は中途半端に動かずエラーになる。<code>$bindables</code> / <code>$commands</code>の重複エントリ(従来は無言で双方向バインドを壊していた)も定義時に弾かれる。</p>
           <ul class="tag-features">
-            <li>Definition Gate</li>
-            <li>Property Inputs</li>
-            <li>Raw Values</li>
-            <li>Colon Event Names</li>
+            <li>Commands from Pure HTML</li>
+            <li>Always async: true</li>
+            <li>DCC / bind-component Exclusive</li>
+            <li>Validated at Definition</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.26.0</span>
+          <span class="tag-name">bind-component</span>
+          <h3>A component in a loop can run its own loop</h3>
+          <p class="what-if">What if the row&rsquo;s child had a list of its own?</p>
+          <p>A <code>bind-component</code> element sitting inside a parent <code>for:</code> can now iterate a list handed to it from that row &mdash; <code>&lt;my-group data-wcs="state.items: groups.*.children"&gt;</code> with its own <code>for: items</code> inside. Getting there closed the cases around it too: parent-originated writes now reach <code>bind-component</code> children, replacing a list whose rows hold one no longer kills the <code>for</code>, and for-row bindings torn down by an ancestor unmount are revived rather than left stale.</p>
+          <p class="ja">親の<code>for:</code>の中に置いた<code>bind-component</code>要素が、その行から渡されたリストを自分の<code>for: items</code>で回せるようになった(<code>&lt;my-group data-wcs="state.items: groups.*.children"&gt;</code>)。その過程で周辺も塞いだ。親側からの書き込みが<code>bind-component</code>の子に届くようになり、行が<code>bind-component</code>を含むリストを差し替えても<code>for</code>が死ななくなり、祖先のアンマウントで破棄されたfor行のバインディングは古いまま残らず復活する。</p>
+          <ul class="tag-features">
+            <li>Nested for</li>
+            <li>Parent Writes Delivered</li>
+            <li>List Replace Survives</li>
+            <li>Verified in a Real Browser</li>
           </ul>
         </div>
       </div>
@@ -866,6 +880,8 @@
         <div class="io-node"><span class="io-tag">&lt;wcs-tilt&gt;</span><span class="io-desc">Device Orientation, iOS-safe</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-accelerometer&gt; &lt;wcs-gyroscope&gt;</span><span class="io-desc">Motion sensors (x / y / z)</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-magnetometer&gt; &lt;wcs-ambient-light-sensor&gt;</span><span class="io-desc">Magnetic field &amp; illuminance</span></div>
+        <div class="io-node"><span class="io-tag">&lt;wcs-audio&gt; &lt;wcs-osc&gt; &lt;wcs-gain&gt;</span><span class="io-desc">Web Audio graph as markup (11 tags)</span></div>
+        <div class="io-node"><span class="io-tag">&lt;wcs-midi&gt;</span><span class="io-desc">Web MIDI in &amp; out, one tag</span></div>
       </div>
       <div class="protocol-note fade-in">
         <h3>One protocol behind them all: <code>wc-bindable</code></h3>
