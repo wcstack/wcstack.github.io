@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>&lt;wcs-state&gt; — Reactive State · wcstack</title>
-  <meta name="description" content="Deep dive into &lt;wcs-state&gt;: path-string data binding, path getters, 40 built-in filters, structural directives, command/event tokens, $streams, the wc-bindable protocol, SSR, and TypeScript support.">
+  <meta name="description" content="Deep dive into &lt;wcs-state&gt;: path-string data binding, path getters, 46 built-in filters, structural directives, command/event tokens, $streams, $watch, the wc-bindable protocol, SSR, and TypeScript support.">
   <meta property="og:title" content="&lt;wcs-state&gt; — Reactive State · wcstack">
   <meta property="og:description" content="The HTML-first reactive core of wcstack. The only contract between UI and state is a path string.">
   <meta property="og:type" content="article">
@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.26.0</span>
+        <span class="pill accent">v1.27.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -340,9 +340,10 @@
           <li><a href="#getters">Path getters</a></li>
           <li><a href="#binding">Binding: data-wcs</a></li>
           <li><a href="#directives">Structural directives</a></li>
-          <li><a href="#filters">Filters (40 built-in)</a></li>
+          <li><a href="#filters">Filters (46 built-in)</a></li>
           <li><a href="#events">Events &amp; tokens</a></li>
           <li><a href="#streams">Streams ($streams)</a></li>
+          <li><a href="#watch">Watch ($watch)</a></li>
           <li><a href="#components">Building components</a></li>
           <li><a href="#bindable">wc-bindable protocol</a></li>
           <li><a href="#ssr-svg">SSR &amp; SVG</a></li>
@@ -365,7 +366,7 @@
           <h3>HTML-first &mdash; this page</h3>
           <ul>
             <li>State declared in a tag; bindings are path strings in <code>data-wcs</code></li>
-            <li>Mustache syntax, 40 filters, <code>for</code> / <code>if</code> directives</li>
+            <li>Mustache syntax, 46 filters, <code>for</code> / <code>if</code> directives</li>
             <li>SSR + hydration, in-page DevTools integration</li>
             <li>Best when the app is <em>written in HTML</em></li>
           </ul>
@@ -651,7 +652,7 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
   <!-- Filters -->
   <section class="doc" id="filters">
     <div class="container">
-      <h2>Filters (40 built-in) <a class="anchor" href="#filters">#</a></h2>
+      <h2>Filters (46 built-in) <a class="anchor" href="#filters">#</a></h2>
       <p>Chain with <code>|</code>: <code>price|mul(1.1)|round(2)|locale(ja-JP)</code></p>
       <p class="ja">パイプで連結できる。</p>
       <div class="filter-grid">
@@ -661,15 +662,15 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
         </div>
         <div class="filter-group">
           <h4>Arithmetic</h4>
-          <div class="chips"><code>inc(n)</code><code>dec(n)</code><code>mul(n)</code><code>div(n)</code><code>mod(n)</code></div>
+          <div class="chips"><code>inc(n)</code><code>dec(n)</code><code>mul(n)</code><code>div(n)</code><code>mod(n)</code><code>abs</code><code>clamp(min,max)</code></div>
         </div>
         <div class="filter-group">
           <h4>Number formatting</h4>
-          <div class="chips"><code>fix(n)</code><code>round(n?)</code><code>floor</code><code>ceil</code><code>locale(loc?)</code><code>percent(n?)</code></div>
+          <div class="chips"><code>fix(n)</code><code>round(n?)</code><code>floor</code><code>ceil</code><code>locale(loc?)</code><code>percent(n?)</code><code>unit(u)</code></div>
         </div>
         <div class="filter-group">
           <h4>String</h4>
-          <div class="chips"><code>uc</code><code>lc</code><code>cap</code><code>trim</code><code>slice(n)</code><code>substr(s,l)</code><code>pad(n,c?)</code><code>rep(n)</code><code>rev</code></div>
+          <div class="chips"><code>uc</code><code>lc</code><code>cap</code><code>trim</code><code>slice(n)</code><code>substr(s,l)</code><code>pad(n,c?)</code><code>rep(n)</code><code>rev</code><code>truncate(n,sfx?)</code><code>join(sep?)</code></div>
         </div>
         <div class="filter-group">
           <h4>Type conversion</h4>
@@ -677,13 +678,15 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
         </div>
         <div class="filter-group">
           <h4>Date / time</h4>
-          <div class="chips"><code>date(loc?)</code><code>time(loc?)</code><code>datetime(loc?)</code><code>ymd(sep?)</code></div>
+          <div class="chips"><code>date(loc?)</code><code>time(loc?)</code><code>datetime(loc?)</code><code>ymd(sep?)</code><code>hms(sep?)</code></div>
         </div>
         <div class="filter-group">
           <h4>Boolean / default</h4>
           <div class="chips"><code>truthy</code><code>falsy</code><code>defaults(v)</code></div>
         </div>
       </div>
+      <p>Six arrived in v1.27.0 &mdash; <code>abs</code>, <code>clamp(min,max)</code>, <code>unit(u)</code>, <code>join(sep?)</code>, <code>truncate(n,suffix?)</code> and <code>hms(sep?)</code> &mdash; picked so presentation stays on the wire instead of leaking into state. The chain they were designed around: <code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>. <code>unit</code> deliberately accepts the strings that <code>fix</code>/<code>percent</code> return, and passes <code>null</code>/<code>undefined</code> through untouched so &ldquo;undefined skips the write, null clears&rdquo; survives the filter. Also fixed in v1.27.0: argument trimming is outside-quotes only, so <code>pad(5, ' ')</code> and <code>join(' / ')</code> finally mean what they say.</p>
+      <p class="ja">v1.27.0で6つ追加 &mdash; <code>abs</code>・<code>clamp(min,max)</code>・<code>unit(u)</code>・<code>join(sep?)</code>・<code>truncate(n,suffix?)</code>・<code>hms(sep?)</code>。表示の都合をstateに持ち込まず、バインディングの上で済ませるための選定で、設計の起点は<code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>というチェーン。<code>unit</code>は<code>fix</code>/<code>percent</code>が返す文字列を意図的に受け入れ、<code>null</code>/<code>undefined</code>は素通しするので「undefinedは書き込みスキップ、nullはクリア」の意味論がフィルタを通っても保たれる。同じくv1.27.0で、引数のトリムはクォートの外側だけになり、<code>pad(5, ' ')</code>や<code>join(' / ')</code>が書いたとおりに動くようになった。</p>
     </div>
   </section>
 
@@ -796,6 +799,51 @@ removeItem(event, index) {
 <pre><code class="language-html">&lt;p data-wcs="textContent: $streamStatus.tokens"&gt;&lt;/p&gt;  &lt;!-- "idle" | "active" | "done" | "error" --&gt;
 &lt;p data-wcs="textContent: $streamError.tokens"&gt;&lt;/p&gt;   &lt;!-- null or last error --&gt;</code></pre>
       </div>
+      <p>To react to a stream that nothing renders, declare <a href="#watch"><code>$watch</code></a> on its value path &mdash; <code>$updatedCallback</code> is binding-driven and will not see it.</p>
+      <p class="ja">どこにも描画されないstreamに反応するには、値のパスに<a href="#watch"><code>$watch</code></a>を宣言する。<code>$updatedCallback</code>はバインディング駆動なので届かない。</p>
+    </div>
+  </section>
+
+  <!-- Watch -->
+  <section class="doc" id="watch">
+    <div class="container">
+      <h2>Watch: <code style="font-family:var(--mono)">$watch</code> <a class="anchor" href="#watch">#</a></h2>
+      <p><code>$updatedCallback</code> is <strong>binding-driven</strong>: it reports the paths whose live DOM bindings were applied, so a value you never render is invisible to it. <code>$watch</code>, added in v1.27.0, is the <strong>headless</strong> counterpart &mdash; it fires on state changes whether or not anything on the page is bound to the path.</p>
+      <p class="ja"><code>$updatedCallback</code>は<strong>バインディング駆動</strong>で、ライブなDOMバインディングが適用されたパスしか報告しない。描画していない値には届かない。v1.27.0で追加された<code>$watch</code>はその<strong>ヘッドレス</strong>版で、パスがどこにバインドされていてもいなくても、状態の変化で発火する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>$watch</span></div>
+<pre><code class="language-javascript">export default {
+  isLoading: false,
+  items: [],
+  $listKeys: { items: "id" },   // makes the row watch below headless
+
+  $watch: {
+    // edge detection is yours: compare cur / prev
+    isLoading(cur, prev) {
+      if (cur === true &amp;&amp; prev === false) { this.startedAt = Date.now(); }
+    },
+    // wildcard paths fire once per changed row; trailing args are loop indexes
+    "items.*.price"(cur, prev, index) {
+      this.lastPriceChange = `#${index}: ${prev} &rarr; ${cur}`;
+    }
+  }
+};</code></pre>
+      </div>
+      <p>The handler runs with <code>this</code> bound to a <strong>writable</strong> state proxy; its writes land in the next update batch, and chains of mutually-writing watches are cut at 32 links. <code>prev</code> is the value at the start of the batch and is <strong>scalar-only</strong> &mdash; it reuses the read the same-value guard already does, so watch costs no extra read, and it is <code>undefined</code> for reference types. Watching a computed getter makes it <strong>eager</strong>: evaluated at connect and at the end of every batch that touches its dependencies, so an unrendered computed can fire at all. Handler exceptions are isolated &mdash; reported to the console (and the devtools timeline), while the remaining watches still run. SSR never runs watches.</p>
+      <p class="ja">ハンドラの<code>this</code>は<strong>書き込み可能</strong>なstateプロキシで、書き込みは次の更新バッチに乗る。相互に書き合うwatchの連鎖は32段で打ち切られる。<code>prev</code>はバッチ開始時点の値で<strong>スカラー限定</strong> &mdash; same-value guardが既に行う読み取りを再利用するため追加コストがなく、参照型では<code>undefined</code>になる。算出getterをwatchすると<strong>eager</strong>になり、接続時と依存が動いたバッチの終わりに毎回評価される &mdash; 描画されていない算出値が発火できるのはこのため。ハンドラ内の例外は隔離され、コンソール(とdevtoolsタイムライン)に報告された上で残りのwatchは実行される。SSRではwatchは動かない。</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Rule</th><th>Consequence</th></tr>
+          <tr><td>Own state only</td><td>A key may not carry <code>@stateName</code> &mdash; rejected at declaration</td></tr>
+          <tr><td>No <code>$</code>-prefixed keys</td><td><code>$streamStatus.x</code> cannot be watched directly &mdash; mirror it through a one-line non-<code>$</code> getter and watch that (the eager rule makes it work unrendered)</td></tr>
+          <tr><td>Batches coalesce</td><td><code>a &rarr; b &rarr; c</code> in one batch fires once with <code>cur = c</code>, <code>prev = a</code></td></tr>
+          <tr><td>Row watches want <code>$listKeys</code></td><td>Without it a whole-array assignment fires every row with <code>prev === undefined</code>; <strong>headless</strong> row watching (no rendered <code>for</code>) fires <em>zero</em> times without it</td></tr>
+          <tr><td>Wildcard getters stay lazy</td><td><code>items.*.tax</code> is not primed (that would sweep the list) &mdash; it fires only when also DOM-bound</td></tr>
+          <tr><td>Mapped <code>bind-component</code> children excluded</td><td>The mapping proxy blanks <code>$</code>-prefixed properties, so the declaration never arrives (same for <code>$streams</code>)</td></tr>
+        </table>
+      </div>
+      <p>Tooling follows the declaration: <code>@wcstack/lint</code> and the VS Code extension check every <code>$watch</code> key statically (<code>wcs/watch-declaration-invalid</code>, <code>wcs/watch-path-missing</code>) &mdash; worth heeding, because a <code>$watch</code> typo does not fail visibly the way a binding typo does; it just never fires. The devtools timeline records <code>watch-error</code> and <code>watch-chain-limit</code> events.</p>
+      <p class="ja">ツーリングも宣言を追う。<code>@wcstack/lint</code>とVS Code拡張は<code>$watch</code>のキーを静的に検証する(<code>wcs/watch-declaration-invalid</code>・<code>wcs/watch-path-missing</code>)。バインディングのタイプミスは「描画されない」形で見えるが、<code>$watch</code>のタイプミスは<strong>黙って一度も発火しない</strong>ので、この検証は素通りしないこと。devtoolsのタイムラインには<code>watch-error</code>と<code>watch-chain-limit</code>が記録される。</p>
     </div>
   </section>
 
@@ -825,8 +873,8 @@ customElements.define("my-component", MyComponent);</code></pre>
       </div>
 
       <h3>Light DOM component</h3>
-      <p>Light DOM shares the namespace with the parent, so a <code>name</code> attribute is required and bindings use <code>@name</code>.</p>
-      <p class="ja">Light DOMは親と名前空間を共有するため、name属性が必須。@nameで参照する。</p>
+      <p>Light DOM shares the namespace with the parent, so a <code>name</code> attribute is required and bindings use <code>@name</code>. Since v1.27.0 the mapped form is treated as <strong>its own binding scope</strong>, so binding it from the host (below) works just as it does for Shadow DOM &mdash; it used to deadlock. Two structural constraints remain: two instances carrying the same <code>name</code> cannot live in one scope (use Shadow DOM for a component stamped on every row), and <code>getBindingsReady(root)</code> does not cover the component's scope &mdash; the same contract as Shadow DOM, where the child lives in a different rootNode.</p>
+      <p class="ja">Light DOMは親と名前空間を共有するため、name属性が必須。@nameで参照する。v1.27.0以降、マップされたLight DOMコンポーネントは<strong>独立したバインディングスコープ</strong>として扱われ、ホストからのバインド(下記)がShadow DOMと同じように動く(以前はデッドロックしていた)。残る制約は構造的なもので、同じ<code>name</code>を持つ2インスタンスは1スコープに共存できない(リストの各行に置くならShadow DOMを使う)。また<code>getBindingsReady(root)</code>はコンポーネントのスコープを覆わない &mdash; 子が別rootNodeにいるShadow DOM形式と同じ契約。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">my-light-component.js</span><span>Light DOM</span></div>
 <pre><code class="language-javascript">class MyLightComponent extends HTMLElement {
@@ -917,8 +965,8 @@ customElements.define("my-light-component", MyLightComponent);</code></pre>
           <tr><td>Spread (<code>...: obj</code>)</td><td>Available</td><td>Not available (needs a manifest)</td></tr>
         </table>
       </div>
-      <p><code>bind-component</code> components deliberately stay outside the wc-bindable protocol: they are wired by <strong>path</strong>, not by a declared property surface. That is why spread and command tokens, which both need a manifest, do not apply to them. A <code>bind-component</code> child placed inside a parent <code>for:</code> can, since v1.26.0, iterate a list handed to it from that row with a <code>for:</code> of its own.</p>
-      <p class="ja"><code>bind-component</code>のコンポーネントは意図的にwc-bindableプロトコルの外にいる。宣言されたプロパティ面ではなく<strong>パス</strong>で結線されるため、マニフェストを要するspreadとコマンドトークンは適用されない。v1.26.0以降、親の<code>for:</code>の中に置いた<code>bind-component</code>の子は、その行から渡されたリストを自分の<code>for:</code>で回せる。</p>
+      <p><code>bind-component</code> components deliberately stay outside the wc-bindable protocol: they are wired by <strong>path</strong>, not by a declared property surface. That is why spread and command tokens, which both need a manifest, do not apply to them. A <code>bind-component</code> child placed inside a parent <code>for:</code> can, since v1.26.0, iterate a list handed to it from that row with a <code>for:</code> of its own &mdash; and v1.27.0 extends this to <strong>any depth and stacking</strong>: components inside components stack scopes, the base list index composes across every boundary, and an intermediate component that only passes the array through still delivers row-field writes to the rows at the bottom. Loop indexes stay scope-local (<code>$1</code>, handler indexes, <code>$getAll</code> all report positions within the component's own scope), so a component's author never has to know how deeply it is placed. One consequence of the mapping proxy: a mapped child cannot declare <code>$watch</code> or <code>$streams</code> &mdash; declare them on the host state.</p>
+      <p class="ja"><code>bind-component</code>のコンポーネントは意図的にwc-bindableプロトコルの外にいる。宣言されたプロパティ面ではなく<strong>パス</strong>で結線されるため、マニフェストを要するspreadとコマンドトークンは適用されない。v1.26.0以降、親の<code>for:</code>の中に置いた<code>bind-component</code>の子は、その行から渡されたリストを自分の<code>for:</code>で回せる。v1.27.0はこれを<strong>任意の深さと積み重ね</strong>に拡張した。コンポーネントの中のコンポーネントはスコープを積み、基底のリストインデックスは境界ごとに合成され、配列を素通しするだけの中間コンポーネントがあっても行フィールドへの書き込みは最下層の行まで届く。ループインデックスはスコープ局所のまま(<code>$1</code>・ハンドラのインデックス・<code>$getAll</code>はすべて自スコープ内の位置を報告する)なので、コンポーネントの作者は自分がどの深さに置かれるかを知らなくてよい。マッピングプロキシの帰結として、マップされた子は<code>$watch</code>と<code>$streams</code>を宣言できない &mdash; ホスト側のstateに宣言する。</p>
     </div>
   </section>
 

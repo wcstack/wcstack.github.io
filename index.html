@@ -611,13 +611,13 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.26.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.27.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
       <div class="stats">
         <div class="stat">
-          <div class="num">43</div>
+          <div class="num">44</div>
           <div class="label">Packages</div>
         </div>
         <div class="stat">
@@ -647,83 +647,70 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.25.0 &ndash; v1.26.0</h2>
-      <p class="section-sub">Sound as markup, list identity that survives a refetch, and one hash that covers every line wcstack runs.</p>
-      <p class="section-sub-ja">音をマークアップに、再取得を越えて残るリストの同一性、そして実行される全行を覆う1つのハッシュ。</p>
+      <h2 class="section-title">Shipped in v1.27.0</h2>
+      <p class="section-sub">A watcher that needs no DOM, filters that keep presentation out of state, and component scopes that stack to any depth.</p>
+      <p class="section-sub-ja">DOMを要しない購読、表示の都合をstateに持ち込ませないフィルタ、どこまでも積めるコンポーネントスコープ。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.25.0</span>
-          <span class="tag-name">@wcstack/audio &middot; @wcstack/midi</span>
-          <h3>The audio graph, written as HTML</h3>
-          <p class="what-if">What if a synth patch were markup you could read?</p>
-          <p>Two packages promoted out of the synth-playground demo. <code>@wcstack/audio</code> turns the Web Audio API into a modular graph you nest in markup &mdash; <code>&lt;wcs-osc&gt;</code> inside <code>&lt;wcs-biquad&gt;</code> inside <code>&lt;wcs-gain&gt;</code> &mdash; where <strong>nesting is the signal chain</strong> and <code>out="bus"</code> routes whatever nesting cannot express. Eleven tags in all, their numbers bound reactively from state. <code>@wcstack/midi</code> adds a single headless <code>&lt;wcs-midi&gt;</code> for both directions, so a controller drives state without a line of <code>requestMIDIAccess</code> glue.</p>
-          <p class="ja">synth-playgroundデモから2パッケージが昇格。<code>@wcstack/audio</code>はWeb Audio APIをマークアップで組むモジュラーグラフにする。<strong>入れ子が信号の流れ</strong>で、入れ子で表せない配線は<code>out="bus"</code>のidで指定する。タグは全部で11個、値はstateから反応的にバインドされる。<code>@wcstack/midi</code>はヘッドレスな<code>&lt;wcs-midi&gt;</code>1つで入出力の両方向を扱い、<code>requestMIDIAccess</code>のグルーコードなしにMIDIコントローラが状態を動かす。</p>
+          <span class="topic-ver">v1.27.0</span>
+          <span class="tag-name">$watch</span>
+          <h3>The change nothing renders, still observed</h3>
+          <p class="what-if">What if state could react without a single binding?</p>
+          <p><code>$updatedCallback</code> is binding-driven &mdash; it reports the paths whose live DOM bindings were applied, so a value nothing renders is invisible to it. <code>$watch</code> is the headless counterpart: declare <code>$watch: &#123; "items.*.price"(cur, prev, index) &#123;&hellip;&#125; &#125;</code> and it fires on state changes whether or not the path is bound anywhere. <code>prev</code> reuses the read the same-value guard already does, so watch costs no extra read. Watching a computed getter makes it <strong>eager</strong> &mdash; an unrendered computed can fire at all &mdash; and with <code>$listKeys</code> a row watch fires per changed row with a real <code>prev</code>. Handler exceptions are isolated, write chains are cut at 32 links, and SSR never runs watches.</p>
+          <p class="ja"><code>$updatedCallback</code>はバインディング駆動 &mdash; ライブなDOMバインディングが適用されたパスしか報告せず、描画されない値には届かない。<code>$watch</code>はそのヘッドレス版で、<code>$watch: &#123; "items.*.price"(cur, prev, index) &#123;&hellip;&#125; &#125;</code>と宣言すれば、パスがどこにバインドされていなくても状態の変化で発火する。<code>prev</code>はsame-value guardが既に行う読み取りを再利用するので追加コストはゼロ。算出getterをwatchすると<strong>eager</strong>になり、描画されていない算出値も発火できる。<code>$listKeys</code>があれば行watchは変わった行ごとに本物の<code>prev</code>つきで発火する。ハンドラの例外は隔離され、書き込み連鎖は32段で打ち切られ、SSRではwatchは動かない。</p>
           <ul class="tag-features">
-            <li>11 Audio Tags</li>
-            <li>Nesting = Signal Chain</li>
-            <li>MIDI In &amp; Out, One Tag</li>
-            <li>Zero Build</li>
+            <li>Headless by Design</li>
+            <li>cur / prev + Indexes</li>
+            <li>Eager Computed Watch</li>
+            <li>Chain Cut at 32</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.26.0</span>
-          <span class="tag-name">$listKeys</span>
-          <h3>Refetched rows keep their DOM</h3>
-          <p class="what-if">What if a full refresh didn&rsquo;t take the cursor with it?</p>
-          <p><code>for:</code> keys rows by object reference &mdash; exactly right until the data arrives as freshly created objects from <code>fetch().json()</code>, a WebSocket snapshot, or <code>JSON.parse</code>. Every row was then torn down, and focus, an in-flight IME composition, <code>&lt;details&gt;</code> open state and inner scroll went with it. Declare <code>$listKeys: &#123; items: "id" &#125;</code> and rows are matched by key instead: the existing row objects are kept, only the fields that actually differ are written, and the DOM is reused. Opt-in per path, and a no-op refresh does no work at all.</p>
-          <p class="ja"><code>for:</code>は行をオブジェクト参照で同定する。参照が保たれる限り正しいが、<code>fetch().json()</code>やWebSocketのスナップショット、<code>JSON.parse</code>のように毎回新しいオブジェクトが来る場合は全行が作り直され、フォーカス・IME変換中の入力・<code>&lt;details&gt;</code>の開閉・内側のスクロール位置が消えていた。<code>$listKeys: &#123; items: "id" &#125;</code>と宣言すればキーで突き合わせ、既存の行オブジェクトを保持したまま差分フィールドだけを書き込み、DOMを再利用する。パス単位のopt-inで、変化がなければ何も起きない。</p>
+          <span class="topic-ver">v1.27.0</span>
+          <span class="tag-name">unit &middot; clamp &middot; abs &middot; join &middot; hms &middot; truncate</span>
+          <h3>Presentation stays on the wire</h3>
+          <p class="what-if">What if <code>"42%"</code> never had to live in your state?</p>
+          <p>Six new filters bring the built-in set to 46, picked so the formatting a page needs stops leaking into the source of truth. The chain they were designed around: <code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code> &mdash; without <code>unit</code>, the suffix had to be built in state, in the worst case a whole derived array carrying <code>"42%"</code> strings. <code>unit</code> deliberately accepts the strings <code>fix</code> / <code>percent</code> return, and passes <code>null</code> / <code>undefined</code> through untouched so write-skip / clear semantics survive. <code>join</code> defaults to <code>", "</code> (a bare comma is what <code>String()</code> already produces), <code>truncate</code> counts kept characters, <code>hms</code> is <code>ymd</code>'s zero-padded, locale-independent counterpart. And quoted filter arguments now keep their whitespace: <code>pad(5, ' ')</code> was silently a no-op before.</p>
+          <p class="ja">フィルタが6つ増えて46に。ページが必要とする整形が信頼できる唯一の情報源へ漏れ出すのを止めるための選定で、設計の起点は<code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>というチェーン。<code>unit</code>がなければ単位はstateの中で組み立てるしかなく、最悪<code>"42%"</code>文字列を運ぶだけの派生配列ができていた。<code>unit</code>は<code>fix</code>/<code>percent</code>が返す文字列を意図的に受け入れ、<code>null</code>/<code>undefined</code>は素通しするので書き込みスキップ/クリアの意味論が保たれる。<code>join</code>の既定は<code>", "</code>(裸のカンマは<code>String()</code>が既にやること)、<code>truncate</code>は残す文字数を数え、<code>hms</code>は<code>ymd</code>の対になるゼロ埋め・ロケール非依存の時刻整形。そしてクォート内の空白が保持されるようになった &mdash; <code>pad(5, ' ')</code>は以前は無言のno-opだった。</p>
           <ul class="tag-features">
-            <li>Per-path Opt-in</li>
-            <li>Field Name or Function</li>
-            <li>Only Changed Fields Written</li>
-            <li>Duplicate Keys Raise</li>
+            <li>40 &rarr; 46 Built-ins</li>
+            <li>clamp|fix|unit(%)</li>
+            <li>null Passes Through</li>
+            <li>Quoted Spaces Survive</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.26.0</span>
-          <span class="tag-name">dist/auto.min.js</span>
-          <h3>One hash covers every line</h3>
-          <p class="what-if">What if <code>integrity</code> actually protected the whole framework?</p>
-          <p>With ESM on a CDN, <code>&lt;script type="module" integrity&gt;</code> protects <em>only the entry</em>; whatever it imports is a separate fetch outside the digest. <code>auto.min.js</code> is now a self-contained bundle with zero static imports, so one <code>integrity</code> attribute covers all of wcstack that runs. Each release publishes sha384 digests for every package in its GitHub Release body plus a machine-readable <code>sri.json</code> &mdash; computed from the published tree, not asked of the CDN. A new CSP guide prices each load path, including the <code>script-src blob:</code> an inline <code>&lt;wcs-state&gt;</code> script costs.</p>
-          <p class="ja">CDN上のESMでは<code>&lt;script type="module" integrity&gt;</code>は<em>エントリしか</em>守らず、その先の<code>import</code>は別フェッチでダイジェストの外に出る。<code>auto.min.js</code>は静的importゼロの自己完結バンドルになったので、<code>integrity</code>属性1個で実行されるwcstack全体を覆える。各リリースはGitHub Release本文に全パッケージのsha384を、機械可読な<code>sri.json</code>とともに公開する。値は公開treeから算出したもので、CDNの自己申告ではない。新しいCSPガイドはロード経路ごとの要求を明示し、インライン<code>&lt;wcs-state&gt;</code>が<code>script-src blob:</code>を要求することも書いた。</p>
-          <ul class="tag-features">
-            <li>Zero Static Imports</li>
-            <li>sri.json per Release</li>
-            <li>Not the CDN&rsquo;s Word</li>
-            <li>CSP Guide</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v1.26.0</span>
-          <span class="tag-name">$commands</span>
-          <h3>An HTML-only component can be called</h3>
-          <p class="what-if">What if a component with no class could still take a command?</p>
-          <p>A Declarative Custom Component lists its state's methods with <code>$commands: ["bumpBy"]</code>, and they become real <code>commands</code> entries in its generated <code>wcBindable</code> &mdash; invocable from a parent as <code>command.bumpBy: $command.bump</code>, exactly like an I/O node, with positional arguments passing through verbatim. The two component mechanisms are also explicitly exclusive now: a <code>&lt;wcs-state bind-component&gt;</code> inside a <code>data-wc-definition</code> host raises instead of half-working, and a duplicate entry in <code>$bindables</code> / <code>$commands</code> &mdash; which used to silently break two-way binding &mdash; is rejected at definition time.</p>
-          <p class="ja">DCC(Declarative Custom Component)がstateのメソッドを<code>$commands: ["bumpBy"]</code>で宣言すると、生成される<code>wcBindable</code>の<code>commands</code>エントリになる。I/Oノードと同じく親から<code>command.bumpBy: $command.bump</code>で呼べ、位置引数はそのまま渡る。2つのコンポーネント機構は明示的に排他になり、<code>data-wc-definition</code>ホストの中の<code>&lt;wcs-state bind-component&gt;</code>は中途半端に動かずエラーになる。<code>$bindables</code> / <code>$commands</code>の重複エントリ(従来は無言で双方向バインドを壊していた)も定義時に弾かれる。</p>
-          <ul class="tag-features">
-            <li>Commands from Pure HTML</li>
-            <li>Always async: true</li>
-            <li>DCC / bind-component Exclusive</li>
-            <li>Validated at Definition</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v1.26.0</span>
+          <span class="topic-ver">v1.27.0</span>
           <span class="tag-name">bind-component</span>
-          <h3>A component in a loop can run its own loop</h3>
-          <p class="what-if">What if the row&rsquo;s child had a list of its own?</p>
-          <p>A <code>bind-component</code> element sitting inside a parent <code>for:</code> can now iterate a list handed to it from that row &mdash; <code>&lt;my-group data-wcs="state.items: groups.*.children"&gt;</code> with its own <code>for: items</code> inside. Getting there closed the cases around it too: parent-originated writes now reach <code>bind-component</code> children, replacing a list whose rows hold one no longer kills the <code>for</code>, and for-row bindings torn down by an ancestor unmount are revived rather than left stale.</p>
-          <p class="ja">親の<code>for:</code>の中に置いた<code>bind-component</code>要素が、その行から渡されたリストを自分の<code>for: items</code>で回せるようになった(<code>&lt;my-group data-wcs="state.items: groups.*.children"&gt;</code>)。その過程で周辺も塞いだ。親側からの書き込みが<code>bind-component</code>の子に届くようになり、行が<code>bind-component</code>を含むリストを差し替えても<code>for</code>が死ななくなり、祖先のアンマウントで破棄されたfor行のバインディングは古いまま残らず復活する。</p>
+          <h3>Scopes stack to any depth</h3>
+          <p class="what-if">What if a component never had to know how deep it sits?</p>
+          <p>v1.26.0 let a <code>bind-component</code> child inside a host's <code>for:</code> run a <code>for:</code> of its own &mdash; one boundary. v1.27.0 makes it structural: components stack inside components, the base list index composes across <em>every</em> boundary, and an intermediate component that only passes the array through still delivers a row-field write to the rows at the bottom. Loop indexes stay scope-local throughout &mdash; <code>$1</code>, handler indexes and <code>$getAll</code> all report positions within the component's own scope &mdash; so the author never writes depth-aware code. The mapped <strong>Light DOM</strong> form also became its own binding scope: binding a Light DOM component from the host used to deadlock; it now initializes exactly like Shadow DOM.</p>
+          <p class="ja">v1.26.0はホストの<code>for:</code>の中の<code>bind-component</code>の子が自分の<code>for:</code>を回せるようにした &mdash; 境界1つ分。v1.27.0はそれを構造にした。コンポーネントの中のコンポーネントはスコープを積み、基底のリストインデックスは<em>すべての</em>境界を越えて合成され、配列を素通しするだけの中間コンポーネントがいても行フィールドへの書き込みは最下層の行まで届く。ループインデックスは一貫してスコープ局所 &mdash; <code>$1</code>・ハンドラのインデックス・<code>$getAll</code>はすべて自スコープ内の位置を報告する &mdash; ので、作者が深さを意識したコードを書くことはない。マップされた<strong>Light DOM</strong>形式も独立したバインディングスコープになり、ホストからのバインドはデッドロックせずShadow DOMと同じように初期化される。</p>
           <ul class="tag-features">
-            <li>Nested for</li>
-            <li>Parent Writes Delivered</li>
-            <li>List Replace Survives</li>
-            <li>Verified in a Real Browser</li>
+            <li>Any Depth, Stacked</li>
+            <li>Scope-local Indexes</li>
+            <li>Pass-through Delivers</li>
+            <li>Light DOM De-deadlocked</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.27.0</span>
+          <span class="tag-name">wcs/watch-* &middot; devtools</span>
+          <h3>The typo that would never fire is caught first</h3>
+          <p class="what-if">What if the linter knew your watchers?</p>
+          <p>A binding typo fails visibly &mdash; something does not render. A <code>$watch</code> typo just never fires. So the declaration was made statically checkable on day one: <code>@wcstack/lint</code> and the VS Code extension validate every key &mdash; <code>wcs/watch-declaration-invalid</code> (error: the exact shapes the runtime raises on &mdash; <code>@</code> cross-state keys, <code>$</code>-prefixed keys, empty segments, non-function handlers) and <code>wcs/watch-path-missing</code> (warning: absent from the state definition, it will never fire). At runtime, the devtools timeline gains <code>watch-error</code> (phase: prime / evaluate / handler) and <code>watch-chain-limit</code> events, so an isolated handler exception is visible instead of vanishing into the console scrollback.</p>
+          <p class="ja">バインディングのタイプミスは「描画されない」形で見える。<code>$watch</code>のタイプミスは黙って一度も発火しない。だから宣言は初日から静的検証の対象になった。<code>@wcstack/lint</code>とVS Code拡張が全キーを検証する &mdash; <code>wcs/watch-declaration-invalid</code>(error: ランタイムがraiseするのと同じ形 &mdash; <code>@</code>付き越境キー・<code>$</code>始まりキー・空セグメント・非関数ハンドラ)と<code>wcs/watch-path-missing</code>(warning: 状態定義に存在せず、一度も発火しない)。ランタイム側ではdevtoolsタイムラインに<code>watch-error</code>(phase: prime / evaluate / handler)と<code>watch-chain-limit</code>が追加され、隔離されたハンドラ例外がコンソールの彼方に消えず見えるようになった。</p>
+          <ul class="tag-features">
+            <li>2 New Lint Codes</li>
+            <li>VS Code Inline</li>
+            <li>watch-error in Timeline</li>
+            <li>Runtime Parity</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
+
 
   <!-- The Core Insight -->
   <section class="insight" id="insight">
