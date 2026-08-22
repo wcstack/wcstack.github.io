@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.27.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.29.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,64 +647,78 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.27.0</h2>
-      <p class="section-sub">A watcher that needs no DOM, filters that keep presentation out of state, and component scopes that stack to any depth.</p>
-      <p class="section-sub-ja">DOMを要しない購読、表示の都合をstateに持ち込ませないフィルタ、どこまでも積めるコンポーネントスコープ。</p>
+      <h2 class="section-title">Shipped in v1.28.0 &ndash; v1.29.0</h2>
+      <p class="section-sub">Wiring is written in HTML, so it can be parsed, checked, navigated, and measured &mdash; by one parser, everywhere.</p>
+      <p class="section-sub-ja">結線はHTMLに静的に書かれている。だからパースでき、検証でき、ジャンプでき、測定できる &mdash; 1つのパーサで、どこでも。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.27.0</span>
-          <span class="tag-name">$watch</span>
-          <h3>The change nothing renders, still observed</h3>
-          <p class="what-if">What if state could react without a single binding?</p>
-          <p><code>$updatedCallback</code> is binding-driven &mdash; it reports the paths whose live DOM bindings were applied, so a value nothing renders is invisible to it. <code>$watch</code> is the headless counterpart: declare <code>$watch: &#123; "items.*.price"(cur, prev, index) &#123;&hellip;&#125; &#125;</code> and it fires on state changes whether or not the path is bound anywhere. <code>prev</code> reuses the read the same-value guard already does, so watch costs no extra read. Watching a computed getter makes it <strong>eager</strong> &mdash; an unrendered computed can fire at all &mdash; and with <code>$listKeys</code> a row watch fires per changed row with a real <code>prev</code>. Handler exceptions are isolated, write chains are cut at 32 links, and SSR never runs watches.</p>
-          <p class="ja"><code>$updatedCallback</code>はバインディング駆動 &mdash; ライブなDOMバインディングが適用されたパスしか報告せず、描画されない値には届かない。<code>$watch</code>はそのヘッドレス版で、<code>$watch: &#123; "items.*.price"(cur, prev, index) &#123;&hellip;&#125; &#125;</code>と宣言すれば、パスがどこにバインドされていなくても状態の変化で発火する。<code>prev</code>はsame-value guardが既に行う読み取りを再利用するので追加コストはゼロ。算出getterをwatchすると<strong>eager</strong>になり、描画されていない算出値も発火できる。<code>$listKeys</code>があれば行watchは変わった行ごとに本物の<code>prev</code>つきで発火する。ハンドラの例外は隔離され、書き込み連鎖は32段で打ち切られ、SSRではwatchは動かない。</p>
+          <span class="topic-ver">v1.28.0</span>
+          <span class="tag-name">[wcs/&hellip;] + did-you-mean</span>
+          <h3>The error explains how to fix itself</h3>
+          <p class="what-if">What if a runtime error came with its own patch?</p>
+          <p>The console is the one surface a mistaken author &mdash; human or AI &mdash; always reads. So the runtime's errors now carry the fix: a stable <code>[wcs/&hellip;]</code> code, a <em>did-you-mean</em> candidate (edit distance &le; 2, the same criterion the lint CLI uses), and a pointer to <code>npx @wcstack/lint</code>. A misspelled filter, an <code>eventToken</code> missing from <code>$eventTokens</code>, a bad <code>$watch</code> shape, a DCC <code>$bindables</code> / <code>$commands</code> typo &mdash; each names its lint code, and the hint is attached <strong>only where lint detects the same case</strong>, so following it never leads to a clean run that leaves the bug standing. DCC suggestions are split by kind: a <code>$commands</code> typo never suggests a value property that would just trap you in the next error.</p>
+          <p class="ja">間違えた書き手 &mdash; 人間でもAIでも &mdash; が必ず読む面はコンソールだけ。だからランタイムのエラー自身が修正手段を運ぶようになった。安定した<code>[wcs/&hellip;]</code>コード、<em>did-you-mean</em>候補(編集距離2以内、lint CLIと同じ規準)、そして<code>npx @wcstack/lint</code>への誘導。フィルタのタイプミス、<code>$eventTokens</code>にない<code>eventToken</code>、不正な<code>$watch</code>、DCCの<code>$bindables</code> / <code>$commands</code>の誤記 &mdash; それぞれが自分のlintコードを名乗る。誘導は<strong>lintが同じケースを検出できる箇所にだけ</strong>付くので、従った先で「lintはクリーンなのにバグは残る」ことがない。DCCの候補は種別で分かれ、<code>$commands</code>のタイプミスに値プロパティを提案して次のエラーへ誘い込むこともない。</p>
           <ul class="tag-features">
-            <li>Headless by Design</li>
-            <li>cur / prev + Indexes</li>
-            <li>Eager Computed Watch</li>
-            <li>Chain Cut at 32</li>
+            <li>Stable wcs/* Codes</li>
+            <li>Did-you-mean &le; 2 Edits</li>
+            <li>Hint Only Where Lint Agrees</li>
+            <li>+1.1KB, Error Paths Only</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.27.0</span>
-          <span class="tag-name">unit &middot; clamp &middot; abs &middot; join &middot; hms &middot; truncate</span>
-          <h3>Presentation stays on the wire</h3>
-          <p class="what-if">What if <code>"42%"</code> never had to live in your state?</p>
-          <p>Six new filters bring the built-in set to 46, picked so the formatting a page needs stops leaking into the source of truth. The chain they were designed around: <code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code> &mdash; without <code>unit</code>, the suffix had to be built in state, in the worst case a whole derived array carrying <code>"42%"</code> strings. <code>unit</code> deliberately accepts the strings <code>fix</code> / <code>percent</code> return, and passes <code>null</code> / <code>undefined</code> through untouched so write-skip / clear semantics survive. <code>join</code> defaults to <code>", "</code> (a bare comma is what <code>String()</code> already produces), <code>truncate</code> counts kept characters, <code>hms</code> is <code>ymd</code>'s zero-padded, locale-independent counterpart. And quoted filter arguments now keep their whitespace: <code>pad(5, ' ')</code> was silently a no-op before.</p>
-          <p class="ja">フィルタが6つ増えて46に。ページが必要とする整形が信頼できる唯一の情報源へ漏れ出すのを止めるための選定で、設計の起点は<code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>というチェーン。<code>unit</code>がなければ単位はstateの中で組み立てるしかなく、最悪<code>"42%"</code>文字列を運ぶだけの派生配列ができていた。<code>unit</code>は<code>fix</code>/<code>percent</code>が返す文字列を意図的に受け入れ、<code>null</code>/<code>undefined</code>は素通しするので書き込みスキップ/クリアの意味論が保たれる。<code>join</code>の既定は<code>", "</code>(裸のカンマは<code>String()</code>が既にやること)、<code>truncate</code>は残す文字数を数え、<code>hms</code>は<code>ymd</code>の対になるゼロ埋め・ロケール非依存の時刻整形。そしてクォート内の空白が保持されるようになった &mdash; <code>pad(5, ' ')</code>は以前は無言のno-opだった。</p>
+          <span class="topic-ver">v1.28.0</span>
+          <span class="tag-name">@wcstack/state/parser</span>
+          <h3>Three parsers become one</h3>
+          <p class="what-if">What if tooling read the grammar straight from the runtime?</p>
+          <p>The lint CLI, the VS Code extension, and the devtools each carried their own approximation of the <code>data-wcs</code> grammar &mdash; drift built in by construction. Now the runtime's canonical binding parser is a public subpath: <code>@wcstack/state/parser</code>, DOM-free and pure, proven by a node-environment test that its import chain never touches the DOM. The manifest gained the vocabulary that used to live as scattered string literals: every modifier (<code>#prevent</code> / <code>#stop</code> / <code>#ro</code> / <code>#init=</code> / <code>#sync=</code>, the <code>on</code> event prefix), the <code>$1..$N</code> index params, every binding type &mdash; all in <code>wcs-manifest.json</code>. As of v1.29.0 all three tools consume it, so a diagnostic can no longer disagree with what the runtime would actually do.</p>
+          <p class="ja">lint CLI・VS Code拡張・devtoolsはそれぞれ<code>data-wcs</code>文法の近似を自前で持っていた &mdash; 構造的に仕込まれたドリフト。ランタイムの正本パーサが公開subpathになった: <code>@wcstack/state/parser</code>。DOM非依存・純粋で、importチェーンがDOMに触れないことはnode環境テストが証明する。manifestには文字列リテラルとして散らばっていた語彙が収載された: 全修飾子(<code>#prevent</code> / <code>#stop</code> / <code>#ro</code> / <code>#init=</code> / <code>#sync=</code>、イベント名の<code>on</code>プレフィクス)、<code>$1..$N</code>、全バインディング種別 &mdash; すべて<code>wcs-manifest.json</code>に。v1.29.0からは3つのツールすべてがこれを消費するので、診断がランタイムの実際の挙動と食い違えなくなった。</p>
           <ul class="tag-features">
-            <li>40 &rarr; 46 Built-ins</li>
-            <li>clamp|fix|unit(%)</li>
-            <li>null Passes Through</li>
-            <li>Quoted Spaces Survive</li>
+            <li>One Canonical Parser</li>
+            <li>DOM-free, Proven</li>
+            <li>Full Vocabulary in Manifest</li>
+            <li>Drift Tests Pin It</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.27.0</span>
-          <span class="tag-name">bind-component</span>
-          <h3>Scopes stack to any depth</h3>
-          <p class="what-if">What if a component never had to know how deep it sits?</p>
-          <p>v1.26.0 let a <code>bind-component</code> child inside a host's <code>for:</code> run a <code>for:</code> of its own &mdash; one boundary. v1.27.0 makes it structural: components stack inside components, the base list index composes across <em>every</em> boundary, and an intermediate component that only passes the array through still delivers a row-field write to the rows at the bottom. Loop indexes stay scope-local throughout &mdash; <code>$1</code>, handler indexes and <code>$getAll</code> all report positions within the component's own scope &mdash; so the author never writes depth-aware code. The mapped <strong>Light DOM</strong> form also became its own binding scope: binding a Light DOM component from the host used to deadlock; it now initializes exactly like Shadow DOM.</p>
-          <p class="ja">v1.26.0はホストの<code>for:</code>の中の<code>bind-component</code>の子が自分の<code>for:</code>を回せるようにした &mdash; 境界1つ分。v1.27.0はそれを構造にした。コンポーネントの中のコンポーネントはスコープを積み、基底のリストインデックスは<em>すべての</em>境界を越えて合成され、配列を素通しするだけの中間コンポーネントがいても行フィールドへの書き込みは最下層の行まで届く。ループインデックスは一貫してスコープ局所 &mdash; <code>$1</code>・ハンドラのインデックス・<code>$getAll</code>はすべて自スコープ内の位置を報告する &mdash; ので、作者が深さを意識したコードを書くことはない。マップされた<strong>Light DOM</strong>形式も独立したバインディングスコープになり、ホストからのバインドはデッドロックせずShadow DOMと同じように初期化される。</p>
+          <span class="topic-ver">v1.28.0 &ndash; v1.29.0</span>
+          <span class="tag-name">&lt;wcs-state src&gt; &middot; wcs-validate</span>
+          <h3>The linter follows src</h3>
+          <p class="what-if">What if your external state file was checked too?</p>
+          <p>State moved into <code>src="./state.js"</code> &mdash; the form a strict CSP demands &mdash; used to be invisible to the linter: every path unresolvable, every check silently skipped. The CLI now resolves <code>&lt;wcs-state src&gt;</code> files (<code>.json</code> / <code>.js</code> / <code>.ts</code>) relative to the HTML and validates the page for real. Honestly stated: a build that was green only because its paths could not be read can now fail. v1.29.0 also closes the loop on the two shapes that threw at runtime but linted clean &mdash; a structural <code>for</code> / <code>if</code> sharing its <code>data-wcs</code> with another binding (<code>wcs/template-syntax</code>), and a <code>$watch</code> that is definitely not an object.</p>
+          <p class="ja">厳格CSPが要求する<code>src="./state.js"</code>形式に移した状態は、linterから見えなかった &mdash; 全パスが解決不能で、全チェックが黙ってスキップされていた。CLIは<code>&lt;wcs-state src&gt;</code>のファイル(<code>.json</code> / <code>.js</code> / <code>.ts</code>)をHTML相対で解決し、ページを本当に検証するようになった。正直に言えば: パスが読めないせいでグリーンだったビルドは、これから落ちうる。v1.29.0はさらに「ランタイムではthrowするのにlintはクリーン」だった2つの形を塞いだ &mdash; <code>data-wcs</code>を他のバインディングと共有する構造ディレクティブ(<code>wcs/template-syntax</code>)と、確実に非オブジェクトな<code>$watch</code>。</p>
           <ul class="tag-features">
-            <li>Any Depth, Stacked</li>
-            <li>Scope-local Indexes</li>
-            <li>Pass-through Delivers</li>
-            <li>Light DOM De-deadlocked</li>
+            <li>.json / .js / .ts Resolved</li>
+            <li>Relative Paths Only</li>
+            <li>2 Runtime-throw Shapes Linted</li>
+            <li>CLI Only &mdash; IDE Stays Single-file</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.27.0</span>
-          <span class="tag-name">wcs/watch-* &middot; devtools</span>
-          <h3>The typo that would never fire is caught first</h3>
-          <p class="what-if">What if the linter knew your watchers?</p>
-          <p>A binding typo fails visibly &mdash; something does not render. A <code>$watch</code> typo just never fires. So the declaration was made statically checkable on day one: <code>@wcstack/lint</code> and the VS Code extension validate every key &mdash; <code>wcs/watch-declaration-invalid</code> (error: the exact shapes the runtime raises on &mdash; <code>@</code> cross-state keys, <code>$</code>-prefixed keys, empty segments, non-function handlers) and <code>wcs/watch-path-missing</code> (warning: absent from the state definition, it will never fire). At runtime, the devtools timeline gains <code>watch-error</code> (phase: prime / evaluate / handler) and <code>watch-chain-limit</code> events, so an isolated handler exception is visible instead of vanishing into the console scrollback.</p>
-          <p class="ja">バインディングのタイプミスは「描画されない」形で見える。<code>$watch</code>のタイプミスは黙って一度も発火しない。だから宣言は初日から静的検証の対象になった。<code>@wcstack/lint</code>とVS Code拡張が全キーを検証する &mdash; <code>wcs/watch-declaration-invalid</code>(error: ランタイムがraiseするのと同じ形 &mdash; <code>@</code>付き越境キー・<code>$</code>始まりキー・空セグメント・非関数ハンドラ)と<code>wcs/watch-path-missing</code>(warning: 状態定義に存在せず、一度も発火しない)。ランタイム側ではdevtoolsタイムラインに<code>watch-error</code>(phase: prime / evaluate / handler)と<code>watch-chain-limit</code>が追加され、隔離されたハンドラ例外がコンソールの彼方に消えず見えるようになった。</p>
+          <span class="topic-ver">v1.29.0</span>
+          <span class="tag-name">vscode-wcs</span>
+          <h3>HTML you can navigate like code</h3>
+          <p class="what-if">What if F12 worked on a path string in HTML?</p>
+          <p>Binding paths are runtime identifiers written directly in HTML &mdash; no source maps needed. Four lenses now run over a positional index built on the canonical parser: <strong>hover</strong> shows a path's kind, inferred type, owning state and declaration line (filters show their signature and type transform, modifiers explain themselves); <strong>go to definition</strong> jumps from <code>data-wcs</code> / <code>&#123;&#123; &#125;&#125;</code> into the state script, with <code>$command.*</code> landing on <code>$commandTokens</code>; <strong>find references</strong> works both directions, shorthand unified with its expansion; <strong>inlay hints</strong> print the rewrite the runtime performs (<code>.name</code> <em>= users.*.name</em>) and the filter chain's result type (<em>&rarr; string</em>). Unresolvable paths get no hover &mdash; zero false hints. The extension also ships <code>wcs.html-data.json</code>, so any editor speaking VS Code custom data completes <code>wcs-*</code> tags.</p>
+          <p class="ja">バインディングパスはHTMLに直接書かれたランタイム識別子 &mdash; source mapは要らない。正本パーサ上の位置付きインデックスに4つのレンズが載った。<strong>hover</strong>はパスの種別・推論型・所属state・宣言行を示し(フィルタはシグネチャと型変換、修飾子は自分の意味を説明する)、<strong>定義へ移動</strong>は<code>data-wcs</code> / <code>&#123;&#123; &#125;&#125;</code>からstateスクリプトへ飛び、<code>$command.*</code>は<code>$commandTokens</code>に着地する。<strong>参照検索</strong>は双方向で、短縮記法は展開形と統合される。<strong>インレイヒント</strong>はランタイムが行う書き換えそのもの(<code>.name</code> <em>= users.*.name</em>)とフィルタチェーンの結果型(<em>&rarr; string</em>)を表示する。解決できないパスにはhoverを出さない &mdash; 偽ヒントゼロ。拡張は<code>wcs.html-data.json</code>も同梱し、VS Code custom dataを話すエディタなら<code>wcs-*</code>タグを補完できる。</p>
           <ul class="tag-features">
-            <li>2 New Lint Codes</li>
-            <li>VS Code Inline</li>
-            <li>watch-error in Timeline</li>
-            <li>Runtime Parity</li>
+            <li>Hover / F12 / Shift+F12</li>
+            <li>Inlay: the Real Rewrite</li>
+            <li>Zero False Hints</li>
+            <li>Custom Data for Any Editor</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.29.0</span>
+          <span class="tag-name">devtools coverage</span>
+          <h3>Declared but never fired, made visible</h3>
+          <p class="what-if">What if the devtools showed you what <em>didn&rsquo;t</em> happen?</p>
+          <p>wcstack&rsquo;s failure model is &ldquo;wrong wiring fails silently&rdquo; &mdash; a <code>$watch</code> that never fires, a token nobody emits, a binding that never attaches. The devtools wiring pane now has a <strong>coverage tab</strong> that joins declared against measured: each <code>$watch</code> path shows <em>fired &times;N</em>, <em>never</em>, or <em>prerequisite-missing</em> &mdash; a wildcard whose list is not <code>for</code>-bound, distinguished from &ldquo;never&rdquo; precisely so the view does not cry wolf. Command and event tokens show <em>emitted &times;N</em> / <em>never</em>; bindings show <em>attached</em> / <em>never-attached</em>, deduplicated to declaration shape by the runtime&rsquo;s own parser. The ledger cannot reconstruct the past, so the view always says since when it has been observing.</p>
+          <p class="ja">wcstackの失敗モデルは「誤った結線は黙って失敗する」 &mdash; 発火しない<code>$watch</code>、誰もemitしないトークン、アタッチされないバインディング。devtoolsの配線ペインに<strong>coverageタブ</strong>が加わり、宣言と実測を突き合わせる。各<code>$watch</code>パスは<em>fired &times;N</em>・<em>never</em>・<em>prerequisite-missing</em>のいずれかを示す &mdash; 最後のものはリストが<code>for</code>にバインドされていないワイルドカードで、「never」と区別されているからこそ狼少年にならない。コマンド/イベントトークンは<em>emitted &times;N</em> / <em>never</em>、バインディングは<em>attached</em> / <em>never-attached</em>を示し、ランタイム自身のパーサで宣言形に重複排除される。台帳は過去を復元できないので、ビューは常に「いつから観測しているか」を明示する。</p>
+          <ul class="tag-features">
+            <li>Declared &times; Measured</li>
+            <li>prerequisite-missing &ne; never</li>
+            <li>Canonical Declared View</li>
+            <li>Observing-since Honesty</li>
           </ul>
         </div>
       </div>
