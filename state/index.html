@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.30.0</span>
+        <span class="pill accent">v1.31.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -407,6 +407,8 @@ this.items = this.items.concat({ id: 4 });   // ✓
 this.items = this.items.toSpliced(0, 1);     // ✓
 this.items.push({ id: 4 });                  // ✗ in-place mutation not detected</code></pre>
       </div>
+      <p>These are not conditional suspicions &mdash; the undetected shapes <em>always</em> drop the update. As of v1.31.0 the linter treats all three (<code>wcs/nested-assign</code>, <code>wcs/array-mutation</code>, <code>wcs/array-index-assign</code>) as <strong>errors</strong>, so <code>wcs-validate</code> fails a build containing any. And a bound path that provably does not resolve (<code>user.nmae</code>) warns once at binding time with <code>wcs/binding-path-missing</code> and a did-you-mean &mdash; the check under-approximates, so absence of a warning proves nothing.</p>
+      <p class="ja">これらは条件つきの疑いではない &mdash; 検出されない形は<em>常に</em>更新を落とす。v1.31.0からlinterは3つすべて(<code>wcs/nested-assign</code>・<code>wcs/array-mutation</code>・<code>wcs/array-index-assign</code>)を<strong>error</strong>として扱い、1つでも含むビルドは<code>wcs-validate</code>で落ちる。また、確実に解決しないバインド済みパス(<code>user.nmae</code>)はバインド時に<code>wcs/binding-path-missing</code>とdid-you-meanつきで一度警告される &mdash; 検査は過小近似なので、警告がないことは何の証明にもならない。</p>
     </div>
   </section>
 
@@ -502,6 +504,16 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
           <tr><td><code>this.$1</code>, <code>this.$2</code>, &hellip;</td><td>Loop iteration index (0-based value, 1-based naming)</td></tr>
         </table>
       </div>
+      <p>Since v1.31.0 index arity is checked: <code>$resolve</code> requires the index count to match the path&rsquo;s <code>*</code> count <strong>exactly</strong>, and <code>$getAll</code> treats it as an upper bound (fewer is a legitimate prefix meaning &ldquo;expand the rest&rdquo;). Surplus indexes used to be silently dropped, returning a plausible-looking wrong value; both now throw <code>wcs/index-arity</code> &mdash; the same code the linter and the IDE report statically, alongside <code>wcs/wildcard-rank</code> (a path&rsquo;s <code>*</code> count or <code>$N</code> exceeding the enclosing <code>for</code> nesting) and <code>wcs/getter-cycle</code> (which names the getters in the cycle).</p>
+      <p class="ja">v1.31.0からインデックスのアリティが検査される。<code>$resolve</code>はインデックス数がパスの<code>*</code>数と<strong>完全一致</strong>することを要求し、<code>$getAll</code>は上限として扱う(少ない分は「残りを展開」という正当なプレフィクス)。余分なインデックスは以前は黙って捨てられ、もっともらしい間違った値が返っていた。いまはどちらも<code>wcs/index-arity</code>をthrowする &mdash; linterとIDEが静的に報告するのと同じコードで、<code>wcs/wildcard-rank</code>(パスの<code>*</code>数や<code>$N</code>が囲む<code>for</code>の深さを超える)と、サイクル中のgetter名を挙げる<code>wcs/getter-cycle</code>も並ぶ。</p>
+
+      <h3>Getters must be pure with respect to state</h3>
+      <p>A getter&rsquo;s cache is invalidated <strong>only</strong> through the dependency graph, and the graph records only what was read <strong>through <code>this</code></strong>. A getter reading <code>Date.now()</code>, the DOM, or a module variable therefore keeps its first value forever &mdash; with no warning. Read only through <code>this</code>; when an untracked input must participate, put it into state and assign to it, or use <code>$trackDependency</code> / <code>$postUpdate</code> / <code>$untrackDependency</code>. Getters that throw are not swallowed: the exception surfaces where the getter was evaluated.</p>
+      <p class="ja">getterのキャッシュは依存グラフ経由で<strong>のみ</strong>無効化され、グラフは<strong><code>this</code>越し</strong>の読み取りしか記録しない。<code>Date.now()</code>・DOM・モジュール変数を読むgetterは、警告なしに最初の値を永遠に保持する。読むのは<code>this</code>越しだけにする。追跡外の入力を関与させたいときは、stateに入れて代入するか、<code>$trackDependency</code> / <code>$postUpdate</code> / <code>$untrackDependency</code>を使う。throwするgetterは握りつぶされず、評価された場所で例外が表面化する。</p>
+
+      <h3>Demand roots &mdash; what makes a getter run</h3>
+      <p>Getters are lazy, and exactly <strong>three</strong> things create demand: a live DOM binding (demand disappears with the element), a <code>$watch</code> declaration (headless), and a <code>$streams</code> <code>args</code> function. <strong><code>$updatedCallback</code> is not a root</strong> &mdash; it reports what the bindings did. Logic that must not depend on what is rendered belongs on <code>$watch</code> or <code>args</code>; <code>$updatedCallback</code> testing a path nothing binds is detected statically as <code>wcs/updated-callback-unbound</code> (v1.31.0).</p>
+      <p class="ja">getterは遅延評価で、需要を生むものはちょうど<strong>3つ</strong>。ライブなDOMバインディング(要素が消えれば需要も消える)、<code>$watch</code>宣言(ヘッドレス)、<code>$streams</code>の<code>args</code>関数。<strong><code>$updatedCallback</code>はrootではない</strong> &mdash; バインディングが行ったことを報告するだけだ。描画に依存してはならないロジックは<code>$watch</code>か<code>args</code>に置く。何もバインドしていないパスを<code>$updatedCallback</code>で調べる形は<code>wcs/updated-callback-unbound</code>として静的に検出される(v1.31.0)。</p>
     </div>
   </section>
 

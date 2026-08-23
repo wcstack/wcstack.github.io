@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.30.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.31.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,50 +647,78 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.30.0</h2>
-      <p class="section-sub">The static-wiring pass, sharpened: &ldquo;never&rdquo; now provably means never, and a spread with nothing to expand is caught before it runs.</p>
-      <p class="section-sub-ja">静的配線の研ぎ澄まし。「never」が証明つきのneverになり、展開するものがないspreadは実行前に捕まる。</p>
+      <h2 class="section-title">Shipped in v1.31.0</h2>
+      <p class="section-sub">Predictability hardening: every silent failure now says its name &mdash; and the contracts you were expected to infer are written down.</p>
+      <p class="section-sub-ja">予測可能性の強化。すべての無言の失敗が自分の名を名乗り、推測に頼らされていた契約が明文化された。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.30.0</span>
-          <span class="tag-name">devtools coverage &middot; $listKeys</span>
-          <h3>&ldquo;Never&rdquo; you can act on</h3>
-          <p class="what-if">What if the tools knew exactly when a watch could never fire?</p>
-          <p>A wildcard row watch fires when its list is <code>for</code>-bound <strong>or</strong> <code>$listKeys</code>-declared &mdash; but the coverage tab could only see the first condition, so a headless-by-design watch was flagged with the same soft &ldquo;prerequisite missing&rdquo; as a genuinely dead one. The runtime now exposes <code>keyedListPaths</code> (the declared list paths &mdash; key specs never cross the boundary), and the prerequisite check accepts either condition at <em>every</em> <code>.*</code> level. The payoff is tone: against a current runtime the note is assertive &mdash; <em>&ldquo;no <code>for</code> binding and no <code>$listKeys</code> declaration &mdash; this watch can never fire&rdquo;</em> &mdash; and only against old runtimes does it fall back to the observational wording.</p>
-          <p class="ja">ワイルドカード行watchが発火するのは、リストが<code>for</code>にバインドされているか、<strong>または</strong><code>$listKeys</code>宣言があるとき。だがcoverageタブには前者しか見えず、設計上ヘッドレスなwatchも本当に死んでいるwatchも同じ弱い「prerequisite missing」で括られていた。ランタイムが<code>keyedListPaths</code>(宣言されたリストパスの集合。キー指定自体は境界を越えない)を公開し、前提チェックは<em>すべての</em><code>.*</code>階層でどちらの条件も受け入れるようになった。成果は物言いの強さに出る。現行ランタイムに対しては<em>「<code>for</code>バインディングも<code>$listKeys</code>宣言もない &mdash; このwatchは発火し得ない」</em>と言い切り、旧ランタイムに対してだけ従来の観察的な表現に落ちる。</p>
+          <span class="topic-ver">v1.31.0</span>
+          <span class="tag-name">wcs/binding-path-missing</span>
+          <h3>The typo that updated nothing now warns</h3>
+          <p class="what-if">What if <code>user.nmae</code> told you, instead of doing nothing?</p>
+          <p>Reading a nested path that does not exist returns <code>undefined</code>, and <code>undefined</code> is the value that skips a write &mdash; so <code>user.nmae</code> updated nothing, without a word. A top-level typo did throw, but with an internal message. The same mistake split into silent or loud by path depth. Each newly wired path is now checked once at binding time: provable misses get one <code>console.warn</code> with <code>wcs/binding-path-missing</code>, a did-you-mean, and a lint pointer; top-level typos throw with the same wording. The check <strong>under-approximates on purpose</strong> &mdash; <code>null</code> parents, empty lists, getter returns, mapped children and <code>$</code> namespaces stay silent &mdash; so no warning proves nothing; lint remains the exhaustive check. And one binding that throws while applying is now confined to that binding: the rest of the batch, <code>$updatedCallback</code>, <code>$watch</code> and stream restarts all still run.</p>
+          <p class="ja">存在しない入れ子パスの読み取りは<code>undefined</code>を返し、<code>undefined</code>は書き込みをスキップする値 &mdash; だから<code>user.nmae</code>は一言もなく何も更新しなかった。トップレベルのタイプミスはthrowしたが、内部語彙のメッセージだった。同じ間違いがパスの深さで無言/有言に分裂していた。新しく結線される各パスはバインド時に一度検査され、証明可能な不在は<code>wcs/binding-path-missing</code>・did-you-mean・lintへの誘導つきの<code>console.warn</code>になり、トップレベルは同じ文言でthrowする。検査は<strong>意図的に過小近似</strong> &mdash; <code>null</code>親・空リスト・getterの戻り値・マップされた子・<code>$</code>名前空間は沈黙を守る &mdash; 警告がないことは何の証明でもなく、網羅はlintの仕事のまま。そして適用中にthrowしたバインディングはそのバインディングに閉じ込められ、バッチの残り・<code>$updatedCallback</code>・<code>$watch</code>・streamの再起動はすべて実行される。</p>
           <ul class="tag-features">
-            <li>for-bound OR $listKeys</li>
-            <li>Every .* Level</li>
-            <li>Assertive on New Runtimes</li>
-            <li>Paths Only Cross the Wire</li>
+            <li>Warn Once at Bind Time</li>
+            <li>Did-you-mean Included</li>
+            <li>Under-approximates on Purpose</li>
+            <li>One Failure &ne; One Batch</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.30.0</span>
-          <span class="tag-name">wcs/spread-no-bindable</span>
-          <h3>The spread that could never expand</h3>
-          <p class="what-if">What if lint caught a spread with nothing to spread?</p>
-          <p>Helper tags &mdash; <code>wcs-fetch-header</code>, <code>wcs-fetch-body</code>, <code>wcs-infinite-scroll</code>, <code>wcs-voice</code> &mdash; declare no <code>wcBindable</code>, so <code>...: slot</code> on one of them is a construct the runtime rejects at bind time. Statically, nothing could tell: the generated catalog conflated &ldquo;no wcBindable&rdquo; with &ldquo;empty wcBindable&rdquo;. It now records <code>hasWcBindable</code> on every contract, and the new <code>wcs/spread-no-bindable</code> error flags the spread, ranged to the <code>...</code> token. The boundary is kept honest: <code>wcs-noise</code>, whose contract is declared but empty, stays legal &mdash; a zero-prop expansion is a valid thing to ask for.</p>
-          <p class="ja">ヘルパータグ &mdash; <code>wcs-fetch-header</code>・<code>wcs-fetch-body</code>・<code>wcs-infinite-scroll</code>・<code>wcs-voice</code> &mdash; は<code>wcBindable</code>を宣言しないので、そこへの<code>...: slot</code>はランタイムがバインド時に拒否する構文。だが静的には誰にも分からなかった。生成カタログが「wcBindableなし」と「空のwcBindable」を混同していたからだ。カタログは全契約に<code>hasWcBindable</code>を記録するようになり、新しい<code>wcs/spread-no-bindable</code>エラーが<code>...</code>トークンの位置でspreadを弾く。境界は正直に保たれている。契約を宣言した上で空の<code>wcs-noise</code>は合法のまま &mdash; 0プロパティの展開は、求めてよいものだから。</p>
+          <span class="topic-ver">v1.31.0</span>
+          <span class="tag-name">demand roots &middot; getter purity</span>
+          <h3>The contracts you were inferring, written down</h3>
+          <p class="what-if">What if &ldquo;does this getter run?&rdquo; had a documented answer?</p>
+          <p>Two contracts the README relied on readers deducing. <strong>Demand roots</strong>: getters are lazy, and exactly three things create demand &mdash; a live DOM binding, a <code>$watch</code>, a <code>$streams</code> <code>args</code> function. <code>$updatedCallback</code> is not one; it follows what was drawn. The first root lives in the DOM, which is how a display-only <code>&lt;b&gt;</code> once became the actual subscription of a feed &mdash; that shape is now caught statically as <code>wcs/updated-callback-unbound</code>. <strong>Getter purity</strong>: the cache is invalidated only through the dependency graph, and the graph records reads through <code>this</code> alone &mdash; a getter reading <code>Date.now()</code>, the DOM, or a module variable keeps its first value forever. The rule, the escape hatches, and the failure contract (report and continue; never roll back) are all in the README now.</p>
+          <p class="ja">READMEが読者の推測に委ねていた2つの契約。<strong>demand roots</strong>: getterは遅延評価で、需要を生むものはちょうど3つ &mdash; ライブなDOMバインディング、<code>$watch</code>、<code>$streams</code>の<code>args</code>関数。<code>$updatedCallback</code>はその1つではない。描かれたものを追うだけだ。最初のrootはDOMに住んでいる &mdash; 表示専用のはずの<code>&lt;b&gt;</code>がフィードの購読そのものだった事故はそこから来た。その形は<code>wcs/updated-callback-unbound</code>として静的に捕まる。<strong>getterの純粋性</strong>: キャッシュの無効化は依存グラフ経由のみで、グラフは<code>this</code>越しの読み取りしか記録しない &mdash; <code>Date.now()</code>・DOM・モジュール変数を読むgetterは最初の値を永遠に保持する。規則も、脱出口も、失敗契約(報告して継続、ロールバックは決してしない)も、いまはREADMEに書いてある。</p>
           <ul class="tag-features">
-            <li>4 Helper Tags Flagged</li>
-            <li>Ranged to the ... Token</li>
-            <li>Empty &ne; Absent</li>
-            <li>Runtime Parity</li>
+            <li>3 Demand Roots, Exactly</li>
+            <li>$updatedCallback Is Not One</li>
+            <li>this-reads Only Are Tracked</li>
+            <li>Report &amp; Continue, Never Roll Back</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.30.0</span>
-          <span class="tag-name">vscode-wcs 1.11</span>
-          <h3>Lenses, sharpened</h3>
-          <p class="what-if">What if <code>$2</code> knew which loop it belonged to?</p>
-          <p>Three lens follow-ups and one unification. A spread on a built-in tag shows its expansion size inline (<code>...: slot</code> <em>&rarr; 13 props</em>). <code>$1&ndash;$9</code> references are scoped to their enclosing <code>for</code> template &mdash; find-references on <code>$2</code> unifies occurrences in the same nest and never merges sibling loops. Path candidates derive through nested arrays, so hover on <code>a.*.b.*.c</code> resolves and two false-positive warnings disappeared from the repo&rsquo;s own examples. And the text channel &mdash; <code>&#123;&#123; &#125;&#125;</code> and comment bindings &mdash; is parsed by the runtime&rsquo;s embedded parser now: <code>&#123;&#123; a; b &#125;&#125;</code> indexes as the single path it actually is, and the <code>:</code> inside <code>date('HH:mm')</code> no longer confuses the filter zone.</p>
-          <p class="ja">3つのレンズ追補と1つの統一。組み込みタグへのspreadは展開サイズをインラインに示す(<code>...: slot</code> <em>&rarr; 13 props</em>)。<code>$1&ndash;$9</code>の参照は自分を囲む<code>for</code>テンプレートにスコープされ、<code>$2</code>の参照検索は同じ入れ子の出現を統合し、隣り合うループを混ぜない。パス候補は入れ子配列を掘って導出されるようになり、<code>a.*.b.*.c</code>のhoverが解決し、リポジトリ自身のexamplesから偽陽性警告が2件消えた。そしてテキストチャネル &mdash; <code>&#123;&#123; &#125;&#125;</code>とコメントバインディング &mdash; はランタイムの埋め込みパーサでパースされるようになった。<code>&#123;&#123; a; b &#125;&#125;</code>は実際そのとおり単一パスとして索引され、<code>date('HH:mm')</code>の<code>:</code>がフィルタ域を誤らせることもない。</p>
+          <span class="topic-ver">v1.31.0</span>
+          <span class="tag-name">wcs/index-arity &middot; wcs/getter-cycle</span>
+          <h3>A plausible wrong value becomes a named error</h3>
+          <p class="what-if">What if an extra index couldn&rsquo;t silently pick row 0?</p>
+          <p>The wildcard count is fixed by the path string, so an extra index can only be a mistake &mdash; yet <code>$resolve("items.*.price", [1,9,9])</code> silently dropped the surplus and returned a plausible-looking wrong value. <code>$resolve</code> now requires an exact match and <code>$getAll</code> an upper bound (fewer is a legitimate prefix: &ldquo;expand the rest&rdquo;), both under <code>wcs/index-arity</code>. Wildcard rank vs the enclosing <code>for</code> nesting and <code>$N</code> beyond the loop depth report as <code>wcs/wildcard-rank</code>, and mutually recursive getters as <code>wcs/getter-cycle</code> naming the getters in the cycle &mdash; where an off-by-one in the depth guard used to destroy the real diagnostic mid-unwind. All four checks run in the linter and the IDE with the same codes the runtime raises with.</p>
+          <p class="ja">ワイルドカードの数はパス文字列で固定されている。だから余分なインデックスは間違い以外にありえない &mdash; のに<code>$resolve("items.*.price", [1,9,9])</code>は余りを黙って捨て、もっともらしい間違った値を返していた。<code>$resolve</code>は完全一致を要求し、<code>$getAll</code>は上限として扱う(少ない分は「残りを展開」という正当なプレフィクス)。どちらも<code>wcs/index-arity</code>。囲む<code>for</code>の深さを超えるワイルドカード階数と<code>$N</code>は<code>wcs/wildcard-rank</code>、相互再帰getterはサイクル中のgetter名を挙げる<code>wcs/getter-cycle</code>として報告される &mdash; 以前は深さガードのoff-by-oneが巻き戻し中に本物の診断を破壊していた。4つの検査はすべて、ランタイムがraiseするのと同じコードでlinterとIDEでも走る。</p>
           <ul class="tag-features">
-            <li>Spread Size Inline</li>
-            <li>$N Scoped to Its Loop</li>
-            <li>Nested-array Candidates</li>
-            <li>One Parser, Text Too</li>
+            <li>$resolve: Exact Arity</li>
+            <li>$getAll: Upper Bound</li>
+            <li>Cycles Name Their Getters</li>
+            <li>Runtime = Lint = IDE Codes</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.31.0</span>
+          <span class="tag-name">wcs/nested-assign &rarr; error</span>
+          <h3>The family that always drops the update fails CI now</h3>
+          <p class="what-if">What if a mistake that is never conditional stopped being a warning?</p>
+          <p>One defect, three syntactic shapes: <code>this.items.push(x)</code>, <code>this.items[0] = x</code>, <code>this.user.name = x</code> &mdash; assignments that never reach the Proxy set trap, so the DOM silently does not update. Design-doc measurements show they <em>always</em> drop the update; these are not conditional suspicions. The whole family &mdash; <code>wcs/array-mutation</code>, <code>wcs/array-index-assign</code>, <code>wcs/nested-assign</code> &mdash; moves from warning to <strong>error severity together</strong>, so <code>wcs-validate</code> exits 1 and a CI gate fails a build that contains any. Deliberately breaking: shipping one unnoticed costs more than failing CI, and moving one code alone would have left <code>push(x)</code> an error while <code>items[0] = x</code> stayed a warning with no explicable difference.</p>
+          <p class="ja">1つの欠陥、3つの構文形。<code>this.items.push(x)</code>・<code>this.items[0] = x</code>・<code>this.user.name = x</code> &mdash; Proxyのsetトラップに決して届かない代入で、DOMは黙って更新されない。設計文書の実測が示すとおり、これらは<em>常に</em>更新を落とす。条件つきの疑いではない。だからファミリー全体 &mdash; <code>wcs/array-mutation</code>・<code>wcs/array-index-assign</code>・<code>wcs/nested-assign</code> &mdash; が<strong>揃ってwarningからerrorへ</strong>移り、<code>wcs-validate</code>はexit 1になり、1つでも含むビルドはCIゲートで落ちる。意図的な破壊的変更だ。気づかれず出荷する方がCIが落ちるより高くつくし、1コードだけ上げれば<code>push(x)</code>はerrorで<code>items[0] = x</code>はwarningという説明不能な差が残っていた。</p>
+          <ul class="tag-features">
+            <li>Always Drops = Error</li>
+            <li>The Family Moves Together</li>
+            <li>wcs-validate Exits 1</li>
+            <li>Intentionally Breaking</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.31.0</span>
+          <span class="tag-name">scoped registries &middot; autoloader</span>
+          <h3>&ldquo;Defined&rdquo; is now a question about a node</h3>
+          <p class="what-if">What if two components could share a tag name on one page?</p>
+          <p>Scoped custom element registries (Chrome/Edge 146, Safari 26) do not inherit from the global one, so &ldquo;is this tag defined?&rdquo; is only meaningful relative to a node &mdash; and resolving it against <code>window.customElements</code> made wcstack fail silently on pages that use them. Every package now resolves the registry from the node the operation is about, falling back to the global registry where the feature is absent (behavior byte-for-byte unchanged). <code>registerComponents(registry?)</code> on all 40 packages defines into a scoped registry; <code>&lt;wcs-defined&gt;</code> watches the registry its subtree resolves against and reports <code>missing</code> immediately under a null registry instead of pending forever. The autoloader defines into the scanned root&rsquo;s registry &mdash; and a failed lazy load no longer wedges every later one: waiters await the load promise itself, which settles on failure too.</p>
+          <p class="ja">Scoped custom element registry(Chrome/Edge 146、Safari 26)はグローバルレジストリを継承しない。「このタグは定義済みか」はノードに相対的な問いであり、<code>window.customElements</code>で解決していたwcstackはこの機能を使うページで黙って壊れていた。全パッケージが操作対象ノードからレジストリを解決し、機能がないプラットフォームではグローバルにフォールバックする(挙動はバイト単位で不変)。全40パッケージの<code>registerComponents(registry?)</code>はスコープ付きレジストリへ定義でき、<code>&lt;wcs-defined&gt;</code>は自分のサブツリーが解決に使うレジストリを監視し、統治するレジストリがなければ永遠のpendingではなく即座に<code>missing</code>を報告する。autoloaderは走査したルートのレジストリへ定義する &mdash; そして失敗したlazy loadが後続のロードを全部塞ぐこともなくなった。待機側はロードのPromise自体をawaitし、それは失敗でも決着する。</p>
+          <ul class="tag-features">
+            <li>Per-node Registry Resolution</li>
+            <li>Global Fallback, Unchanged</li>
+            <li>registerComponents(registry)</li>
+            <li>Failed Load No Longer Wedges</li>
           </ul>
         </div>
       </div>
