@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.31.0</span>
+        <span class="pill accent">v1.32.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -498,6 +498,7 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
           <tr><th>API</th><th>Purpose</th></tr>
           <tr><td><code>this.$getAll("path.*", [])</code></td><td>Collect all values for a wildcard path</td></tr>
           <tr><td><code>this.$resolve("path.*", [i], value?)</code></td><td>Read / write at an explicit index</td></tr>
+          <tr><td><code>this.$setAll("path.*", [], value)</code></td><td>v1.32.0: write every matching address <strong>in place</strong> &mdash; broadcast, mapper <code>(cur, ...i) =&gt; next</code>, or per-address array with <code>&#123; spread: true &#125;</code>. Keeps the array (list indexes, row caches, render diff survive, unlike <code>.map()</code> reassignment); <code>undefined</code> means &ldquo;skip this address&rdquo;, <code>null</code> clears</td></tr>
           <tr><td><code>this.$postUpdate("path")</code></td><td>Manually trigger an update notification</td></tr>
           <tr><td><code>this.$trackDependency(path)</code></td><td>Register a dependency for cache invalidation</td></tr>
           <tr><td><code>this.$untrackDependency(fn)</code></td><td>Read values without registering dependencies</td></tr>
@@ -699,6 +700,8 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
           <div class="chips"><code>truthy</code><code>falsy</code><code>defaults(v)</code></div>
         </div>
       </div>
+      <p><strong>The default locale is <code>&lt;html lang&gt;</code> as of v1.32.0</strong> (breaking; it was <code>'en'</code>). The four locale-dependent filters &mdash; <code>locale</code>, <code>date</code>, <code>time</code>, <code>datetime</code> &mdash; read <code>config.locale</code>, which now defaults to the page&rsquo;s declared language, falling back to <code>'en'</code>. An explicit <code>bootstrapState(&#123; locale &#125;)</code> still wins, and per-call overrides (<code>price|locale(fr-FR)</code>) are fixed at bind time. Changing <code>config.locale</code> after render updates nothing &mdash; set <code>&lt;html lang&gt;</code> in the markup, before the page renders.</p>
+      <p class="ja"><strong>既定ロケールはv1.32.0から<code>&lt;html lang&gt;</code></strong>(破壊的変更。従来は<code>'en'</code>)。ロケール依存の4フィルタ &mdash; <code>locale</code>・<code>date</code>・<code>time</code>・<code>datetime</code> &mdash; が読む<code>config.locale</code>の既定がページの宣言言語になり、なければ<code>'en'</code>に落ちる。明示的な<code>bootstrapState(&#123; locale &#125;)</code>が常に勝ち、per-callの上書き(<code>price|locale(fr-FR)</code>)はバインド時に固定される。描画後に<code>config.locale</code>を変えても何も更新されない &mdash; <code>&lt;html lang&gt;</code>はマークアップに、ページが描画される前に書く。</p>
       <p>Six arrived in v1.27.0 &mdash; <code>abs</code>, <code>clamp(min,max)</code>, <code>unit(u)</code>, <code>join(sep?)</code>, <code>truncate(n,suffix?)</code> and <code>hms(sep?)</code> &mdash; picked so presentation stays on the wire instead of leaking into state. The chain they were designed around: <code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>. <code>unit</code> deliberately accepts the strings that <code>fix</code>/<code>percent</code> return, and passes <code>null</code>/<code>undefined</code> through untouched so &ldquo;undefined skips the write, null clears&rdquo; survives the filter. Also fixed in v1.27.0: argument trimming is outside-quotes only, so <code>pad(5, ' ')</code> and <code>join(' / ')</code> finally mean what they say.</p>
       <p class="ja">v1.27.0で6つ追加 &mdash; <code>abs</code>・<code>clamp(min,max)</code>・<code>unit(u)</code>・<code>join(sep?)</code>・<code>truncate(n,suffix?)</code>・<code>hms(sep?)</code>。表示の都合をstateに持ち込まず、バインディングの上で済ませるための選定で、設計の起点は<code>style.height: cpu|clamp(0,100)|fix(0)|unit(%)</code>というチェーン。<code>unit</code>は<code>fix</code>/<code>percent</code>が返す文字列を意図的に受け入れ、<code>null</code>/<code>undefined</code>は素通しするので「undefinedは書き込みスキップ、nullはクリア」の意味論がフィルタを通っても保たれる。同じくv1.27.0で、引数のトリムはクォートの外側だけになり、<code>pad(5, ' ')</code>や<code>join(' / ')</code>が書いたとおりに動くようになった。</p>
     </div>

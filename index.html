@@ -611,13 +611,13 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.31.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.32.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
       <div class="stats">
         <div class="stat">
-          <div class="num">44</div>
+          <div class="num">45</div>
           <div class="label">Packages</div>
         </div>
         <div class="stat">
@@ -647,79 +647,94 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.31.0</h2>
-      <p class="section-sub">Predictability hardening: every silent failure now says its name &mdash; and the contracts you were expected to infer are written down.</p>
-      <p class="section-sub-ja">予測可能性の強化。すべての無言の失敗が自分の名を名乗り、推測に頼らされていた契約が明文化された。</p>
+      <h2 class="section-title">Shipped in v1.32.0</h2>
+      <p class="section-sub">The SPA release: server-rendered routes the client adopts, markup that binds whenever it arrives, animations as policy, and a router that speaks its whole state.</p>
+      <p class="section-sub-ja">SPAのためのリリース。サーバーが描いたルートをクライアントが引き継ぎ、いつ届いたマークアップでもバインドされ、アニメーションはポリシーになり、ルーターは自分の全状態を語る。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.31.0</span>
-          <span class="tag-name">wcs/binding-path-missing</span>
-          <h3>The typo that updated nothing now warns</h3>
-          <p class="what-if">What if <code>user.nmae</code> told you, instead of doing nothing?</p>
-          <p>Reading a nested path that does not exist returns <code>undefined</code>, and <code>undefined</code> is the value that skips a write &mdash; so <code>user.nmae</code> updated nothing, without a word. A top-level typo did throw, but with an internal message. The same mistake split into silent or loud by path depth. Each newly wired path is now checked once at binding time: provable misses get one <code>console.warn</code> with <code>wcs/binding-path-missing</code>, a did-you-mean, and a lint pointer; top-level typos throw with the same wording. The check <strong>under-approximates on purpose</strong> &mdash; <code>null</code> parents, empty lists, getter returns, mapped children and <code>$</code> namespaces stay silent &mdash; so no warning proves nothing; lint remains the exhaustive check. And one binding that throws while applying is now confined to that binding: the rest of the batch, <code>$updatedCallback</code>, <code>$watch</code> and stream restarts all still run.</p>
-          <p class="ja">存在しない入れ子パスの読み取りは<code>undefined</code>を返し、<code>undefined</code>は書き込みをスキップする値 &mdash; だから<code>user.nmae</code>は一言もなく何も更新しなかった。トップレベルのタイプミスはthrowしたが、内部語彙のメッセージだった。同じ間違いがパスの深さで無言/有言に分裂していた。新しく結線される各パスはバインド時に一度検査され、証明可能な不在は<code>wcs/binding-path-missing</code>・did-you-mean・lintへの誘導つきの<code>console.warn</code>になり、トップレベルは同じ文言でthrowする。検査は<strong>意図的に過小近似</strong> &mdash; <code>null</code>親・空リスト・getterの戻り値・マップされた子・<code>$</code>名前空間は沈黙を守る &mdash; 警告がないことは何の証明でもなく、網羅はlintの仕事のまま。そして適用中にthrowしたバインディングはそのバインディングに閉じ込められ、バッチの残り・<code>$updatedCallback</code>・<code>$watch</code>・streamの再起動はすべて実行される。</p>
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">&lt;wcs-router enable-ssr&gt;</span>
+          <h3>The server renders, the client adopts</h3>
+          <p class="what-if">What if SSR meant adopting the DOM, not re-rendering it?</p>
+          <p>Put <code>enable-ssr</code> on the router and pass the request URL to <code>@wcstack/server</code>&rsquo;s <code>renderToString(html, &#123; url &#125;)</code>: the initial route is rendered server-side &mdash; typed params, nested routes, and <code>for:</code> / <code>if:</code> templates inside route content included &mdash; and the client-side router <strong>adopts</strong> that DOM on boot instead of re-rendering it, with state bindings hydrated live on the same nodes. Anything that fails verification (URL mismatch, edited templates) falls back silently to client-side rendering. Guarded routes are never rendered on the server &mdash; a guard is an authorization point and runs client-side, so the outlet ships empty. <code>&lt;wcs-link&gt;</code> anchors arrive server-rendered with <code>active</code> / <code>aria-current</code> already set.</p>
+          <p class="ja">ルーターに<code>enable-ssr</code>を置き、<code>@wcstack/server</code>の<code>renderToString(html, &#123; url &#125;)</code>にリクエストURLを渡す。初期ルートはサーバー側で描画され &mdash; 型付きパラメータも、ネストしたルートも、ルート内容の<code>for:</code> / <code>if:</code>テンプレートも含めて &mdash; クライアントのルーターは起動時にそのDOMを再描画せず<strong>引き継ぐ</strong>。stateバインディングは同じノードの上でライブにハイドレートされる。検証に失敗したもの(URL不一致、編集されたテンプレート)は黙ってクライアント描画にフォールバックする。ガード付きルートはサーバーでは決して描画されない &mdash; ガードは認可点でありクライアントで走るから、outletは空で届く。<code>&lt;wcs-link&gt;</code>のアンカーは<code>active</code> / <code>aria-current</code>つきでサーバーから届く。</p>
           <ul class="tag-features">
-            <li>Warn Once at Bind Time</li>
-            <li>Did-you-mean Included</li>
-            <li>Under-approximates on Purpose</li>
-            <li>One Failure &ne; One Batch</li>
+            <li>Adopt, Don&rsquo;t Re-render</li>
+            <li>Route Content Hydrates Live</li>
+            <li>Guarded Routes Ship Empty</li>
+            <li>Silent CSR Fallback</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.31.0</span>
-          <span class="tag-name">demand roots &middot; getter purity</span>
-          <h3>The contracts you were inferring, written down</h3>
-          <p class="what-if">What if &ldquo;does this getter run?&rdquo; had a documented answer?</p>
-          <p>Two contracts the README relied on readers deducing. <strong>Demand roots</strong>: getters are lazy, and exactly three things create demand &mdash; a live DOM binding, a <code>$watch</code>, a <code>$streams</code> <code>args</code> function. <code>$updatedCallback</code> is not one; it follows what was drawn. The first root lives in the DOM, which is how a display-only <code>&lt;b&gt;</code> once became the actual subscription of a feed &mdash; that shape is now caught statically as <code>wcs/updated-callback-unbound</code>. <strong>Getter purity</strong>: the cache is invalidated only through the dependency graph, and the graph records reads through <code>this</code> alone &mdash; a getter reading <code>Date.now()</code>, the DOM, or a module variable keeps its first value forever. The rule, the escape hatches, and the failure contract (report and continue; never roll back) are all in the README now.</p>
-          <p class="ja">READMEが読者の推測に委ねていた2つの契約。<strong>demand roots</strong>: getterは遅延評価で、需要を生むものはちょうど3つ &mdash; ライブなDOMバインディング、<code>$watch</code>、<code>$streams</code>の<code>args</code>関数。<code>$updatedCallback</code>はその1つではない。描かれたものを追うだけだ。最初のrootはDOMに住んでいる &mdash; 表示専用のはずの<code>&lt;b&gt;</code>がフィードの購読そのものだった事故はそこから来た。その形は<code>wcs/updated-callback-unbound</code>として静的に捕まる。<strong>getterの純粋性</strong>: キャッシュの無効化は依存グラフ経由のみで、グラフは<code>this</code>越しの読み取りしか記録しない &mdash; <code>Date.now()</code>・DOM・モジュール変数を読むgetterは最初の値を永遠に保持する。規則も、脱出口も、失敗契約(報告して継続、ロールバックは決してしない)も、いまはREADMEに書いてある。</p>
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">binder protocol</span>
+          <h3>Markup binds whenever it arrives</h3>
+          <p class="what-if">What if a binding worked no matter when its DOM showed up?</p>
+          <p>A <code>data-wcs</code> binding used to exist only for nodes state walked at startup. Route content inactive at that moment, and every <code>&lt;wcs-head&gt;</code> child (reflected into <code>&lt;head&gt;</code> as a clone), silently did nothing &mdash; forever. The binder protocol is the fix, and it is one function: <strong>whoever inserts DOM hands the subtree to whoever owns bindings</strong>. State installs a binder on a global symbol, the router looks it up, neither imports the other &mdash; the dual of the transition-runner. A per-route translated <code>&lt;title data-wcs&gt;</code> now just works. The two rejected alternatives are on record: state scanning every insertion would bill the many insertions carrying no bindings, and would let external <code>innerHTML</code> activate <code>data-wcs</code> &mdash; against the CSP direction.</p>
+          <p class="ja"><code>data-wcs</code>バインディングは、stateが起動時に走査したノードにしか存在しなかった。その瞬間に非活性だったルート内容も、クローンとして<code>&lt;head&gt;</code>へ反映される<code>&lt;wcs-head&gt;</code>の子も、黙って何もしなかった &mdash; 永遠に。binderプロトコルがその修正で、中身は関数1つ。<strong>DOMを差し込んだ側が、バインドを所有する側へサブツリーを手渡す</strong>。stateがグローバルsymbolにbinderを置き、routerがそれを引く。互いにimportしない &mdash; transition-runnerの双対。ルートごとに翻訳された<code>&lt;title data-wcs&gt;</code>が、ただ動くようになった。棄却した2案も記録にある。stateが全挿入を走査する案はバインディングを持たない大多数の挿入に課金し、外部由来の<code>innerHTML</code>が<code>data-wcs</code>を発火させてしまう &mdash; CSPの方向性に反する。</p>
           <ul class="tag-features">
-            <li>3 Demand Roots, Exactly</li>
-            <li>$updatedCallback Is Not One</li>
-            <li>this-reads Only Are Tracked</li>
-            <li>Report &amp; Continue, Never Roll Back</li>
+            <li>One Function, One Symbol</li>
+            <li>Route Content Binds</li>
+            <li>&lt;title data-wcs&gt; Works</li>
+            <li>No Import Either Way</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.31.0</span>
-          <span class="tag-name">wcs/index-arity &middot; wcs/getter-cycle</span>
-          <h3>A plausible wrong value becomes a named error</h3>
-          <p class="what-if">What if an extra index couldn&rsquo;t silently pick row 0?</p>
-          <p>The wildcard count is fixed by the path string, so an extra index can only be a mistake &mdash; yet <code>$resolve("items.*.price", [1,9,9])</code> silently dropped the surplus and returned a plausible-looking wrong value. <code>$resolve</code> now requires an exact match and <code>$getAll</code> an upper bound (fewer is a legitimate prefix: &ldquo;expand the rest&rdquo;), both under <code>wcs/index-arity</code>. Wildcard rank vs the enclosing <code>for</code> nesting and <code>$N</code> beyond the loop depth report as <code>wcs/wildcard-rank</code>, and mutually recursive getters as <code>wcs/getter-cycle</code> naming the getters in the cycle &mdash; where an off-by-one in the depth guard used to destroy the real diagnostic mid-unwind. All four checks run in the linter and the IDE with the same codes the runtime raises with.</p>
-          <p class="ja">ワイルドカードの数はパス文字列で固定されている。だから余分なインデックスは間違い以外にありえない &mdash; のに<code>$resolve("items.*.price", [1,9,9])</code>は余りを黙って捨て、もっともらしい間違った値を返していた。<code>$resolve</code>は完全一致を要求し、<code>$getAll</code>は上限として扱う(少ない分は「残りを展開」という正当なプレフィクス)。どちらも<code>wcs/index-arity</code>。囲む<code>for</code>の深さを超えるワイルドカード階数と<code>$N</code>は<code>wcs/wildcard-rank</code>、相互再帰getterはサイクル中のgetter名を挙げる<code>wcs/getter-cycle</code>として報告される &mdash; 以前は深さガードのoff-by-oneが巻き戻し中に本物の診断を破壊していた。4つの検査はすべて、ランタイムがraiseするのと同じコードでlinterとIDEでも走る。</p>
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">@wcstack/view-transition</span>
+          <h3>Animation as policy, not markup</h3>
+          <p class="what-if">What if leave and move were the only animations you had to ask for?</p>
+          <p>Package 45. Enter animations never needed JS &mdash; <code>@starting-style</code> covers a new row or a mounting branch. What CSS cannot reach is <strong>leaving</strong> (nodes detach synchronously) and <strong>moving</strong> (a reorder has no intermediate state). <code>&lt;wcs-view-transition&gt;</code> is a <em>policy node</em>: it renders nothing and describes no animation &mdash; it decides whether a DOM change animates and what a collision does (<code>mode="latest / queue / exhaust"</code>), while the animation stays in CSS against <code>::view-transition-*</code>. The rule everything is subordinate to: <strong>a DOM change is applied exactly once, whatever happens to its animation</strong> &mdash; unsupported browser, hidden tab, reduced motion, collision, all still end with the change applied. <code>naming="auto"</code> names every list row so <code>::view-transition-group(*.wcs-row)</code> addresses them all.</p>
+          <p class="ja">45番目のパッケージ。入場アニメーションにJSは要らなかった &mdash; 新しい行やマウントされる分岐は<code>@starting-style</code>で足りる。CSSが届かないのは<strong>退場</strong>(ノードは同期的に外れる)と<strong>移動</strong>(並べ替えに中間状態はない)。<code>&lt;wcs-view-transition&gt;</code>は<em>ポリシーノード</em>だ。何も描画せず、アニメーションも記述しない &mdash; DOM変更をアニメーションさせるか、衝突時にどうするか(<code>mode="latest / queue / exhaust"</code>)だけを裁定し、アニメーション自体は<code>::view-transition-*</code>のCSSに残る。すべてが従う規則: <strong>DOM変更はアニメーションがどうなろうと正確に1回適用される</strong> &mdash; 非対応ブラウザでも、隠れたタブでも、reduced motionでも、衝突しても、変更は必ず適用されて終わる。<code>naming="auto"</code>は全リスト行に名前を振り、<code>::view-transition-group(*.wcs-row)</code>で一括指定できる。</p>
           <ul class="tag-features">
-            <li>$resolve: Exact Arity</li>
-            <li>$getAll: Upper Bound</li>
-            <li>Cycles Name Their Getters</li>
-            <li>Runtime = Lint = IDE Codes</li>
+            <li>Enter Was Always Free</li>
+            <li>Applied Exactly Once</li>
+            <li>CSS Owns the Animation</li>
+            <li>naming="auto" for Rows</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.31.0</span>
-          <span class="tag-name">wcs/nested-assign &rarr; error</span>
-          <h3>The family that always drops the update fails CI now</h3>
-          <p class="what-if">What if a mistake that is never conditional stopped being a warning?</p>
-          <p>One defect, three syntactic shapes: <code>this.items.push(x)</code>, <code>this.items[0] = x</code>, <code>this.user.name = x</code> &mdash; assignments that never reach the Proxy set trap, so the DOM silently does not update. Design-doc measurements show they <em>always</em> drop the update; these are not conditional suspicions. The whole family &mdash; <code>wcs/array-mutation</code>, <code>wcs/array-index-assign</code>, <code>wcs/nested-assign</code> &mdash; moves from warning to <strong>error severity together</strong>, so <code>wcs-validate</code> exits 1 and a CI gate fails a build that contains any. Deliberately breaking: shipping one unnoticed costs more than failing CI, and moving one code alone would have left <code>push(x)</code> an error while <code>items[0] = x</code> stayed a warning with no explicable difference.</p>
-          <p class="ja">1つの欠陥、3つの構文形。<code>this.items.push(x)</code>・<code>this.items[0] = x</code>・<code>this.user.name = x</code> &mdash; Proxyのsetトラップに決して届かない代入で、DOMは黙って更新されない。設計文書の実測が示すとおり、これらは<em>常に</em>更新を落とす。条件つきの疑いではない。だからファミリー全体 &mdash; <code>wcs/array-mutation</code>・<code>wcs/array-index-assign</code>・<code>wcs/nested-assign</code> &mdash; が<strong>揃ってwarningからerrorへ</strong>移り、<code>wcs-validate</code>はexit 1になり、1つでも含むビルドはCIゲートで落ちる。意図的な破壊的変更だ。気づかれず出荷する方がCIが落ちるより高くつくし、1コードだけ上げれば<code>push(x)</code>はerrorで<code>items[0] = x</code>はwarningという説明不能な差が残っていた。</p>
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">typedParams &middot; searchParams &middot; replaceUrl</span>
+          <h3>The router speaks its whole state</h3>
+          <p class="what-if">What if no app ever parsed a path string again?</p>
+          <p><code>&lt;wcs-router&gt;</code> now exposes the entire navigation state over wc-bindable: <code>typedParams</code> (a <code>:id(int)</code> arrives as a number), <code>searchParams</code>, <code>routeName</code>, plus <code>replaceUrl</code> beside <code>navigateUrl</code> &mdash; so a filter writes <code>replaceUrl = "?category=audio"</code> and never grows the history stack. Events fire in a documented order with <code>path</code> last as the &ldquo;navigation finished&rdquo; signal; the exposed objects are frozen snapshots. Query-only navigations are <strong>same-match</strong>: no guard re-runs, no restamp, no scroll. The route elements themselves became detached controllers &mdash; the router element is the one observation surface, and the router-spa demo dropped its last path regex for it. State never interprets a path string again.</p>
+          <p class="ja"><code>&lt;wcs-router&gt;</code>がナビゲーション状態の全体をwc-bindableで公開するようになった。<code>typedParams</code>(<code>:id(int)</code>は数値で届く)、<code>searchParams</code>、<code>routeName</code>、そして<code>navigateUrl</code>の隣に<code>replaceUrl</code> &mdash; フィルタは<code>replaceUrl = "?category=audio"</code>と書けば履歴を積み上げない。イベントは文書化された順で発火し、最後の<code>path</code>が「ナビゲーション完了」の合図。公開オブジェクトは凍結されたスナップショット。クエリのみのナビゲーションは<strong>same-match</strong>: ガードは再実行されず、再スタンプも、スクロールもない。ルート要素自体はdetachedなコントローラになり、ルーター要素が唯一の観測面 &mdash; router-spaデモは最後のパス正規表現をこれで捨てた。stateが二度とパス文字列を解釈することはない。</p>
           <ul class="tag-features">
-            <li>Always Drops = Error</li>
-            <li>The Family Moves Together</li>
-            <li>wcs-validate Exits 1</li>
-            <li>Intentionally Breaking</li>
+            <li>Params Arrive Typed</li>
+            <li>replaceUrl for Filters</li>
+            <li>Query-only = Same-match</li>
+            <li>No Regex Left in the Demo</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.31.0</span>
-          <span class="tag-name">scoped registries &middot; autoloader</span>
-          <h3>&ldquo;Defined&rdquo; is now a question about a node</h3>
-          <p class="what-if">What if two components could share a tag name on one page?</p>
-          <p>Scoped custom element registries (Chrome/Edge 146, Safari 26) do not inherit from the global one, so &ldquo;is this tag defined?&rdquo; is only meaningful relative to a node &mdash; and resolving it against <code>window.customElements</code> made wcstack fail silently on pages that use them. Every package now resolves the registry from the node the operation is about, falling back to the global registry where the feature is absent (behavior byte-for-byte unchanged). <code>registerComponents(registry?)</code> on all 40 packages defines into a scoped registry; <code>&lt;wcs-defined&gt;</code> watches the registry its subtree resolves against and reports <code>missing</code> immediately under a null registry instead of pending forever. The autoloader defines into the scanned root&rsquo;s registry &mdash; and a failed lazy load no longer wedges every later one: waiters await the load promise itself, which settles on failure too.</p>
-          <p class="ja">Scoped custom element registry(Chrome/Edge 146、Safari 26)はグローバルレジストリを継承しない。「このタグは定義済みか」はノードに相対的な問いであり、<code>window.customElements</code>で解決していたwcstackはこの機能を使うページで黙って壊れていた。全パッケージが操作対象ノードからレジストリを解決し、機能がないプラットフォームではグローバルにフォールバックする(挙動はバイト単位で不変)。全40パッケージの<code>registerComponents(registry?)</code>はスコープ付きレジストリへ定義でき、<code>&lt;wcs-defined&gt;</code>は自分のサブツリーが解決に使うレジストリを監視し、統治するレジストリがなければ永遠のpendingではなく即座に<code>missing</code>を報告する。autoloaderは走査したルートのレジストリへ定義する &mdash; そして失敗したlazy loadが後続のロードを全部塞ぐこともなくなった。待機側はロードのPromise自体をawaitし、それは失敗でも決着する。</p>
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">&lt;html lang&gt; &middot; basename</span>
+          <h3>The page&rsquo;s language is the locale</h3>
+          <p class="what-if">What if <code>lang="ja"</code> was all the i18n config there was?</p>
+          <p><strong>Breaking</strong>: the four locale-dependent filters (<code>locale</code> / <code>date</code> / <code>time</code> / <code>datetime</code>) now default to <code>&lt;html lang&gt;</code> instead of <code>'en'</code> &mdash; the standard place a page records its language becomes the single source of truth, and the CDN one-liner gains a way to set the locale at all. Changing it later re-renders nothing: set the language before the page renders. For multilingual sites, the locale goes <strong>in the basename</strong>, never in a <code>/:lang</code> route parameter &mdash; the router intercepts every same-origin navigation under its basename, so a parameterized language link would switch nothing, silently; with <code>&lt;base href="/ja/"&gt;</code> a link to <code>/en/&hellip;</code> falls outside the router and the browser performs the real navigation a language switch needs.</p>
+          <p class="ja"><strong>破壊的変更</strong>: ロケール依存の4フィルタ(<code>locale</code> / <code>date</code> / <code>time</code> / <code>datetime</code>)の既定が<code>'en'</code>から<code>&lt;html lang&gt;</code>になった &mdash; ページが言語を記録する標準の場所が唯一の情報源になり、CDNワンライナーにロケールを設定する手段が初めてできた。後から変えても何も再描画されない。言語はページが描画される前に決める。多言語サイトではロケールは<strong>basenameに</strong>置く。<code>/:lang</code>ルートパラメータには決して置かない &mdash; ルーターはbasename配下の同一オリジンナビゲーションをすべて横取りするので、パラメータ化された言語リンクは黙って何も切り替えない。<code>&lt;base href="/ja/"&gt;</code>なら<code>/en/&hellip;</code>へのリンクはルーターの外に落ち、言語切替に必要な本物のナビゲーションをブラウザが行う。</p>
           <ul class="tag-features">
-            <li>Per-node Registry Resolution</li>
-            <li>Global Fallback, Unchanged</li>
-            <li>registerComponents(registry)</li>
-            <li>Failed Load No Longer Wedges</li>
+            <li>Breaking: 'en' &rarr; lang</li>
+            <li>One Source of Truth</li>
+            <li>Locale in the Basename</li>
+            <li>Set It Before Render</li>
           </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v1.32.0</span>
+          <span class="tag-name">a11y phases 0&ndash;7</span>
+          <h3>Accessible by delegation, opt-in by policy</h3>
+          <p class="what-if">What if the framework&rsquo;s a11y answer was mostly &ldquo;let the browser&rdquo;?</p>
+          <p>Eight phases, one principle: delegate to the platform, and make anything opinionated opt-in. The router writes out the Navigation API defaults as intent (scroll and focus reset <em>after-transition</em>), repairs scroll in fallback browsers, and offers <code>focus="heading"</code> / <code>announce="title"</code> policies. <code>&lt;wcs-link&gt;</code> pairs its <code>active</code> class with <code>aria-current="page"</code> and forwards <code>aria-*</code> to its anchor. State preserves focus across keyed reorders via <code>moveBefore()</code> &mdash; the row you are typing in keeps its cursor through a re-sort. <code>&lt;wcs-raf&gt;</code> gains an opt-in <code>reduced-motion="pause"</code> gate (opt-in because a tick is functional output, not decoration). And a new diagnostic, <code>wcs/aria-attr-unknown</code>, catches the <code>attr.aria-labels</code> typo that <code>setAttribute</code> writes happily and assistive technology ignores.</p>
+          <p class="ja">8フェーズ、原則は1つ。プラットフォームに委譲し、意見のあるものはopt-inにする。ルーターはNavigation APIの既定値を意図として明記し(スクロールとフォーカスリセットは<em>after-transition</em>)、フォールバックブラウザのスクロールを修繕し、<code>focus="heading"</code> / <code>announce="title"</code>ポリシーを提供する。<code>&lt;wcs-link&gt;</code>は<code>active</code>クラスに<code>aria-current="page"</code>を並走させ、<code>aria-*</code>をアンカーへ転送する。stateは<code>moveBefore()</code>でキー付き並べ替えを越えてフォーカスを保持 &mdash; 入力中の行は再ソートしてもカーソルを失わない。<code>&lt;wcs-raf&gt;</code>にはopt-inの<code>reduced-motion="pause"</code>ゲート(tickは装飾ではなく機能出力だからopt-in)。そして新診断<code>wcs/aria-attr-unknown</code>が、<code>setAttribute</code>は喜んで書き支援技術は無視する<code>attr.aria-labels</code>のタイプミスを捕まえる。</p>
+          <ul class="tag-features">
+            <li>Delegate First</li>
+            <li>focus= / announce= Opt-in</li>
+            <li>moveBefore Keeps Focus</li>
+            <li>aria Typos Caught</li>
+          </ul>
+        </div>
         </div>
       </div>
     </div>
@@ -883,6 +898,7 @@
         <div class="io-node"><span class="io-tag">&lt;wcs-magnetometer&gt; &lt;wcs-ambient-light-sensor&gt;</span><span class="io-desc">Magnetic field &amp; illuminance</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-audio&gt; &lt;wcs-osc&gt; &lt;wcs-gain&gt;</span><span class="io-desc">Web Audio graph as markup (11 tags)</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-midi&gt;</span><span class="io-desc">Web MIDI in &amp; out, one tag</span></div>
+        <div class="io-node"><span class="io-tag">&lt;wcs-view-transition&gt;</span><span class="io-desc">Leave &amp; move animations, policy only</span></div>
       </div>
       <div class="protocol-note fade-in">
         <h3>One protocol behind them all: <code>wc-bindable</code></h3>
@@ -1176,7 +1192,11 @@ const html = await renderToString(`
 &lt;script type="module" src="https://esm.run/@wcstack/devtools/auto"&gt;&lt;/script&gt;
 
 &lt;!-- State last: command-token emissions are not replayed --&gt;
-&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;</code></pre>
+&lt;script type="module" src="https://esm.run/@wcstack/state/auto"&gt;&lt;/script&gt;
+
+&lt;!-- Or (v1.32.0+): the SPA core in ONE request — state + router + fetch +
+     storage + autoloader pre-linked, one SRI hash covering all of it --&gt;
+&lt;script type="module" src="https://esm.run/wcstack/auto"&gt;&lt;/script&gt;</code></pre>
       </div>
       <div class="cdn-block">
         <div class="code-header">
