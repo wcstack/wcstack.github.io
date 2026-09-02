@@ -611,13 +611,13 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.32.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.33.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
       <div class="stats">
         <div class="stat">
-          <div class="num">45</div>
+          <div class="num">47</div>
           <div class="label">Packages</div>
         </div>
         <div class="stat">
@@ -647,94 +647,65 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.32.0</h2>
-      <p class="section-sub">The SPA release: server-rendered routes the client adopts, markup that binds whenever it arrives, animations as policy, and a router that speaks its whole state.</p>
-      <p class="section-sub-ja">SPAのためのリリース。サーバーが描いたルートをクライアントが引き継ぎ、いつ届いたマークアップでもバインドされ、アニメーションはポリシーになり、ルーターは自分の全状態を語る。</p>
+      <h2 class="section-title">Shipped in v1.33.0</h2>
+      <p class="section-sub">One tree: components mount onto it, named state begins its exit, your TypeScript types reach the HTML, and the whole page tests headlessly.</p>
+      <p class="section-sub-ja">木はひとつ。コンポーネントはそこにマウントされ、named stateは退場を始め、TypeScriptの型はHTMLに届き、ページ全体がヘッドレスにテストできる。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">&lt;wcs-router enable-ssr&gt;</span>
-          <h3>The server renders, the client adopts</h3>
-          <p class="what-if">What if SSR meant adopting the DOM, not re-rendering it?</p>
-          <p>Put <code>enable-ssr</code> on the router and pass the request URL to <code>@wcstack/server</code>&rsquo;s <code>renderToString(html, &#123; url &#125;)</code>: the initial route is rendered server-side &mdash; typed params, nested routes, and <code>for:</code> / <code>if:</code> templates inside route content included &mdash; and the client-side router <strong>adopts</strong> that DOM on boot instead of re-rendering it, with state bindings hydrated live on the same nodes. Anything that fails verification (URL mismatch, edited templates) falls back silently to client-side rendering. Guarded routes are never rendered on the server &mdash; a guard is an authorization point and runs client-side, so the outlet ships empty. <code>&lt;wcs-link&gt;</code> anchors arrive server-rendered with <code>active</code> / <code>aria-current</code> already set.</p>
-          <p class="ja">ルーターに<code>enable-ssr</code>を置き、<code>@wcstack/server</code>の<code>renderToString(html, &#123; url &#125;)</code>にリクエストURLを渡す。初期ルートはサーバー側で描画され &mdash; 型付きパラメータも、ネストしたルートも、ルート内容の<code>for:</code> / <code>if:</code>テンプレートも含めて &mdash; クライアントのルーターは起動時にそのDOMを再描画せず<strong>引き継ぐ</strong>。stateバインディングは同じノードの上でライブにハイドレートされる。検証に失敗したもの(URL不一致、編集されたテンプレート)は黙ってクライアント描画にフォールバックする。ガード付きルートはサーバーでは決して描画されない &mdash; ガードは認可点でありクライアントで走るから、outletは空で届く。<code>&lt;wcs-link&gt;</code>のアンカーは<code>active</code> / <code>aria-current</code>つきでサーバーから届く。</p>
+          <span class="topic-ver">v1.33.0</span>
+          <span class="tag-name">state: path</span>
+          <h3>Components mount onto the tree</h3>
+          <p class="what-if">What if handing a component its data was one path?</p>
+          <p><code>&lt;user-card data-wcs="state: user"&gt;</code> mounts a <strong>whole subtree</strong> of the host&rsquo;s state as the component&rsquo;s root: inside, <code>name</code> <em>is</em> <code>user.name</code> &mdash; reads, writes, getters and <code>for:</code> all resolve against the tree, and host-side writes reach the component. In a loop, mount the row itself: <code>state: .</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>), and the component&rsquo;s own keys stay <strong>private</strong> (rule R1) &mdash; shadowing a mount-point key warns once as <code>wcs/mount-own-key-shadow</code>. The same one-segment binding was a silent no-op before v1.33.0; now it is the root rule of the mount design, and the invariant it carries into v2: a mounted component&rsquo;s bindings are indistinguishable from the template inlined at the mount point.</p>
+          <p class="ja"><code>&lt;user-card data-wcs="state: user"&gt;</code>はホストのstateの<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする。内側では<code>name</code>が<em>そのまま</em><code>user.name</code> &mdash; 読み・書き・getter・<code>for:</code>のすべてが木に対して解決され、ホスト側の書き込みはコンポーネントに届く。ループの中では行そのものをマウントする: <code>state: .</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>(規則R1) &mdash; マウント先のキーを隠すと<code>wcs/mount-own-key-shadow</code>が一度だけ警告する。この1セグメントのバインディングはv1.33.0以前は無言のno-opだった。いまやmount設計のルート規則であり、v2へ持ち越される不変条件を運ぶ: マウントされたコンポーネントのバインディングは、マウント点にインライン展開されたテンプレートと区別がつかない。</p>
           <ul class="tag-features">
-            <li>Adopt, Don&rsquo;t Re-render</li>
-            <li>Route Content Hydrates Live</li>
-            <li>Guarded Routes Ship Empty</li>
-            <li>Silent CSR Fallback</li>
+            <li>One Path, Whole Subtree</li>
+            <li>state: . Mounts the Row</li>
+            <li>Own Keys Stay Private</li>
+            <li>Longest Prefix Wins</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">binder protocol</span>
-          <h3>Markup binds whenever it arrives</h3>
-          <p class="what-if">What if a binding worked no matter when its DOM showed up?</p>
-          <p>A <code>data-wcs</code> binding used to exist only for nodes state walked at startup. Route content inactive at that moment, and every <code>&lt;wcs-head&gt;</code> child (reflected into <code>&lt;head&gt;</code> as a clone), silently did nothing &mdash; forever. The binder protocol is the fix, and it is one function: <strong>whoever inserts DOM hands the subtree to whoever owns bindings</strong>. State installs a binder on a global symbol, the router looks it up, neither imports the other &mdash; the dual of the transition-runner. A per-route translated <code>&lt;title data-wcs&gt;</code> now just works. The two rejected alternatives are on record: state scanning every insertion would bill the many insertions carrying no bindings, and would let external <code>innerHTML</code> activate <code>data-wcs</code> &mdash; against the CSP direction.</p>
-          <p class="ja"><code>data-wcs</code>バインディングは、stateが起動時に走査したノードにしか存在しなかった。その瞬間に非活性だったルート内容も、クローンとして<code>&lt;head&gt;</code>へ反映される<code>&lt;wcs-head&gt;</code>の子も、黙って何もしなかった &mdash; 永遠に。binderプロトコルがその修正で、中身は関数1つ。<strong>DOMを差し込んだ側が、バインドを所有する側へサブツリーを手渡す</strong>。stateがグローバルsymbolにbinderを置き、routerがそれを引く。互いにimportしない &mdash; transition-runnerの双対。ルートごとに翻訳された<code>&lt;title data-wcs&gt;</code>が、ただ動くようになった。棄却した2案も記録にある。stateが全挿入を走査する案はバインディングを持たない大多数の挿入に課金し、外部由来の<code>innerHTML</code>が<code>data-wcs</code>を発火させてしまう &mdash; CSPの方向性に反する。</p>
+          <span class="topic-ver">v1.33.0</span>
+          <span class="tag-name">wcs/named-state-deprecated</span>
+          <h3>Named state begins its exit</h3>
+          <p class="what-if">What if the tree needed no second axis?</p>
+          <p>The <code>name</code> attribute and the <code>@name</code> selector were a second axis next to the path &mdash; a flat per-rootNode registry that does not cross shadow boundaries: a drive letter, not a filesystem root. v2 removes them in favor of mounts (<code>&lt;wcs-state mount="cart"&gt;</code> grafts a state onto the root tree; bindings read <code>cart.total</code>). Nothing changes in 1.x: the linter reports every site as <code>wcs/named-state-deprecated</code> with its per-site replacement, the runtime warns only under <code>config.debug</code>, a <code>@default</code> selector simply drops, and Light DOM <code>bind-component</code> &mdash; where <code>name</code> is still required today &mdash; is exempt. One tree per root, extended only by mounting: the Unix correspondence, minus the second drive.</p>
+          <p class="ja"><code>name</code>属性と<code>@name</code>セレクタはパスの隣にある第二の軸だった &mdash; shadow境界を越えない、rootNodeごとのフラットなレジストリ。ファイルシステムのルートではなくドライブレターだ。v2はこれをmountに置き換える(<code>&lt;wcs-state mount="cart"&gt;</code>がstateをルートの木に接ぎ木し、バインディングは<code>cart.total</code>と読む)。1.xでは何も変わらない。linterが全使用箇所を<code>wcs/named-state-deprecated</code>として置き換え付きで報告し、ランタイムは<code>config.debug</code>下でのみ警告し、<code>@default</code>セレクタは単に外せばよく、今日も<code>name</code>が必須のLight DOM <code>bind-component</code>は対象外。木はルートごとに1つ、拡張はマウントだけ &mdash; 第二のドライブを除いた、Unixとの対応。</p>
           <ul class="tag-features">
-            <li>One Function, One Symbol</li>
-            <li>Route Content Binds</li>
-            <li>&lt;title data-wcs&gt; Works</li>
-            <li>No Import Either Way</li>
+            <li>Removed in v2</li>
+            <li>Per-site Replacement Shown</li>
+            <li>@default Just Drops</li>
+            <li>Light DOM Exempt</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">@wcstack/view-transition</span>
-          <h3>Animation as policy, not markup</h3>
-          <p class="what-if">What if leave and move were the only animations you had to ask for?</p>
-          <p>Package 45. Enter animations never needed JS &mdash; <code>@starting-style</code> covers a new row or a mounting branch. What CSS cannot reach is <strong>leaving</strong> (nodes detach synchronously) and <strong>moving</strong> (a reorder has no intermediate state). <code>&lt;wcs-view-transition&gt;</code> is a <em>policy node</em>: it renders nothing and describes no animation &mdash; it decides whether a DOM change animates and what a collision does (<code>mode="latest / queue / exhaust"</code>), while the animation stays in CSS against <code>::view-transition-*</code>. The rule everything is subordinate to: <strong>a DOM change is applied exactly once, whatever happens to its animation</strong> &mdash; unsupported browser, hidden tab, reduced motion, collision, all still end with the change applied. <code>naming="auto"</code> names every list row so <code>::view-transition-group(*.wcs-row)</code> addresses them all.</p>
-          <p class="ja">45番目のパッケージ。入場アニメーションにJSは要らなかった &mdash; 新しい行やマウントされる分岐は<code>@starting-style</code>で足りる。CSSが届かないのは<strong>退場</strong>(ノードは同期的に外れる)と<strong>移動</strong>(並べ替えに中間状態はない)。<code>&lt;wcs-view-transition&gt;</code>は<em>ポリシーノード</em>だ。何も描画せず、アニメーションも記述しない &mdash; DOM変更をアニメーションさせるか、衝突時にどうするか(<code>mode="latest / queue / exhaust"</code>)だけを裁定し、アニメーション自体は<code>::view-transition-*</code>のCSSに残る。すべてが従う規則: <strong>DOM変更はアニメーションがどうなろうと正確に1回適用される</strong> &mdash; 非対応ブラウザでも、隠れたタブでも、reduced motionでも、衝突しても、変更は必ず適用されて終わる。<code>naming="auto"</code>は全リスト行に名前を振り、<code>::view-transition-group(*.wcs-row)</code>で一括指定できる。</p>
+          <span class="topic-ver">v1.33.0</span>
+          <span class="tag-name">@wcstack/typescript</span>
+          <h3>Your types reach the HTML</h3>
+          <p class="what-if">What if a state type checked the paths in your markup?</p>
+          <p>A TypeScript state file already knows every path and its type &mdash; but HTML cannot consume a <code>.d.ts</code>, so <code>users: [] as &#123; name: string &#125;[]</code> left <code>users.*.name</code> unresolvable: a real typo was only a warning and a correct binding got a false one. <code>wcs-schema emit src/state.ts</code> compiles the state with the TypeScript compiler API and writes the <code>stateSchema</code> sidecar the validator consumes &mdash; typos become <code>wcs/path-nonexistent</code> <strong>errors</strong>, <code>for:</code> on a non-array becomes <code>wcs/path-type-mismatch</code>, and <code>wcs-schema check</code> fails CI when type and manifest drift. <code>wcs-tsc</code> runs tsc over the <code>&lt;wcs-state&gt;</code> inline scripts themselves (typed <code>this</code>, diagnostics pointing into the HTML), the new <code>--strict</code> flag moves the exit-code threshold to warnings, and every element package now augments <code>HTMLElementTagNameMap</code>. The pipeline: <code>wcs-schema check &amp;&amp; wcs-validate --strict</code>.</p>
+          <p class="ja">TypeScriptのstateファイルはすべてのパスと型を既に知っている &mdash; だがHTMLは<code>.d.ts</code>を読めず、<code>users: [] as &#123; name: string &#125;[]</code>の<code>users.*.name</code>は解決不能だった。本物のタイプミスはwarning止まり、正しいバインディングには偽のwarning。<code>wcs-schema emit src/state.ts</code>はstateをTypeScriptコンパイラAPIでコンパイルし、バリデータが消費する<code>stateSchema</code>サイドカーを書き出す &mdash; タイプミスは<code>wcs/path-nonexistent</code>の<strong>error</strong>になり、非配列への<code>for:</code>は<code>wcs/path-type-mismatch</code>になり、型とマニフェストのドリフトは<code>wcs-schema check</code>がCIで落とす。<code>wcs-tsc</code>は<code>&lt;wcs-state&gt;</code>のインラインスクリプト自体にtscを走らせ(型付き<code>this</code>、診断はHTML内の行を指す)、新しい<code>--strict</code>フラグはexit codeの閾値をwarningに引き下げ、全要素パッケージが<code>HTMLElementTagNameMap</code>を拡張する。パイプラインは<code>wcs-schema check &amp;&amp; wcs-validate --strict</code>。</p>
           <ul class="tag-features">
-            <li>Enter Was Always Free</li>
-            <li>Applied Exactly Once</li>
-            <li>CSS Owns the Animation</li>
-            <li>naming="auto" for Rows</li>
+            <li>Type &rarr; Sidecar &rarr; Error</li>
+            <li>tsc Inside Your HTML</li>
+            <li>--strict Gates Warnings</li>
+            <li>Typed querySelector</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">typedParams &middot; searchParams &middot; replaceUrl</span>
-          <h3>The router speaks its whole state</h3>
-          <p class="what-if">What if no app ever parsed a path string again?</p>
-          <p><code>&lt;wcs-router&gt;</code> now exposes the entire navigation state over wc-bindable: <code>typedParams</code> (a <code>:id(int)</code> arrives as a number), <code>searchParams</code>, <code>routeName</code>, plus <code>replaceUrl</code> beside <code>navigateUrl</code> &mdash; so a filter writes <code>replaceUrl = "?category=audio"</code> and never grows the history stack. Events fire in a documented order with <code>path</code> last as the &ldquo;navigation finished&rdquo; signal; the exposed objects are frozen snapshots. Query-only navigations are <strong>same-match</strong>: no guard re-runs, no restamp, no scroll. The route elements themselves became detached controllers &mdash; the router element is the one observation surface, and the router-spa demo dropped its last path regex for it. State never interprets a path string again.</p>
-          <p class="ja"><code>&lt;wcs-router&gt;</code>がナビゲーション状態の全体をwc-bindableで公開するようになった。<code>typedParams</code>(<code>:id(int)</code>は数値で届く)、<code>searchParams</code>、<code>routeName</code>、そして<code>navigateUrl</code>の隣に<code>replaceUrl</code> &mdash; フィルタは<code>replaceUrl = "?category=audio"</code>と書けば履歴を積み上げない。イベントは文書化された順で発火し、最後の<code>path</code>が「ナビゲーション完了」の合図。公開オブジェクトは凍結されたスナップショット。クエリのみのナビゲーションは<strong>same-match</strong>: ガードは再実行されず、再スタンプも、スクロールもない。ルート要素自体はdetachedなコントローラになり、ルーター要素が唯一の観測面 &mdash; router-spaデモは最後のパス正規表現をこれで捨てた。stateが二度とパス文字列を解釈することはない。</p>
+          <span class="topic-ver">v1.33.0</span>
+          <span class="tag-name">@wcstack/testing</span>
+          <h3>The whole page, tested headlessly</h3>
+          <p class="what-if">What if testing a page were one import?</p>
+          <p>A <code>&lt;wcs-state&gt;</code> page is plain DOM, so it already tests under vitest + happy-dom with no browser and no test-only API &mdash; the bare recipes are in the state README, pinned by a contract test that executes the same lines. <code>@wcstack/testing</code> packages recipe 1: <code>mount(html)</code> registers the elements and waits with the same stabilization loop <code>renderToString</code> uses &mdash; <code>&lt;wcs-router&gt;</code>&rsquo;s first route, a <code>$connectedCallback</code> that inserts more elements, and every binding, covered by one call. Then <code>app.state().write(s =&gt; &#123; s.count = 42 &#125;)</code> does what a handler does, <code>fire(button, "click")</code> does what a user does, <code>settle()</code> lets the batch drain, and <code>root: "shadow"</code> scopes the whole test to a fresh shadow root.</p>
+          <p class="ja"><code>&lt;wcs-state&gt;</code>のページはただのDOMだから、ブラウザなし・テスト専用APIなしで、vitest + happy-domの下で既にテストできる &mdash; 素のレシピはstateのREADMEにあり、同じ行を実行する契約テストで固定されている。<code>@wcstack/testing</code>はそのレシピ1をパッケージ化した。<code>mount(html)</code>は要素を登録し、<code>renderToString</code>が使うのと同じ安定化ループで待つ &mdash; <code>&lt;wcs-router&gt;</code>の初期ルートも、要素を追加挿入する<code>$connectedCallback</code>も、すべてのバインディングも、1回の呼び出しでカバーされる。あとは<code>app.state().write(s =&gt; &#123; s.count = 42 &#125;)</code>がハンドラのやることを、<code>fire(button, "click")</code>がユーザーのやることをやり、<code>settle()</code>でバッチが流れ、<code>root: "shadow"</code>はテスト全体を新しいshadow rootに閉じ込める。</p>
           <ul class="tag-features">
-            <li>Params Arrive Typed</li>
-            <li>replaceUrl for Filters</li>
-            <li>Query-only = Same-match</li>
-            <li>No Regex Left in the Demo</li>
+            <li>No Browser, No Test API</li>
+            <li>One Call Waits for All</li>
+            <li>write() = a Handler</li>
+            <li>fire() = a User</li>
           </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">&lt;html lang&gt; &middot; basename</span>
-          <h3>The page&rsquo;s language is the locale</h3>
-          <p class="what-if">What if <code>lang="ja"</code> was all the i18n config there was?</p>
-          <p><strong>Breaking</strong>: the four locale-dependent filters (<code>locale</code> / <code>date</code> / <code>time</code> / <code>datetime</code>) now default to <code>&lt;html lang&gt;</code> instead of <code>'en'</code> &mdash; the standard place a page records its language becomes the single source of truth, and the CDN one-liner gains a way to set the locale at all. Changing it later re-renders nothing: set the language before the page renders. For multilingual sites, the locale goes <strong>in the basename</strong>, never in a <code>/:lang</code> route parameter &mdash; the router intercepts every same-origin navigation under its basename, so a parameterized language link would switch nothing, silently; with <code>&lt;base href="/ja/"&gt;</code> a link to <code>/en/&hellip;</code> falls outside the router and the browser performs the real navigation a language switch needs.</p>
-          <p class="ja"><strong>破壊的変更</strong>: ロケール依存の4フィルタ(<code>locale</code> / <code>date</code> / <code>time</code> / <code>datetime</code>)の既定が<code>'en'</code>から<code>&lt;html lang&gt;</code>になった &mdash; ページが言語を記録する標準の場所が唯一の情報源になり、CDNワンライナーにロケールを設定する手段が初めてできた。後から変えても何も再描画されない。言語はページが描画される前に決める。多言語サイトではロケールは<strong>basenameに</strong>置く。<code>/:lang</code>ルートパラメータには決して置かない &mdash; ルーターはbasename配下の同一オリジンナビゲーションをすべて横取りするので、パラメータ化された言語リンクは黙って何も切り替えない。<code>&lt;base href="/ja/"&gt;</code>なら<code>/en/&hellip;</code>へのリンクはルーターの外に落ち、言語切替に必要な本物のナビゲーションをブラウザが行う。</p>
-          <ul class="tag-features">
-            <li>Breaking: 'en' &rarr; lang</li>
-            <li>One Source of Truth</li>
-            <li>Locale in the Basename</li>
-            <li>Set It Before Render</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v1.32.0</span>
-          <span class="tag-name">a11y phases 0&ndash;7</span>
-          <h3>Accessible by delegation, opt-in by policy</h3>
-          <p class="what-if">What if the framework&rsquo;s a11y answer was mostly &ldquo;let the browser&rdquo;?</p>
-          <p>Eight phases, one principle: delegate to the platform, and make anything opinionated opt-in. The router writes out the Navigation API defaults as intent (scroll and focus reset <em>after-transition</em>), repairs scroll in fallback browsers, and offers <code>focus="heading"</code> / <code>announce="title"</code> policies. <code>&lt;wcs-link&gt;</code> pairs its <code>active</code> class with <code>aria-current="page"</code> and forwards <code>aria-*</code> to its anchor. State preserves focus across keyed reorders via <code>moveBefore()</code> &mdash; the row you are typing in keeps its cursor through a re-sort. <code>&lt;wcs-raf&gt;</code> gains an opt-in <code>reduced-motion="pause"</code> gate (opt-in because a tick is functional output, not decoration). And a new diagnostic, <code>wcs/aria-attr-unknown</code>, catches the <code>attr.aria-labels</code> typo that <code>setAttribute</code> writes happily and assistive technology ignores.</p>
-          <p class="ja">8フェーズ、原則は1つ。プラットフォームに委譲し、意見のあるものはopt-inにする。ルーターはNavigation APIの既定値を意図として明記し(スクロールとフォーカスリセットは<em>after-transition</em>)、フォールバックブラウザのスクロールを修繕し、<code>focus="heading"</code> / <code>announce="title"</code>ポリシーを提供する。<code>&lt;wcs-link&gt;</code>は<code>active</code>クラスに<code>aria-current="page"</code>を並走させ、<code>aria-*</code>をアンカーへ転送する。stateは<code>moveBefore()</code>でキー付き並べ替えを越えてフォーカスを保持 &mdash; 入力中の行は再ソートしてもカーソルを失わない。<code>&lt;wcs-raf&gt;</code>にはopt-inの<code>reduced-motion="pause"</code>ゲート(tickは装飾ではなく機能出力だからopt-in)。そして新診断<code>wcs/aria-attr-unknown</code>が、<code>setAttribute</code>は喜んで書き支援技術は無視する<code>attr.aria-labels</code>のタイプミスを捕まえる。</p>
-          <ul class="tag-features">
-            <li>Delegate First</li>
-            <li>focus= / announce= Opt-in</li>
-            <li>moveBefore Keeps Focus</li>
-            <li>aria Typos Caught</li>
-          </ul>
-        </div>
         </div>
       </div>
     </div>

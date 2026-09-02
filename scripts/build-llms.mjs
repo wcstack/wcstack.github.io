@@ -19,7 +19,7 @@ const wcstackDir = process.env.WCSTACK_DIR ?? path.resolve(siteRoot, "..", "wcst
 const skillDir = process.env.WCSTACK_SKILL_DIR ?? path.resolve(siteRoot, "..", "wcstack-skill");
 
 const CORE = ["state", "router", "signals"];
-const TOOLING = ["devtools", "autoloader", "server", "lint", "vscode-wcs"];
+const TOOLING = ["devtools", "autoloader", "server", "lint", "vscode-wcs", "typescript", "testing"];
 const ENTRY = ["wcstack"];
 const SKIP = new Set(["poc-visual-editor"]);
 

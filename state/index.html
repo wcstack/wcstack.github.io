@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.32.0</span>
+        <span class="pill accent">v1.33.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -426,11 +426,11 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
         <li><code>setInitialState()</code> &rarr; programmatic API</li>
       </ol>
 
-      <h3>Named state</h3>
-      <p>Give a state a <code>name</code> and address it from anywhere with <code>path@name</code>.</p>
-      <p class="ja">nameを付けると、どこからでもpath@nameで参照できる。</p>
+      <h3>Named state <span style="font-size:0.7em;opacity:0.75">(deprecated in v1.33.0 &mdash; removed in v2)</span></h3>
+      <p>Give a state a <code>name</code> and address it from anywhere with <code>path@name</code>. <strong>Deprecated as of v1.33.0</strong>: the name is a second axis next to the path, and v2 removes it in favor of mounts (<code>&lt;wcs-state mount="cart"&gt;</code> grafts the state onto the root tree; bindings read <code>cart.total</code>). Nothing changes in 1.x &mdash; the linter reports each site as <code>wcs/named-state-deprecated</code> with its replacement, and a <code>@default</code> selector can simply be dropped. Avoid the form in new code; Light DOM <code>bind-component</code>, where <code>name</code> is still required, is exempt.</p>
+      <p class="ja">nameを付けると、どこからでもpath@nameで参照できる。<strong>v1.33.0で非推奨</strong>: nameはパスの隣の第二の軸であり、v2はこれをmount(<code>&lt;wcs-state mount="cart"&gt;</code>がstateをルートの木に接ぎ木し、バインディングは<code>cart.total</code>と読む)に置き換えて削除する。1.xでは何も変わらない &mdash; linterが各使用箇所を<code>wcs/named-state-deprecated</code>として置き換え付きで報告し、<code>@default</code>セレクタは単に外せばよい。新しいコードでは使わないこと。<code>name</code>が今も必須のLight DOM <code>bind-component</code>は対象外。</p>
       <div class="code-block">
-        <div class="code-header"><span class="filename">index.html</span><span>Named state</span></div>
+        <div class="code-header"><span class="filename">index.html</span><span>Named state (legacy)</span></div>
 <pre><code class="language-html">&lt;wcs-state name="cart"&gt;...&lt;/wcs-state&gt;
 
 &lt;div data-wcs="textContent: total@cart"&gt;&lt;/div&gt;</code></pre>
@@ -921,6 +921,10 @@ customElements.define("my-light-component", MyLightComponent);</code></pre>
 &lt;my-component data-wcs="state.message: user.name"&gt;&lt;/my-component&gt;</code></pre>
       </div>
       <p>A standalone component can await readiness with <code>async $stateReadyCallback(stateProp)</code>.</p>
+
+      <h3>Whole-object mount: <code>state: path</code> <span style="font-size:0.7em;opacity:0.75">(v1.33.0)</span></h3>
+      <p>Instead of wiring property by property, mount a <strong>whole subtree</strong> as the component&rsquo;s root &mdash; inside the component every path is relative to the mount point: <code>&lt;user-card data-wcs="state: user"&gt;</code> makes <code>name</code> inside <em>be</em> <code>user.name</code> (reads, writes, getters and <code>for:</code> included). In a loop, mount the row itself: <code>&lt;user-row data-wcs="state: ."&gt;</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>); the component&rsquo;s own keys stay <strong>private</strong> and shadowing a mount-point key warns once (<code>wcs/mount-own-key-shadow</code>). An array cannot be the mount root in 1.x &mdash; mount the row or the object holding the array.</p>
+      <p class="ja">プロパティを1つずつ結線する代わりに、<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする &mdash; 内側ではすべてのパスがマウント点からの相対になる。<code>&lt;user-card data-wcs="state: user"&gt;</code>なら内側の<code>name</code>は<em>そのまま</em><code>user.name</code>(読み・書き・getter・<code>for:</code>を含む)。ループでは行そのものをマウントする: <code>&lt;user-row data-wcs="state: ."&gt;</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>のまま、マウント先のキーを隠すと一度だけ警告される(<code>wcs/mount-own-key-shadow</code>)。1.xでは配列をマウントルートにできない &mdash; 行か、配列を持つオブジェクトをマウントする。</p>
 
       <h3>Declarative Custom Components (DCC)</h3>
       <p>Define a reusable custom element <strong>entirely in HTML</strong> with <code>data-wc-definition</code>. Each instance gets its own state; <code>$bindables</code> declares the properties exposed through the <code>wc-bindable</code> protocol (with <code>CustomEvent</code> dispatch like <code>my-counter:count-changed</code>).</p>
