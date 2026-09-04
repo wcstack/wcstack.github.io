@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v1.33.0</span>
+        <span class="pill accent">v2.0.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -426,16 +426,18 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
         <li><code>setInitialState()</code> &rarr; programmatic API</li>
       </ol>
 
-      <h3>Named state <span style="font-size:0.7em;opacity:0.75">(deprecated in v1.33.0 &mdash; removed in v2)</span></h3>
-      <p>Give a state a <code>name</code> and address it from anywhere with <code>path@name</code>. <strong>Deprecated as of v1.33.0</strong>: the name is a second axis next to the path, and v2 removes it in favor of mounts (<code>&lt;wcs-state mount="cart"&gt;</code> grafts the state onto the root tree; bindings read <code>cart.total</code>). Nothing changes in 1.x &mdash; the linter reports each site as <code>wcs/named-state-deprecated</code> with its replacement, and a <code>@default</code> selector can simply be dropped. Avoid the form in new code; Light DOM <code>bind-component</code>, where <code>name</code> is still required, is exempt.</p>
-      <p class="ja">nameを付けると、どこからでもpath@nameで参照できる。<strong>v1.33.0で非推奨</strong>: nameはパスの隣の第二の軸であり、v2はこれをmount(<code>&lt;wcs-state mount="cart"&gt;</code>がstateをルートの木に接ぎ木し、バインディングは<code>cart.total</code>と読む)に置き換えて削除する。1.xでは何も変わらない &mdash; linterが各使用箇所を<code>wcs/named-state-deprecated</code>として置き換え付きで報告し、<code>@default</code>セレクタは単に外せばよい。新しいコードでは使わないこと。<code>name</code>が今も必須のLight DOM <code>bind-component</code>は対象外。</p>
+      <h3>Mounting additional state (<code>mount</code>)</h3>
+      <p>There is <strong>one state tree per root</strong>. To split state across modules, mount a <strong>volume</strong>: its data is grafted onto the root tree at the mount path, and bindings read it by prefix. This is <code>mount /dev/sdb1 /mnt/data</code>, not a second namespace. The root <code>&lt;wcs-state&gt;</code> is required (it may be empty), <strong>load order does not matter</strong> &mdash; a volume connected before the root is grafted when the root registers &mdash; and mount paths are static (<code>*</code>, <code>$</code>, <code>#</code>, <code>@</code> are rejected). A volume carries its own getters, <code>$watch</code>, <code>$listKeys</code>, <code>$updatedCallback</code> and lifecycle callbacks, all relative to its mount point.</p>
+      <p class="ja">stateの木は<strong>ルートごとに1本</strong>。モジュールに分けるときは<strong>ボリューム</strong>をマウントする。データはルートの木のマウントパスに接ぎ木され、バインディングは接頭辞付きのパスで読む。第二の名前空間ではなく<code>mount /dev/sdb1 /mnt/data</code>である。ルートの<code>&lt;wcs-state&gt;</code>は必須(空でよい)で、<strong>ロード順は問わない</strong> &mdash; ルートより先に接続されたボリュームはルート登録時に接ぎ木される &mdash; マウントパスは静的(<code>*</code> <code>$</code> <code>#</code> <code>@</code>は不可)。ボリュームは自分のgetter・<code>$watch</code>・<code>$listKeys</code>・<code>$updatedCallback</code>・ライフサイクルを、すべてマウント点からの相対で持つ。</p>
       <div class="code-block">
-        <div class="code-header"><span class="filename">index.html</span><span>Named state (legacy)</span></div>
-<pre><code class="language-html">&lt;wcs-state name="cart"&gt;...&lt;/wcs-state&gt;
+        <div class="code-header"><span class="filename">index.html</span><span>Volume mount</span></div>
+<pre><code class="language-html">&lt;wcs-state src="./app.js"&gt;&lt;/wcs-state&gt;
+&lt;wcs-state mount="cart" src="./cart.js"&gt;&lt;/wcs-state&gt;
 
-&lt;div data-wcs="textContent: total@cart"&gt;&lt;/div&gt;</code></pre>
+&lt;div data-wcs="textContent: cart.total"&gt;&lt;/div&gt;</code></pre>
       </div>
-
+      <p><strong>Migrating from v1 named state.</strong> <code>name=</code> and <code>path@name</code> were removed in v2: <code>name="cart"</code> becomes <code>mount="cart"</code>, <code>total@cart</code> becomes <code>cart.total</code>, and <code>@default</code> simply drops. The runtime fails fast on <code>name=</code> and treats <code>@</code> in a path as a parse error, both printing the replacement, and <code>wcs/named-state-deprecated</code> lists every remaining site as a lint <strong>error</strong>. One volume caveat: <code>$streams</code> raises on a volume, and <code>$commandTokens</code> / <code>$eventTokens</code> / <code>$on</code> belong on the root &mdash; those are the only declarations that are not a plain rename.</p>
+      <p class="ja"><strong>v1のnamed stateからの移行。</strong> <code>name=</code>と<code>path@name</code>はv2で削除された。<code>name="cart"</code>は<code>mount="cart"</code>に、<code>total@cart</code>は<code>cart.total</code>に、<code>@default</code>は単に外す。ランタイムは<code>name=</code>で即座に失敗し、パス中の<code>@</code>はparse errorになり、どちらも置き換え先を表示する。残った箇所は<code>wcs/named-state-deprecated</code>がlintの<strong>error</strong>として列挙する。ボリュームでの注意は1つ &mdash; <code>$streams</code>はボリュームでは不可、<code>$commandTokens</code> / <code>$eventTokens</code> / <code>$on</code>はルートに置く。単純なリネームで済まないのはこの4つだけ。</p>
       <h3>Lifecycle hooks</h3>
       <div class="code-block">
         <div class="code-header"><span class="filename">state.js</span><span>Lifecycle</span></div>
@@ -856,7 +858,7 @@ removeItem(event, index) {
           <tr><td>Batches coalesce</td><td><code>a &rarr; b &rarr; c</code> in one batch fires once with <code>cur = c</code>, <code>prev = a</code></td></tr>
           <tr><td>Row watches want <code>$listKeys</code></td><td>Without it a whole-array assignment fires every row with <code>prev === undefined</code>; <strong>headless</strong> row watching (no rendered <code>for</code>) fires <em>zero</em> times without it</td></tr>
           <tr><td>Wildcard getters stay lazy</td><td><code>items.*.tax</code> is not primed (that would sweep the list) &mdash; it fires only when also DOM-bound</td></tr>
-          <tr><td>Mapped <code>bind-component</code> children excluded</td><td>The mapping proxy blanks <code>$</code>-prefixed properties, so the declaration never arrives (same for <code>$streams</code>)</td></tr>
+          <tr><td>Mounted <code>bind-component</code> scopes excluded</td><td>A mounted scope does not execute declaration surfaces &mdash; the declaration is ignored with a one-time console warning (same for <code>$streams</code>). Declare on the root, or on a volume</td></tr>
         </table>
       </div>
       <p>Tooling follows the declaration: <code>@wcstack/lint</code> and the VS Code extension check every <code>$watch</code> key statically (<code>wcs/watch-declaration-invalid</code>, <code>wcs/watch-path-missing</code>) &mdash; worth heeding, because a <code>$watch</code> typo does not fail visibly the way a binding typo does; it just never fires. The devtools timeline records <code>watch-error</code> and <code>watch-chain-limit</code> events, and as of v1.29.0 firing itself is measured: the runtime emits <code>state:watch-fired</code>, and the devtools coverage tab joins declared keys against it &mdash; each path shows <em>fired &times;N</em>, <em>never</em>, or <em>prerequisite-missing</em>, kept distinct from &ldquo;never&rdquo;. Since v1.30.0 that prerequisite is exact: a wildcard&rsquo;s list counts as satisfied when it is <code>for</code>-bound <strong>or</strong> <code>$listKeys</code>-declared &mdash; the same two conditions the rules table states &mdash; and when neither holds the note says assertively that the watch can never fire. Since v1.28.0 the runtime&rsquo;s own declaration errors carry the same <code>[wcs/watch-declaration-invalid]</code> code plus a lint pointer, so console and CLI speak one vocabulary.</p>
@@ -890,8 +892,8 @@ customElements.define("my-component", MyComponent);</code></pre>
       </div>
 
       <h3>Light DOM component</h3>
-      <p>Light DOM shares the namespace with the parent, so a <code>name</code> attribute is required and bindings use <code>@name</code>. Since v1.27.0 the mapped form is treated as <strong>its own binding scope</strong>, so binding it from the host (below) works just as it does for Shadow DOM &mdash; it used to deadlock. Two structural constraints remain: two instances carrying the same <code>name</code> cannot live in one scope (use Shadow DOM for a component stamped on every row), and <code>getBindingsReady(root)</code> does not cover the component's scope &mdash; the same contract as Shadow DOM, where the child lives in a different rootNode.</p>
-      <p class="ja">Light DOMは親と名前空間を共有するため、name属性が必須。@nameで参照する。v1.27.0以降、マップされたLight DOMコンポーネントは<strong>独立したバインディングスコープ</strong>として扱われ、ホストからのバインド(下記)がShadow DOMと同じように動く(以前はデッドロックしていた)。残る制約は構造的なもので、同じ<code>name</code>を持つ2インスタンスは1スコープに共存できない(リストの各行に置くならShadow DOMを使う)。また<code>getBindingsReady(root)</code>はコンポーネントのスコープを覆わない &mdash; 子が別rootNodeにいるShadow DOM形式と同じ契約。</p>
+      <p>In v2 a Light DOM component is written <strong>exactly like the Shadow one</strong> &mdash; no <code>name</code>, no <code>@</code> references. Scope is decided by position in the DOM, so the v1 rule &ldquo;two instances carrying the same <code>name</code> cannot share a scope, use Shadow DOM for a component stamped on every row&rdquo; is gone with the registry that caused it: the same Light DOM component can sit on every row of a list. The host <strong>must</strong> wire it, though &mdash; a plain, unwired Light DOM <code>bind-component</code> cannot exist in v2, because an independent tree cannot share the parent&rsquo;s root; it fails loudly with the fix (attach a shadow root, or mount it from the host). <code>getBindingsReady(root)</code> now covers mounted scopes once the mount record resolves.</p>
+      <p class="ja">v2ではLight DOMコンポーネントは<strong>Shadowと完全に同じ書き方</strong>になる &mdash; <code>name</code>も<code>@</code>参照も要らない。スコープはDOM上の位置で決まるので、「同じ<code>name</code>の2インスタンスは1スコープに共存できない、リストの各行に置くならShadow DOMを使え」というv1の制約は、その原因だったレジストリごと消えた。同じLight DOMコンポーネントをリストの全行に置ける。ただしホストが<strong>必ず</strong>配線すること &mdash; 配線のない素のLight DOM <code>bind-component</code>はv2では存在できない(独立した木は親のルートを共有できないため)。修正方法つきで大きく失敗する(shadow rootを付けるか、ホストからマウントする)。<code>getBindingsReady(root)</code>はマウント記録が解決すればマウント配下も覆う。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">my-light-component.js</span><span>Light DOM</span></div>
 <pre><code class="language-javascript">class MyLightComponent extends HTMLElement {
@@ -899,15 +901,17 @@ customElements.define("my-component", MyComponent);</code></pre>
 
   connectedCallback() {
     this.innerHTML = `
-      &lt;wcs-state bind-component="state" name="my-light"&gt;&lt;/wcs-state&gt;
-      &lt;div data-wcs="text: message@my-light"&gt;&lt;/div&gt;
-      &lt;input type="text" data-wcs="value: message@my-light" /&gt;
+      &lt;wcs-state bind-component="state"&gt;&lt;/wcs-state&gt;
+      &lt;div data-wcs="text: message"&gt;&lt;/div&gt;
+      &lt;input type="text" data-wcs="value: message" /&gt;
     `;
   }
 }
-customElements.define("my-light-component", MyLightComponent);</code></pre>
-      </div>
+customElements.define("my-light-component", MyLightComponent);
 
+// the host wires it: &lt;my-light-component data-wcs="state: user"&gt;
+//                or &lt;my-light-component data-wcs="state.message: user.name"&gt;</code></pre>
+      </div>
       <h3>Host binding</h3>
       <p>The parent page binds into a component's state from outside &mdash; still just paths.</p>
       <div class="code-block">
@@ -922,9 +926,9 @@ customElements.define("my-light-component", MyLightComponent);</code></pre>
       </div>
       <p>A standalone component can await readiness with <code>async $stateReadyCallback(stateProp)</code>.</p>
 
-      <h3>Whole-object mount: <code>state: path</code> <span style="font-size:0.7em;opacity:0.75">(v1.33.0)</span></h3>
-      <p>Instead of wiring property by property, mount a <strong>whole subtree</strong> as the component&rsquo;s root &mdash; inside the component every path is relative to the mount point: <code>&lt;user-card data-wcs="state: user"&gt;</code> makes <code>name</code> inside <em>be</em> <code>user.name</code> (reads, writes, getters and <code>for:</code> included). In a loop, mount the row itself: <code>&lt;user-row data-wcs="state: ."&gt;</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>); the component&rsquo;s own keys stay <strong>private</strong> and shadowing a mount-point key warns once (<code>wcs/mount-own-key-shadow</code>). An array cannot be the mount root in 1.x &mdash; mount the row or the object holding the array.</p>
-      <p class="ja">プロパティを1つずつ結線する代わりに、<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする &mdash; 内側ではすべてのパスがマウント点からの相対になる。<code>&lt;user-card data-wcs="state: user"&gt;</code>なら内側の<code>name</code>は<em>そのまま</em><code>user.name</code>(読み・書き・getter・<code>for:</code>を含む)。ループでは行そのものをマウントする: <code>&lt;user-row data-wcs="state: ."&gt;</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>のまま、マウント先のキーを隠すと一度だけ警告される(<code>wcs/mount-own-key-shadow</code>)。1.xでは配列をマウントルートにできない &mdash; 行か、配列を持つオブジェクトをマウントする。</p>
+      <h3>Whole-object mount: <code>state: path</code></h3>
+      <p>Instead of wiring property by property, mount a <strong>whole subtree</strong> as the component&rsquo;s root &mdash; inside the component every path is relative to the mount point: <code>&lt;user-card data-wcs="state: user"&gt;</code> makes <code>name</code> inside <em>be</em> <code>user.name</code> (reads, writes, getters and <code>for:</code> included). In a loop, mount the row itself: <code>&lt;user-row data-wcs="state: ."&gt;</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>); the component&rsquo;s own keys stay <strong>private</strong> and shadowing a mount-point key warns once (<code>wcs/mount-own-key-shadow</code>). An array cannot be the mount root &mdash; mount the row or the object holding the array. Rule R1 is strict: a default declared for a <em>mapped</em> key keeps that key private and hides the host value, so drop the default to read the tree.</p>
+      <p class="ja">プロパティを1つずつ結線する代わりに、<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする &mdash; 内側ではすべてのパスがマウント点からの相対になる。<code>&lt;user-card data-wcs="state: user"&gt;</code>なら内側の<code>name</code>は<em>そのまま</em><code>user.name</code>(読み・書き・getter・<code>for:</code>を含む)。ループでは行そのものをマウントする: <code>&lt;user-row data-wcs="state: ."&gt;</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>のまま、マウント先のキーを隠すと一度だけ警告される(<code>wcs/mount-own-key-shadow</code>)。配列をマウントルートにはできない &mdash; 行か、配列を持つオブジェクトをマウントする。規則R1は厳格で、<em>mapped</em>なキーに既定値を宣言するとそのキーは私有になりホストの値を隠す。木を読みたいなら既定値を外すこと。</p>
 
       <h3>Declarative Custom Components (DCC)</h3>
       <p>Define a reusable custom element <strong>entirely in HTML</strong> with <code>data-wc-definition</code>. Each instance gets its own state; <code>$bindables</code> declares the properties exposed through the <code>wc-bindable</code> protocol (with <code>CustomEvent</code> dispatch like <code>my-counter:count-changed</code>).</p>
@@ -986,7 +990,7 @@ customElements.define("my-light-component", MyLightComponent);</code></pre>
           <tr><td>Spread (<code>...: obj</code>)</td><td>Available</td><td>Not available (needs a manifest)</td></tr>
         </table>
       </div>
-      <p><code>bind-component</code> components deliberately stay outside the wc-bindable protocol: they are wired by <strong>path</strong>, not by a declared property surface. That is why spread and command tokens, which both need a manifest, do not apply to them. A <code>bind-component</code> child placed inside a parent <code>for:</code> can, since v1.26.0, iterate a list handed to it from that row with a <code>for:</code> of its own &mdash; and v1.27.0 extends this to <strong>any depth and stacking</strong>: components inside components stack scopes, the base list index composes across every boundary, and an intermediate component that only passes the array through still delivers row-field writes to the rows at the bottom. Loop indexes stay scope-local (<code>$1</code>, handler indexes, <code>$getAll</code> all report positions within the component's own scope), so a component's author never has to know how deeply it is placed. One consequence of the mapping proxy: a mapped child cannot declare <code>$watch</code> or <code>$streams</code> &mdash; declare them on the host state.</p>
+      <p><code>bind-component</code> components deliberately stay outside the wc-bindable protocol: they are wired by <strong>path</strong>, not by a declared property surface. That is why spread and command tokens, which both need a manifest, do not apply to them. A <code>bind-component</code> child placed inside a parent <code>for:</code> can, since v1.26.0, iterate a list handed to it from that row with a <code>for:</code> of its own &mdash; and v1.27.0 extends this to <strong>any depth and stacking</strong>: components inside components stack scopes, the base list index composes across every boundary, and an intermediate component that only passes the array through still delivers row-field writes to the rows at the bottom. Loop indexes stay scope-local (<code>$1</code>, handler indexes, <code>$getAll</code> all report positions within the component's own scope), so a component's author never has to know how deeply it is placed. One consequence of mounting: a mounted scope does not execute declaration surfaces, so <code>$watch</code> and <code>$streams</code> there are ignored with a one-time warning &mdash; declare them on the root state, or on a volume.</p>
       <p class="ja"><code>bind-component</code>のコンポーネントは意図的にwc-bindableプロトコルの外にいる。宣言されたプロパティ面ではなく<strong>パス</strong>で結線されるため、マニフェストを要するspreadとコマンドトークンは適用されない。v1.26.0以降、親の<code>for:</code>の中に置いた<code>bind-component</code>の子は、その行から渡されたリストを自分の<code>for:</code>で回せる。v1.27.0はこれを<strong>任意の深さと積み重ね</strong>に拡張した。コンポーネントの中のコンポーネントはスコープを積み、基底のリストインデックスは境界ごとに合成され、配列を素通しするだけの中間コンポーネントがあっても行フィールドへの書き込みは最下層の行まで届く。ループインデックスはスコープ局所のまま(<code>$1</code>・ハンドラのインデックス・<code>$getAll</code>はすべて自スコープ内の位置を報告する)なので、コンポーネントの作者は自分がどの深さに置かれるかを知らなくてよい。マッピングプロキシの帰結として、マップされた子は<code>$watch</code>と<code>$streams</code>を宣言できない &mdash; ホスト側のstateに宣言する。</p>
     </div>
   </section>

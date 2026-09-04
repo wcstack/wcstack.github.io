@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v1.33.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.0.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,64 +647,64 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v1.33.0</h2>
-      <p class="section-sub">One tree: components mount onto it, named state begins its exit, your TypeScript types reach the HTML, and the whole page tests headlessly.</p>
-      <p class="section-sub-ja">木はひとつ。コンポーネントはそこにマウントされ、named stateは退場を始め、TypeScriptの型はHTMLに届き、ページ全体がヘッドレスにテストできる。</p>
+      <h2 class="section-title">Shipped in v2.0.0</h2>
+      <p class="section-sub">One state tree per root. Extend it by mounting, never by naming &mdash; and the bridging layer between components is gone.</p>
+      <p class="section-sub-ja">stateはルートごとに1本の木。拡張はマウントで行い、名前では行わない &mdash; そしてコンポーネント間の橋渡し層は消えた。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v1.33.0</span>
-          <span class="tag-name">state: path</span>
-          <h3>Components mount onto the tree</h3>
-          <p class="what-if">What if handing a component its data was one path?</p>
-          <p><code>&lt;user-card data-wcs="state: user"&gt;</code> mounts a <strong>whole subtree</strong> of the host&rsquo;s state as the component&rsquo;s root: inside, <code>name</code> <em>is</em> <code>user.name</code> &mdash; reads, writes, getters and <code>for:</code> all resolve against the tree, and host-side writes reach the component. In a loop, mount the row itself: <code>state: .</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>), and the component&rsquo;s own keys stay <strong>private</strong> (rule R1) &mdash; shadowing a mount-point key warns once as <code>wcs/mount-own-key-shadow</code>. The same one-segment binding was a silent no-op before v1.33.0; now it is the root rule of the mount design, and the invariant it carries into v2: a mounted component&rsquo;s bindings are indistinguishable from the template inlined at the mount point.</p>
-          <p class="ja"><code>&lt;user-card data-wcs="state: user"&gt;</code>はホストのstateの<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする。内側では<code>name</code>が<em>そのまま</em><code>user.name</code> &mdash; 読み・書き・getter・<code>for:</code>のすべてが木に対して解決され、ホスト側の書き込みはコンポーネントに届く。ループの中では行そのものをマウントする: <code>state: .</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>(規則R1) &mdash; マウント先のキーを隠すと<code>wcs/mount-own-key-shadow</code>が一度だけ警告する。この1セグメントのバインディングはv1.33.0以前は無言のno-opだった。いまやmount設計のルート規則であり、v2へ持ち越される不変条件を運ぶ: マウントされたコンポーネントのバインディングは、マウント点にインライン展開されたテンプレートと区別がつかない。</p>
+          <span class="topic-ver">v2.0.0</span>
+          <span class="tag-name">&lt;wcs-state mount&gt;</span>
+          <h3>One tree, extended by mounting</h3>
+          <p class="what-if">What if state had a filesystem root instead of drive letters?</p>
+          <p><code>&lt;wcs-state mount="cart" src="./cart.js"&gt;</code> grafts a module&rsquo;s state onto the root tree at <code>cart</code>, and bindings read it as an ordinary path: <code>cart.total</code>. That is the whole mechanism &mdash; <code>mount /dev/sdb1 /mnt/data</code>, not a second namespace. A volume brings getters, <code>$watch</code>, <code>$listKeys</code>, <code>$updatedCallback</code> and lifecycle callbacks, all relative to its own mount path, and <strong>load order does not matter</strong>: a volume that connects before the root is grafted when the root registers, and reads under a pending mount return <code>undefined</code> without a false path warning. Because there is only one tree, a root getter reading <code>this["cart.total"]</code> tracks the dependency like any other &mdash; the cross-state read problem disappears along with the second axis.</p>
+          <p class="ja"><code>&lt;wcs-state mount="cart" src="./cart.js"&gt;</code>はモジュールのstateをルートの木の<code>cart</code>に接ぎ木し、バインディングはただのパスとして読む: <code>cart.total</code>。機構はそれだけだ &mdash; 第二の名前空間ではなく<code>mount /dev/sdb1 /mnt/data</code>。ボリュームはgetter・<code>$watch</code>・<code>$listKeys</code>・<code>$updatedCallback</code>・ライフサイクルを、すべて自分のマウントパス相対で持ち込む。そして<strong>ロード順は問わない</strong>: ルートより先に接続されたボリュームはルート登録時に接ぎ木され、保留中のマウント配下の読みは偽の警告なしに<code>undefined</code>を返す。木が1本しかないので、ルートのgetterが<code>this["cart.total"]</code>と読めば依存は普通に張られる &mdash; クロスstate読み取りの問題は第二の軸ごと消滅した。</p>
           <ul class="tag-features">
-            <li>One Path, Whole Subtree</li>
-            <li>state: . Mounts the Row</li>
-            <li>Own Keys Stay Private</li>
-            <li>Longest Prefix Wins</li>
+            <li>Graft, Don&rsquo;t Namespace</li>
+            <li>Load Order Irrelevant</li>
+            <li>Declarations Go Relative</li>
+            <li>Cross-module Reads Are Paths</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.33.0</span>
-          <span class="tag-name">wcs/named-state-deprecated</span>
-          <h3>Named state begins its exit</h3>
-          <p class="what-if">What if the tree needed no second axis?</p>
-          <p>The <code>name</code> attribute and the <code>@name</code> selector were a second axis next to the path &mdash; a flat per-rootNode registry that does not cross shadow boundaries: a drive letter, not a filesystem root. v2 removes them in favor of mounts (<code>&lt;wcs-state mount="cart"&gt;</code> grafts a state onto the root tree; bindings read <code>cart.total</code>). Nothing changes in 1.x: the linter reports every site as <code>wcs/named-state-deprecated</code> with its per-site replacement, the runtime warns only under <code>config.debug</code>, a <code>@default</code> selector simply drops, and Light DOM <code>bind-component</code> &mdash; where <code>name</code> is still required today &mdash; is exempt. One tree per root, extended only by mounting: the Unix correspondence, minus the second drive.</p>
-          <p class="ja"><code>name</code>属性と<code>@name</code>セレクタはパスの隣にある第二の軸だった &mdash; shadow境界を越えない、rootNodeごとのフラットなレジストリ。ファイルシステムのルートではなくドライブレターだ。v2はこれをmountに置き換える(<code>&lt;wcs-state mount="cart"&gt;</code>がstateをルートの木に接ぎ木し、バインディングは<code>cart.total</code>と読む)。1.xでは何も変わらない。linterが全使用箇所を<code>wcs/named-state-deprecated</code>として置き換え付きで報告し、ランタイムは<code>config.debug</code>下でのみ警告し、<code>@default</code>セレクタは単に外せばよく、今日も<code>name</code>が必須のLight DOM <code>bind-component</code>は対象外。木はルートごとに1つ、拡張はマウントだけ &mdash; 第二のドライブを除いた、Unixとの対応。</p>
+          <span class="topic-ver">v2.0.0</span>
+          <span class="tag-name">name= &rarr; mount=</span>
+          <h3>The drive letter is gone</h3>
+          <p class="what-if">What if a component never needed a name to be found?</p>
+          <p><code>name=</code> and <code>path@name</code> are removed. <code>name=</code> now fails fast and <code>@</code> anywhere in a path is a parse error &mdash; each printing the exact replacement, with <code>wcs/named-state-deprecated</code> raised to a lint <strong>error</strong> so the whole migration is a machine-generated list. The rewrite is mechanical: <code>name="x"</code> &rarr; <code>mount="x"</code>, <code>total@cart</code> &rarr; <code>cart.total</code>, <code>@default</code> just drops. The clearest win lands on <strong>Light DOM components</strong>: scope is now decided by position in the DOM, so they are written exactly like Shadow ones &mdash; no <code>name</code>, no <code>@</code> &mdash; and the v1 rule &ldquo;a component on every row of a list needs Shadow DOM&rdquo; is gone with the registry that caused it.</p>
+          <p class="ja"><code>name=</code>と<code>path@name</code>は削除された。<code>name=</code>は即座に失敗し、パス中の<code>@</code>はparse errorになる &mdash; どちらも正確な置き換え先を表示し、<code>wcs/named-state-deprecated</code>はlintの<strong>error</strong>に昇格したので、移行作業そのものが機械生成のリストになる。書き換えは機械的だ: <code>name="x"</code> &rarr; <code>mount="x"</code>、<code>total@cart</code> &rarr; <code>cart.total</code>、<code>@default</code>は単に外す。最も分かりやすい恩恵は<strong>Light DOMコンポーネント</strong>にある: スコープはDOM上の位置で決まるようになったので、Shadowと完全に同じ書き方になり &mdash; <code>name</code>も<code>@</code>も要らない &mdash; 「リストの各行に置くならShadow DOMを使え」というv1の制約は、その原因だったレジストリごと消えた。</p>
           <ul class="tag-features">
-            <li>Removed in v2</li>
-            <li>Per-site Replacement Shown</li>
-            <li>@default Just Drops</li>
-            <li>Light DOM Exempt</li>
+            <li>Fail Fast, With the Fix</li>
+            <li>Lint Lists Every Site</li>
+            <li>Light DOM = Shadow Form</li>
+            <li>One Per Row Is Fine</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.33.0</span>
-          <span class="tag-name">@wcstack/typescript</span>
-          <h3>Your types reach the HTML</h3>
-          <p class="what-if">What if a state type checked the paths in your markup?</p>
-          <p>A TypeScript state file already knows every path and its type &mdash; but HTML cannot consume a <code>.d.ts</code>, so <code>users: [] as &#123; name: string &#125;[]</code> left <code>users.*.name</code> unresolvable: a real typo was only a warning and a correct binding got a false one. <code>wcs-schema emit src/state.ts</code> compiles the state with the TypeScript compiler API and writes the <code>stateSchema</code> sidecar the validator consumes &mdash; typos become <code>wcs/path-nonexistent</code> <strong>errors</strong>, <code>for:</code> on a non-array becomes <code>wcs/path-type-mismatch</code>, and <code>wcs-schema check</code> fails CI when type and manifest drift. <code>wcs-tsc</code> runs tsc over the <code>&lt;wcs-state&gt;</code> inline scripts themselves (typed <code>this</code>, diagnostics pointing into the HTML), the new <code>--strict</code> flag moves the exit-code threshold to warnings, and every element package now augments <code>HTMLElementTagNameMap</code>. The pipeline: <code>wcs-schema check &amp;&amp; wcs-validate --strict</code>.</p>
-          <p class="ja">TypeScriptのstateファイルはすべてのパスと型を既に知っている &mdash; だがHTMLは<code>.d.ts</code>を読めず、<code>users: [] as &#123; name: string &#125;[]</code>の<code>users.*.name</code>は解決不能だった。本物のタイプミスはwarning止まり、正しいバインディングには偽のwarning。<code>wcs-schema emit src/state.ts</code>はstateをTypeScriptコンパイラAPIでコンパイルし、バリデータが消費する<code>stateSchema</code>サイドカーを書き出す &mdash; タイプミスは<code>wcs/path-nonexistent</code>の<strong>error</strong>になり、非配列への<code>for:</code>は<code>wcs/path-type-mismatch</code>になり、型とマニフェストのドリフトは<code>wcs-schema check</code>がCIで落とす。<code>wcs-tsc</code>は<code>&lt;wcs-state&gt;</code>のインラインスクリプト自体にtscを走らせ(型付き<code>this</code>、診断はHTML内の行を指す)、新しい<code>--strict</code>フラグはexit codeの閾値をwarningに引き下げ、全要素パッケージが<code>HTMLElementTagNameMap</code>を拡張する。パイプラインは<code>wcs-schema check &amp;&amp; wcs-validate --strict</code>。</p>
+          <span class="topic-ver">v2.0.0</span>
+          <span class="tag-name">one ledger</span>
+          <h3>The bridge between components is gone</h3>
+          <p class="what-if">What if a mounted component were indistinguishable from inlined markup?</p>
+          <p>That is the invariant v2 is built on, and it removes an entire layer. v1 connected a child state to a parent through inner/outer proxies, derived mapping rules, a cross-boundary address stack and piggyback registration &mdash; <strong>1,327 lines</strong> whose whole job was translation. In v2 a mounted component&rsquo;s bindings are composed into <strong>absolute paths at registration time</strong> and land in the parent&rsquo;s single ledger: three boundaries deep still registers once, and the caches a mapped child could never hold now simply apply. Measured on a list whose rows are components: <strong>create1k &minus;24%</strong>, <strong>update &minus;45%</strong>, <strong>&minus;1.5&nbsp;KB per row</strong> on the heap. Pages with no components and no volumes are <strong>unchanged</strong> &mdash; a gated design constraint, not a hope.</p>
+          <p class="ja">これがv2の土台にある不変条件であり、これが一つの層をまるごと取り除いた。v1は子のstateと親を、inner/outer proxy・派生マッピング規則・越境アドレススタック・相乗り登録でつないでいた &mdash; 翻訳だけが仕事の<strong>1,327行</strong>。v2ではマウントされたコンポーネントのバインディングは<strong>登録時に絶対パスへ合成</strong>され、親の単一の台帳に載る: 境界3枚を越えても登録は1回で、mappedな子が決して持てなかったキャッシュがそのまま効く。行がコンポーネントであるリストでの実測: <strong>create1k &minus;24%</strong>、<strong>update &minus;45%</strong>、ヒープは<strong>1行あたり&minus;1.5&nbsp;KB</strong>。コンポーネントもボリュームも無いページは<strong>不変</strong> &mdash; 願望ではなく、計測でゲートされた設計制約である。</p>
           <ul class="tag-features">
-            <li>Type &rarr; Sidecar &rarr; Error</li>
-            <li>tsc Inside Your HTML</li>
-            <li>--strict Gates Warnings</li>
-            <li>Typed querySelector</li>
+            <li>&minus;1,327 Lines of Bridging</li>
+            <li>Absolute Paths, One Ledger</li>
+            <li>create1k &minus;24% / update &minus;45%</li>
+            <li>Plain Pages Unchanged</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v1.33.0</span>
-          <span class="tag-name">@wcstack/testing</span>
-          <h3>The whole page, tested headlessly</h3>
-          <p class="what-if">What if testing a page were one import?</p>
-          <p>A <code>&lt;wcs-state&gt;</code> page is plain DOM, so it already tests under vitest + happy-dom with no browser and no test-only API &mdash; the bare recipes are in the state README, pinned by a contract test that executes the same lines. <code>@wcstack/testing</code> packages recipe 1: <code>mount(html)</code> registers the elements and waits with the same stabilization loop <code>renderToString</code> uses &mdash; <code>&lt;wcs-router&gt;</code>&rsquo;s first route, a <code>$connectedCallback</code> that inserts more elements, and every binding, covered by one call. Then <code>app.state().write(s =&gt; &#123; s.count = 42 &#125;)</code> does what a handler does, <code>fire(button, "click")</code> does what a user does, <code>settle()</code> lets the batch drain, and <code>root: "shadow"</code> scopes the whole test to a fresh shadow root.</p>
-          <p class="ja"><code>&lt;wcs-state&gt;</code>のページはただのDOMだから、ブラウザなし・テスト専用APIなしで、vitest + happy-domの下で既にテストできる &mdash; 素のレシピはstateのREADMEにあり、同じ行を実行する契約テストで固定されている。<code>@wcstack/testing</code>はそのレシピ1をパッケージ化した。<code>mount(html)</code>は要素を登録し、<code>renderToString</code>が使うのと同じ安定化ループで待つ &mdash; <code>&lt;wcs-router&gt;</code>の初期ルートも、要素を追加挿入する<code>$connectedCallback</code>も、すべてのバインディングも、1回の呼び出しでカバーされる。あとは<code>app.state().write(s =&gt; &#123; s.count = 42 &#125;)</code>がハンドラのやることを、<code>fire(button, "click")</code>がユーザーのやることをやり、<code>settle()</code>でバッチが流れ、<code>root: "shadow"</code>はテスト全体を新しいshadow rootに閉じ込める。</p>
+          <span class="topic-ver">v2.0.0</span>
+          <span class="tag-name">semver</span>
+          <h3>What we promise, written down</h3>
+          <p class="what-if">What if the first breaking release also said what breaking means?</p>
+          <p>Every package shares one version and ships in lockstep, so the first major is the right moment to state the contract. <strong>Covered by semver</strong>: the <code>data-wcs</code> syntax and its documented semantics, each package&rsquo;s element surface (tag names, attributes, <code>static wcBindable</code>), the interop protocols (wc-bindable, command-token, event-token, transition-runner, binder, ssr-snapshot), and the tooling contracts (manifest <code>schemaVersion</code>, the <code>wcs-schema</code> / <code>wcs-tsc</code> CLIs, the <code>@wcstack/testing</code> API). <strong>Not covered</strong>: internal module layout, console message wording, performance characteristics. And the deprecation practice is the one v2 just followed &mdash; a surface is flagged for at least one minor, with a lint rule and a runtime notice pointing at its replacement, before the next major removes it.</p>
+          <p class="ja">全パッケージはバージョンを共有しlockstepでリリースされる。だから最初のメジャーは契約を明文化すべき時だ。<strong>semverの保証対象</strong>: <code>data-wcs</code>構文とその文書化された意味論、各パッケージの要素表面(タグ名・属性・<code>static wcBindable</code>)、相互運用プロトコル(wc-bindable, command-token, event-token, transition-runner, binder, ssr-snapshot)、ツール契約(manifestの<code>schemaVersion</code>、<code>wcs-schema</code> / <code>wcs-tsc</code> CLI、<code>@wcstack/testing</code> API)。<strong>対象外</strong>: 内部モジュール構成、コンソールメッセージの文言、性能特性。そしてdeprecationの運用は、v2がいま実行したそれだ &mdash; 表面は削除の前に最低1つのminorで予告され、lintルールとランタイム通知が置き換え先を指す。</p>
           <ul class="tag-features">
-            <li>No Browser, No Test API</li>
-            <li>One Call Waits for All</li>
-            <li>write() = a Handler</li>
-            <li>fire() = a User</li>
+            <li>One Version, Lockstep</li>
+            <li>Syntax &amp; Protocols Covered</li>
+            <li>Internals Are Not</li>
+            <li>Flagged Before Removed</li>
           </ul>
         </div>
       </div>
