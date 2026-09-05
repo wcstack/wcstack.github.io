@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.0.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.1.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,64 +647,50 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v2.0.0</h2>
-      <p class="section-sub">One state tree per root. Extend it by mounting, never by naming &mdash; and the bridging layer between components is gone.</p>
-      <p class="section-sub-ja">stateはルートごとに1本の木。拡張はマウントで行い、名前では行わない &mdash; そしてコンポーネント間の橋渡し層は消えた。</p>
+      <h2 class="section-title">Shipped in v2.1.0</h2>
+      <p class="section-sub">A small additive release: the accessibility policies now do what they promised, a mount&rsquo;s private keys stay private all the way to the last channel, and devtools can finally see the overlay.</p>
+      <p class="section-sub-ja">小さな追加リリース。アクセシビリティのポリシーは約束どおりに動くようになり、マウントの私有キーは最後の経路まで私有のままで、devtoolsはついにオーバーレイを見られる。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v2.0.0</span>
-          <span class="tag-name">&lt;wcs-state mount&gt;</span>
-          <h3>One tree, extended by mounting</h3>
-          <p class="what-if">What if state had a filesystem root instead of drive letters?</p>
-          <p><code>&lt;wcs-state mount="cart" src="./cart.js"&gt;</code> grafts a module&rsquo;s state onto the root tree at <code>cart</code>, and bindings read it as an ordinary path: <code>cart.total</code>. That is the whole mechanism &mdash; <code>mount /dev/sdb1 /mnt/data</code>, not a second namespace. A volume brings getters, <code>$watch</code>, <code>$listKeys</code>, <code>$updatedCallback</code> and lifecycle callbacks, all relative to its own mount path, and <strong>load order does not matter</strong>: a volume that connects before the root is grafted when the root registers, and reads under a pending mount return <code>undefined</code> without a false path warning. Because there is only one tree, a root getter reading <code>this["cart.total"]</code> tracks the dependency like any other &mdash; the cross-state read problem disappears along with the second axis.</p>
-          <p class="ja"><code>&lt;wcs-state mount="cart" src="./cart.js"&gt;</code>はモジュールのstateをルートの木の<code>cart</code>に接ぎ木し、バインディングはただのパスとして読む: <code>cart.total</code>。機構はそれだけだ &mdash; 第二の名前空間ではなく<code>mount /dev/sdb1 /mnt/data</code>。ボリュームはgetter・<code>$watch</code>・<code>$listKeys</code>・<code>$updatedCallback</code>・ライフサイクルを、すべて自分のマウントパス相対で持ち込む。そして<strong>ロード順は問わない</strong>: ルートより先に接続されたボリュームはルート登録時に接ぎ木され、保留中のマウント配下の読みは偽の警告なしに<code>undefined</code>を返す。木が1本しかないので、ルートのgetterが<code>this["cart.total"]</code>と読めば依存は普通に張られる &mdash; クロスstate読み取りの問題は第二の軸ごと消滅した。</p>
+          <span class="topic-ver">v2.1.0</span>
+          <span class="tag-name">focus="heading"</span>
+          <h3>The focus reset, actually reset</h3>
+          <p class="what-if">What if opting into an accessibility policy could never make things worse?</p>
+          <p>It could, and now it cannot. Two holes closed. <strong>The gate did not match what ran</strong>: <em>any</em> <code>focus=</code> attribute made the router tell the Navigation API <code>focusReset: "manual"</code>, but only the exact value <code>"heading"</code> made the policy act &mdash; so <code>focus=""</code> or a typo switched off the browser&rsquo;s own reset and put nothing in its place. Now only <code>"heading"</code> activates, and anything else falls back to the browser. <strong>A route without a heading stranded focus</strong>: it stayed on the element you clicked, and a persistent nav <code>&lt;wcs-link&gt;</code> is the common case &mdash; leaving a screen reader on the previous screen. The router now reproduces the spec-default reset itself: first <code>[autofocus]</code>, else <code>&lt;body&gt;</code>. Hidden headings are skipped (focusing them was a no-op with the same result), and <code>&lt;wcs-link&gt;</code> mirrors <code>lang</code> / <code>dir</code> to its anchor so a multilingual nav announces in the right language.</p>
+          <p class="ja">悪化させうる状態だった。もうそうはならない。塞いだ穴は2つ。<strong>ゲートが実装と食い違っていた</strong>: <em>どの</em><code>focus=</code>属性でもrouterはNavigation APIに<code>focusReset: "manual"</code>を渡すのに、ポリシーが動くのは値がちょうど<code>"heading"</code>のときだけ &mdash; つまり<code>focus=""</code>やタイプミスは、ブラウザ自身のリセットを切った上で代わりに何もしなかった。いまは<code>"heading"</code>だけが有効化し、それ以外はブラウザ既定に戻る。<strong>見出しの無いルートはフォーカスを取り残した</strong>: クリックした要素に留まり続け、永続ナビの<code>&lt;wcs-link&gt;</code>が典型だった &mdash; スクリーンリーダーは前の画面に置き去りになる。routerはいまspec既定のリセットを自前で再現する: まず<code>[autofocus]</code>、無ければ<code>&lt;body&gt;</code>。非表示の見出しはスキップされ(フォーカスしても無効で同じ結果だった)、<code>&lt;wcs-link&gt;</code>は<code>lang</code> / <code>dir</code>をアンカーに転写するので、多言語ナビが正しい言語で読み上げられる。</p>
           <ul class="tag-features">
-            <li>Graft, Don&rsquo;t Namespace</li>
-            <li>Load Order Irrelevant</li>
-            <li>Declarations Go Relative</li>
-            <li>Cross-module Reads Are Paths</li>
+            <li>Exact Value or Browser Default</li>
+            <li>No Heading, Still Reset</li>
+            <li>Hidden Headings Skipped</li>
+            <li>lang / dir Reach the Anchor</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.0.0</span>
-          <span class="tag-name">name= &rarr; mount=</span>
-          <h3>The drive letter is gone</h3>
-          <p class="what-if">What if a component never needed a name to be found?</p>
-          <p><code>name=</code> and <code>path@name</code> are removed. <code>name=</code> now fails fast and <code>@</code> anywhere in a path is a parse error &mdash; each printing the exact replacement, with <code>wcs/named-state-deprecated</code> raised to a lint <strong>error</strong> so the whole migration is a machine-generated list. The rewrite is mechanical: <code>name="x"</code> &rarr; <code>mount="x"</code>, <code>total@cart</code> &rarr; <code>cart.total</code>, <code>@default</code> just drops. The clearest win lands on <strong>Light DOM components</strong>: scope is now decided by position in the DOM, so they are written exactly like Shadow ones &mdash; no <code>name</code>, no <code>@</code> &mdash; and the v1 rule &ldquo;a component on every row of a list needs Shadow DOM&rdquo; is gone with the registry that caused it.</p>
-          <p class="ja"><code>name=</code>と<code>path@name</code>は削除された。<code>name=</code>は即座に失敗し、パス中の<code>@</code>はparse errorになる &mdash; どちらも正確な置き換え先を表示し、<code>wcs/named-state-deprecated</code>はlintの<strong>error</strong>に昇格したので、移行作業そのものが機械生成のリストになる。書き換えは機械的だ: <code>name="x"</code> &rarr; <code>mount="x"</code>、<code>total@cart</code> &rarr; <code>cart.total</code>、<code>@default</code>は単に外す。最も分かりやすい恩恵は<strong>Light DOMコンポーネント</strong>にある: スコープはDOM上の位置で決まるようになったので、Shadowと完全に同じ書き方になり &mdash; <code>name</code>も<code>@</code>も要らない &mdash; 「リストの各行に置くならShadow DOMを使え」というv1の制約は、その原因だったレジストリごと消えた。</p>
+          <span class="topic-ver">v2.1.0</span>
+          <span class="tag-name">$updatedCallback</span>
+          <h3>Private keys stay private</h3>
+          <p class="what-if">What if privacy held all the way to the last channel?</p>
+          <p>A mounted component&rsquo;s own data keys are private to that mount instance (rule R1) &mdash; they live in a separate address space carrying a marker segment, <code>users.*.#m3.editing</code>, so they cannot collide with the tree. But those addresses were still being delivered to the root&rsquo;s <code>$updatedCallback</code>, where they are worse than useless: the <code>#m&lt;id&gt;</code> vocabulary means nothing outside the scope, and the id changes on every re-initialization, so no author could act on one. They are now filtered out at the delivery boundary, for both the root and a volume&rsquo;s relative callback. In the same pass, <code>IStateElement.name</code> and <code>State.get name()</code> were removed &mdash; dead surface that always returned <code>"default"</code> once the name dimension was gone.</p>
+          <p class="ja">マウントされたコンポーネント自身のデータキーは、そのマウントインスタンスに私有だ(規則R1) &mdash; マーカーセグメントを含む別のアドレス空間<code>users.*.#m3.editing</code>に載るので、木とは衝突しない。だがそのアドレスがルートの<code>$updatedCallback</code>には届いてしまっていた。そこでは無意味を通り越して有害で、<code>#m&lt;id&gt;</code>という語彙はスコープの外では意味を持たず、idは再初期化のたびに変わるので、作者は何も判断できない。いまは配送の境界で除外される。ルートでも、ボリュームの相対コールバックでも同じ。同じ整理で<code>IStateElement.name</code>と<code>State.get name()</code>が削除された &mdash; 名前の次元が消えた後は常に<code>"default"</code>を返すだけの死んだ表面だった。</p>
           <ul class="tag-features">
-            <li>Fail Fast, With the Fix</li>
-            <li>Lint Lists Every Site</li>
-            <li>Light DOM = Shadow Form</li>
-            <li>One Per Row Is Fine</li>
+            <li>Marker Paths Filtered Out</li>
+            <li>Root and Volume Alike</li>
+            <li>Unstable ids Never Escape</li>
+            <li>Dead name Surface Removed</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.0.0</span>
-          <span class="tag-name">one ledger</span>
-          <h3>The bridge between components is gone</h3>
-          <p class="what-if">What if a mounted component were indistinguishable from inlined markup?</p>
-          <p>That is the invariant v2 is built on, and it removes an entire layer. v1 connected a child state to a parent through inner/outer proxies, derived mapping rules, a cross-boundary address stack and piggyback registration &mdash; <strong>1,327 lines</strong> whose whole job was translation. In v2 a mounted component&rsquo;s bindings are composed into <strong>absolute paths at registration time</strong> and land in the parent&rsquo;s single ledger: three boundaries deep still registers once, and the caches a mapped child could never hold now simply apply. Measured on a list whose rows are components: <strong>create1k &minus;24%</strong>, <strong>update &minus;45%</strong>, <strong>&minus;1.5&nbsp;KB per row</strong> on the heap. Pages with no components and no volumes are <strong>unchanged</strong> &mdash; a gated design constraint, not a hope.</p>
-          <p class="ja">これがv2の土台にある不変条件であり、これが一つの層をまるごと取り除いた。v1は子のstateと親を、inner/outer proxy・派生マッピング規則・越境アドレススタック・相乗り登録でつないでいた &mdash; 翻訳だけが仕事の<strong>1,327行</strong>。v2ではマウントされたコンポーネントのバインディングは<strong>登録時に絶対パスへ合成</strong>され、親の単一の台帳に載る: 境界3枚を越えても登録は1回で、mappedな子が決して持てなかったキャッシュがそのまま効く。行がコンポーネントであるリストでの実測: <strong>create1k &minus;24%</strong>、<strong>update &minus;45%</strong>、ヒープは<strong>1行あたり&minus;1.5&nbsp;KB</strong>。コンポーネントもボリュームも無いページは<strong>不変</strong> &mdash; 願望ではなく、計測でゲートされた設計制約である。</p>
+          <span class="topic-ver">v2.1.0</span>
+          <span class="tag-name">overlays()</span>
+          <h3>Devtools can see the mount</h3>
+          <p class="what-if">What if the invisible half of the tree had a window?</p>
+          <p>Private keys and component getters live in the overlay address space, which means they never appear in <code>keys()</code> or <code>read()</code> &mdash; correct for the runtime, but it left the devtools showing only half of what a mounted page holds. The State pane gains an <strong>Overlays</strong> section under the selected tree&rsquo;s key list: one entry per mount record, with its marker, mount table, delta and private/getter keys. The protocol member shipped in v2.0.0 unconsumed; this is the UI catching up, and it is called optionally &mdash; a runtime without <code>overlays()</code> hides the section entirely, and an empty array renders no heading. Alongside it, <code>state:watch-fired</code> and <code>state:token-emit</code> now carry the firing tree, so measurements stay attributed per tree on a page where several trees declare the same watch path.</p>
+          <p class="ja">私有キーとコンポーネントのgetterはオーバーレイのアドレス空間に居る。つまり<code>keys()</code>にも<code>read()</code>にも現れない &mdash; ランタイムとしては正しいが、devtoolsはマウントされたページの半分しか映せていなかった。Stateペインに、選択中の木のキー一覧の下へ<strong>Overlays</strong>セクションが加わる。マウント記録ごとに1エントリ、マーカー・マウント表・デルタ・私有/getterキーつき。プロトコルのメンバー自体はv2.0.0で未消費のまま出ていた。これはUIが追いついた形で、呼び出しはoptional &mdash; <code>overlays()</code>を持たないランタイムではセクションごと隠れ、空配列なら見出しも出ない。あわせて<code>state:watch-fired</code>と<code>state:token-emit</code>が発火した木を運ぶようになり、同じwatchパスを複数の木が宣言するページでも計測が木ごとに帰属する。</p>
           <ul class="tag-features">
-            <li>&minus;1,327 Lines of Bridging</li>
-            <li>Absolute Paths, One Ledger</li>
-            <li>create1k &minus;24% / update &minus;45%</li>
-            <li>Plain Pages Unchanged</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v2.0.0</span>
-          <span class="tag-name">semver</span>
-          <h3>What we promise, written down</h3>
-          <p class="what-if">What if the first breaking release also said what breaking means?</p>
-          <p>Every package shares one version and ships in lockstep, so the first major is the right moment to state the contract. <strong>Covered by semver</strong>: the <code>data-wcs</code> syntax and its documented semantics, each package&rsquo;s element surface (tag names, attributes, <code>static wcBindable</code>), the interop protocols (wc-bindable, command-token, event-token, transition-runner, binder, ssr-snapshot), and the tooling contracts (manifest <code>schemaVersion</code>, the <code>wcs-schema</code> / <code>wcs-tsc</code> CLIs, the <code>@wcstack/testing</code> API). <strong>Not covered</strong>: internal module layout, console message wording, performance characteristics. And the deprecation practice is the one v2 just followed &mdash; a surface is flagged for at least one minor, with a lint rule and a runtime notice pointing at its replacement, before the next major removes it.</p>
-          <p class="ja">全パッケージはバージョンを共有しlockstepでリリースされる。だから最初のメジャーは契約を明文化すべき時だ。<strong>semverの保証対象</strong>: <code>data-wcs</code>構文とその文書化された意味論、各パッケージの要素表面(タグ名・属性・<code>static wcBindable</code>)、相互運用プロトコル(wc-bindable, command-token, event-token, transition-runner, binder, ssr-snapshot)、ツール契約(manifestの<code>schemaVersion</code>、<code>wcs-schema</code> / <code>wcs-tsc</code> CLI、<code>@wcstack/testing</code> API)。<strong>対象外</strong>: 内部モジュール構成、コンソールメッセージの文言、性能特性。そしてdeprecationの運用は、v2がいま実行したそれだ &mdash; 表面は削除の前に最低1つのminorで予告され、lintルールとランタイム通知が置き換え先を指す。</p>
-          <ul class="tag-features">
-            <li>One Version, Lockstep</li>
-            <li>Syntax &amp; Protocols Covered</li>
-            <li>Internals Are Not</li>
-            <li>Flagged Before Removed</li>
+            <li>One Entry Per Mount Record</li>
+            <li>The Half keys() Never Showed</li>
+            <li>Optional, Degrades Silently</li>
+            <li>Measurements Per Tree</li>
           </ul>
         </div>
       </div>
