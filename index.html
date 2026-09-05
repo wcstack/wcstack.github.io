@@ -707,11 +707,11 @@
       <p class="section-sub-ja">フックなし。インポートなし。グルーコードなし。</p>
       <div class="insight-body fade-in">
         <p>In every existing framework, the <strong>component</strong> is where UI meets state. Even with external stores, you still write glue code inside the component to pull state in. State and UI always couple through JavaScript.</p>
-        <p style="margin-top:14px">wcstack takes a different path. Literally. The <strong>only</strong> contract between UI and state is a <strong>path string</strong> &mdash; <code>user.name</code>, <code>cart.items.*.subtotal</code>, <code>@shared</code>. The component's JavaScript doesn't contain a single line that references state. The HTML alone describes every data dependency &mdash; the same idea as a REST URL: a simple string contract, no shared code.</p>
+        <p style="margin-top:14px">wcstack takes a different path. Literally. The <strong>only</strong> contract between UI and state is a <strong>path string</strong> &mdash; <code>user.name</code>, <code>cart.items.*.subtotal</code>, <code>cart.total</code>. The component's JavaScript doesn't contain a single line that references state. The HTML alone describes every data dependency &mdash; the same idea as a REST URL: a simple string contract, no shared code.</p>
       </div>
       <div class="insight-diagram fade-in">
 <pre><span class="layer">State</span>   <span class="note">←</span> <span class="path">"user.name"</span> <span class="note">→</span>  <span class="layer">UI</span>          <span class="note">Path binds the two layers</span>
-<span class="layer">Comp A</span>  <span class="note">←</span> <span class="path">"@app"</span> <span class="note">→</span>       <span class="layer">Comp B</span>      <span class="note">Named path crosses components</span>
+<span class="layer">Comp A</span>  <span class="note">←</span> <span class="path">"cart.total"</span> <span class="note">→</span> <span class="layer">Comp B</span>      <span class="note">Mounted path crosses components</span>
 <span class="layer">Loop</span>    <span class="note">←</span> <span class="path">"items.*"</span> <span class="note">→</span>    <span class="layer">Template</span>    <span class="note">Wildcard abstracts the index</span></pre>
       </div>
       <p class="insight-ja fade-in">UIと状態を結ぶ唯一の契約はパス文字列。UIを作り直しても状態に触れなくていい。状態をリファクタリングしてもDOMに触れなくていい。HTMLを読めばすべてが分かる。</p>
