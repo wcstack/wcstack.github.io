@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v2.1.0</span>
+        <span class="pill accent">v2.2.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -451,9 +451,14 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
   },
   $updatedCallback(paths, indexes) {  // after updates (async, not awaited)
     console.log("updated:", paths);
+  },
+  $errorCallback(error, { path }) {  // a binding failed to apply (root-only, not awaited)
+    this.loadError = `${path}: ${error.message}`;
   }
 };</code></pre>
       </div>
+      <p><code>$errorCallback(error, info)</code> (v2.2.0) is the in-page <strong>error boundary</strong> for bindings. When applying a binding throws &mdash; a path getter or filter threw, a structural directive failed &mdash; the failure is isolated (the rest of the batch still applies) and, without the hook, reported with <code>console.error</code>. Declare it on the root state and the report comes to you instead: <code>info</code> is <code>{ path, bindingType, node }</code> with the path as written in <code>data-wcs</code>, <code>this</code> is the writable state proxy, and the hook runs once per failed binding after <code>$updatedCallback</code>, is not awaited, and has its own exceptions isolated. Root-only (a volume declaring it is ignored); DevTools still receives <code>state:binding-apply-error</code>.</p>
+      <p class="ja"><code>$errorCallback(error, info)</code>(v2.2.0)はバインディングのページ内<strong>エラー境界</strong>。バインディング適用時のthrow &mdash; パスgetterやフィルタの例外、構造ディレクティブの失敗 &mdash; は隔離され(バッチの残りは適用される)、フックが無ければ<code>console.error</code>に報告される。ルートstateに宣言すればその報告が届く: <code>info</code>は<code>{ path, bindingType, node }</code>で<code>path</code>は<code>data-wcs</code>に書かれたまま、<code>this</code>は書き込み可能なstateプロキシ、失敗したバインディングごとに<code>$updatedCallback</code>の後に1回走り、awaitされず、自身の例外も隔離される。ルート専用(ボリュームでの宣言は無視される)。DevToolsは変わらず<code>state:binding-apply-error</code>を受け取る。</p>
     </div>
   </section>
 
@@ -929,6 +934,8 @@ customElements.define("my-light-component", MyLightComponent);
       <h3>Whole-object mount: <code>state: path</code></h3>
       <p>Instead of wiring property by property, mount a <strong>whole subtree</strong> as the component&rsquo;s root &mdash; inside the component every path is relative to the mount point: <code>&lt;user-card data-wcs="state: user"&gt;</code> makes <code>name</code> inside <em>be</em> <code>user.name</code> (reads, writes, getters and <code>for:</code> included). In a loop, mount the row itself: <code>&lt;user-row data-wcs="state: ."&gt;</code>. Partial mounts coexist by longest prefix (<code>state: user; state.theme: theme</code>); the component&rsquo;s own keys stay <strong>private</strong> and shadowing a mount-point key warns once (<code>wcs/mount-own-key-shadow</code>). An array cannot be the mount root &mdash; mount the row or the object holding the array. Rule R1 is strict: a default declared for a <em>mapped</em> key keeps that key private and hides the host value, so drop the default to read the tree.</p>
       <p class="ja">プロパティを1つずつ結線する代わりに、<strong>サブツリー全体</strong>をコンポーネントのルートとしてマウントする &mdash; 内側ではすべてのパスがマウント点からの相対になる。<code>&lt;user-card data-wcs="state: user"&gt;</code>なら内側の<code>name</code>は<em>そのまま</em><code>user.name</code>(読み・書き・getter・<code>for:</code>を含む)。ループでは行そのものをマウントする: <code>&lt;user-row data-wcs="state: ."&gt;</code>。部分マウントは最長プレフィクス勝ちで共存し(<code>state: user; state.theme: theme</code>)、コンポーネント自身のキーは<strong>private</strong>のまま、マウント先のキーを隠すと一度だけ警告される(<code>wcs/mount-own-key-shadow</code>)。配列をマウントルートにはできない &mdash; 行か、配列を持つオブジェクトをマウントする。規則R1は厳格で、<em>mapped</em>なキーに既定値を宣言するとそのキーは私有になりホストの値を隠す。木を読みたいなら既定値を外すこと。</p>
+      <p><strong>Exported getters (v2.2.0).</strong> A mounted component&rsquo;s getters are exported at its mount point: a read of a key the tree does not have is answered by the getter of the component mounted there &mdash; <code>&lt;span data-wcs="textContent: user.display"&gt;</code> renders the component&rsquo;s <code>get display()</code>. A key the tree does have wins and warns once (<code>wcs/mount-export-shadowed</code>); private keys and methods are never visible. Row mounts export per row (<code>$getAll("users.*.display")</code>), dependencies flow through, and writing to an exported key runs the setter or throws. Accessors whose component-local path contains a wildcard are not exported. This is what makes <strong>self-recursive components</strong> expressible: a <code>&lt;tree-node&gt;</code> rendering <code>&lt;tree-node data-wcs="state: ."&gt;</code> per child can define <code>get total()</code> over <code>this.$getAll("children.*.total")</code>. The parent evaluates before the child registers, so write derived expressions defensively (<code>(x ?? 0)</code>).</p>
+      <p class="ja"><strong>エクスポートされたgetter(v2.2.0)。</strong> マウントされたコンポーネントのgetterはマウント点にエクスポートされる: 木に無いキーの読みは、そこにマウントされたコンポーネントのgetterが答える &mdash; <code>&lt;span data-wcs="textContent: user.display"&gt;</code>はコンポーネントの<code>get display()</code>を描画する。木にあるキーは木が勝ち、一度だけ警告する(<code>wcs/mount-export-shadowed</code>)。私有キーとメソッドは決して見えない。行マウントは行ごとにエクスポートし(<code>$getAll("users.*.display")</code>)、依存は貫通し、エクスポートされたキーへの書き込みはsetterを走らせるか無ければthrowする。コンポーネント内のパスにワイルドカードを含むアクセサはエクスポートされない。これが<strong>自己再帰コンポーネント</strong>を可能にする: 子ごとに<code>&lt;tree-node data-wcs="state: ."&gt;</code>を描く<code>&lt;tree-node&gt;</code>が、<code>this.$getAll("children.*.total")</code>の上に<code>get total()</code>を定義できる。親は子の登録より先に評価されるので、派生式は防御的に書く(<code>(x ?? 0)</code>)。</p>
 
       <h3>Declarative Custom Components (DCC)</h3>
       <p>Define a reusable custom element <strong>entirely in HTML</strong> with <code>data-wc-definition</code>. Each instance gets its own state; <code>$bindables</code> declares the properties exposed through the <code>wc-bindable</code> protocol (with <code>CustomEvent</code> dispatch like <code>my-counter:count-changed</code>).</p>

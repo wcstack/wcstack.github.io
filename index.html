@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.1.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.2.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,50 +647,92 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v2.1.0</h2>
-      <p class="section-sub">A small additive release: the accessibility policies now do what they promised, a mount&rsquo;s private keys stay private all the way to the last channel, and devtools can finally see the overlay.</p>
-      <p class="section-sub-ja">小さな追加リリース。アクセシビリティのポリシーは約束どおりに動くようになり、マウントの私有キーは最後の経路まで私有のままで、devtoolsはついにオーバーレイを見られる。</p>
+      <h2 class="section-title">Shipped in v2.2.0</h2>
+      <p class="section-sub">A real additive release: a route guard can load data and redirect dynamically, a mounted component&rsquo;s getters are readable from outside, bindings get an in-page error boundary, <code>matchMedia</code> becomes a tag, strict Trusted Types pages work, and a two-way binding that went quiet now says why.</p>
+      <p class="section-sub-ja">本格的な追加リリース。ルートガードはデータを読み込み動的にリダイレクトでき、マウントされたコンポーネントのgetterは外から読め、バインディングはページ内のエラー境界を得て、<code>matchMedia</code>はタグになり、Trusted Typesを強制するページで動き、黙ってしまった双方向バインディングは理由を告げる。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v2.1.0</span>
-          <span class="tag-name">focus="heading"</span>
-          <h3>The focus reset, actually reset</h3>
-          <p class="what-if">What if opting into an accessibility policy could never make things worse?</p>
-          <p>It could, and now it cannot. Two holes closed. <strong>The gate did not match what ran</strong>: <em>any</em> <code>focus=</code> attribute made the router tell the Navigation API <code>focusReset: "manual"</code>, but only the exact value <code>"heading"</code> made the policy act &mdash; so <code>focus=""</code> or a typo switched off the browser&rsquo;s own reset and put nothing in its place. Now only <code>"heading"</code> activates, and anything else falls back to the browser. <strong>A route without a heading stranded focus</strong>: it stayed on the element you clicked, and a persistent nav <code>&lt;wcs-link&gt;</code> is the common case &mdash; leaving a screen reader on the previous screen. The router now reproduces the spec-default reset itself: first <code>[autofocus]</code>, else <code>&lt;body&gt;</code>. Hidden headings are skipped (focusing them was a no-op with the same result), and <code>&lt;wcs-link&gt;</code> mirrors <code>lang</code> / <code>dir</code> to its anchor so a multilingual nav announces in the right language.</p>
-          <p class="ja">悪化させうる状態だった。もうそうはならない。塞いだ穴は2つ。<strong>ゲートが実装と食い違っていた</strong>: <em>どの</em><code>focus=</code>属性でもrouterはNavigation APIに<code>focusReset: "manual"</code>を渡すのに、ポリシーが動くのは値がちょうど<code>"heading"</code>のときだけ &mdash; つまり<code>focus=""</code>やタイプミスは、ブラウザ自身のリセットを切った上で代わりに何もしなかった。いまは<code>"heading"</code>だけが有効化し、それ以外はブラウザ既定に戻る。<strong>見出しの無いルートはフォーカスを取り残した</strong>: クリックした要素に留まり続け、永続ナビの<code>&lt;wcs-link&gt;</code>が典型だった &mdash; スクリーンリーダーは前の画面に置き去りになる。routerはいまspec既定のリセットを自前で再現する: まず<code>[autofocus]</code>、無ければ<code>&lt;body&gt;</code>。非表示の見出しはスキップされ(フォーカスしても無効で同じ結果だった)、<code>&lt;wcs-link&gt;</code>は<code>lang</code> / <code>dir</code>をアンカーに転写するので、多言語ナビが正しい言語で読み上げられる。</p>
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">guard &rarr; data</span>
+          <h3>The guard was already the loader</h3>
+          <p class="what-if">What if a route could load its data without a new lifecycle phase?</p>
+          <p>A guard function was already the one asynchronous step that runs before the route content is swapped in. v2.2.0 lets it return more than a boolean. Return an <strong>object</strong> and the router enters the route and commits it as the new output-only <code>&lt;wcs-router&gt;.data</code> member (<code>wcs-router:data-changed</code>, fired first in the commit order) &mdash; so the page never shows the new route with empty content, and a <code>&lt;wcs-view-transition&gt;</code> animates real content instead of a blank frame. Return a <strong>non-empty string</strong> and the navigation is cancelled and redirected there, a dynamic target that wins over the static <code>guard=</code> attribute. The function also receives a third argument, a frozen <code>{ params, typedParams, searchParams, routeName }</code> snapshot of the match being entered, so <code>fetch(`/api/users/${typedParams.id}`)</code> needs no URL parsing. Every falsy return still cancels, so existing guards are untouched. On a nested chain each guard may return an object; they shallow-merge parent &rarr; child, and <code>data</code> is <code>null</code> on a navigation that loads nothing.</p>
+          <p class="ja">ガード関数はもともと、ルートの内容が差し替わる前に走る唯一の非同期ステップだった。v2.2.0はそこから真偽値以外も返せるようにする。<strong>オブジェクト</strong>を返せばrouterはルートに入り、それを新設の出力専用メンバー<code>&lt;wcs-router&gt;.data</code>としてコミットする(<code>wcs-router:data-changed</code>、コミット順の先頭で発火) &mdash; だからページが空の内容で新ルートを見せる瞬間はなく、<code>&lt;wcs-view-transition&gt;</code>は空白のフレームではなく実際の内容をアニメーションする。<strong>空でない文字列</strong>を返せばナビゲーションは取り消されそこへリダイレクトされる。静的な<code>guard=</code>属性に勝つ動的な行き先だ。関数は第3引数として、入ろうとしているマッチの凍結スナップショット<code>{ params, typedParams, searchParams, routeName }</code>も受け取るので、<code>fetch(`/api/users/${typedParams.id}`)</code>にURL解析は要らない。falsyな戻り値は今までどおり取り消しなので、既存のガードは無傷。ネストしたチェーンでは各ガードがオブジェクトを返してよく、親&rarr;子でshallow-mergeされる。何も読み込まないナビゲーションでは<code>data</code>は<code>null</code>。</p>
           <ul class="tag-features">
-            <li>Exact Value or Browser Default</li>
-            <li>No Heading, Still Reset</li>
-            <li>Hidden Headings Skipped</li>
-            <li>lang / dir Reach the Anchor</li>
+            <li>Object In, Route Entered</li>
+            <li>String In, Redirected</li>
+            <li>The Match, Frozen</li>
+            <li>Falsy Still Cancels</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.1.0</span>
-          <span class="tag-name">$updatedCallback</span>
-          <h3>Private keys stay private</h3>
-          <p class="what-if">What if privacy held all the way to the last channel?</p>
-          <p>A mounted component&rsquo;s own data keys are private to that mount instance (rule R1) &mdash; they live in a separate address space carrying a marker segment, <code>users.*.#m3.editing</code>, so they cannot collide with the tree. But those addresses were still being delivered to the root&rsquo;s <code>$updatedCallback</code>, where they are worse than useless: the <code>#m&lt;id&gt;</code> vocabulary means nothing outside the scope, and the id changes on every re-initialization, so no author could act on one. They are now filtered out at the delivery boundary, for both the root and a volume&rsquo;s relative callback. In the same pass, <code>IStateElement.name</code> and <code>State.get name()</code> were removed &mdash; dead surface that always returned <code>"default"</code> once the name dimension was gone.</p>
-          <p class="ja">マウントされたコンポーネント自身のデータキーは、そのマウントインスタンスに私有だ(規則R1) &mdash; マーカーセグメントを含む別のアドレス空間<code>users.*.#m3.editing</code>に載るので、木とは衝突しない。だがそのアドレスがルートの<code>$updatedCallback</code>には届いてしまっていた。そこでは無意味を通り越して有害で、<code>#m&lt;id&gt;</code>という語彙はスコープの外では意味を持たず、idは再初期化のたびに変わるので、作者は何も判断できない。いまは配送の境界で除外される。ルートでも、ボリュームの相対コールバックでも同じ。同じ整理で<code>IStateElement.name</code>と<code>State.get name()</code>が削除された &mdash; 名前の次元が消えた後は常に<code>"default"</code>を返すだけの死んだ表面だった。</p>
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">state: path</span>
+          <h3>A component&rsquo;s getters, readable from outside</h3>
+          <p class="what-if">What if a mounted component could answer questions the tree cannot?</p>
+          <p>A component mounted at <code>user</code> has always read the tree through its mount point. For getters the direction is now two-way: <strong>a read of a key the tree does not have is answered by the getter of the component mounted there</strong>. <code>&lt;span data-wcs="textContent: user.display"&gt;</code> renders the component&rsquo;s <code>get display()</code>; a key the tree does have still wins, with a one-time <code>wcs/mount-export-shadowed</code> warning, and private keys and methods are never visible. Row mounts export per row, so <code>$getAll("users.*.display")</code> and <code>text: .display</code> inside the same <code>for</code> read each row component&rsquo;s getter, and dependencies flow through &mdash; change <code>user.name</code> and everything that read <code>user.display</code> re-renders. Writing to an exported key runs the accessor&rsquo;s setter or throws, so the tree never grows a key that would hide the getter. The payoff is <strong>self-recursive components</strong>: a <code>&lt;tree-node&gt;</code> that renders <code>&lt;tree-node data-wcs="state: ."&gt;</code> for each child can define <code>get total()</code> over <code>this.$getAll("children.*.total")</code> &mdash; each level closes over one level, and the ledger resolves the recursion. Paths cannot express recursion; the recursion lives in the DOM, and the paths are its unrolled form. The parent evaluates before the child registers, so the first read may see <code>undefined</code>: write <code>(x ?? 0)</code>.</p>
+          <p class="ja"><code>user</code>にマウントされたコンポーネントは、ずっとマウント点を通して木を読んできた。getterについては、いまやその向きが双方向になる: <strong>木に無いキーの読みは、そこにマウントされたコンポーネントのgetterが答える</strong>。<code>&lt;span data-wcs="textContent: user.display"&gt;</code>はコンポーネントの<code>get display()</code>を描画する。木にあるキーは引き続き木が勝ち、<code>wcs/mount-export-shadowed</code>が一度だけ警告する。私有キーとメソッドは決して見えない。行マウントは行ごとにエクスポートするので、同じ<code>for</code>の中の<code>$getAll("users.*.display")</code>と<code>text: .display</code>は各行コンポーネントのgetterを読み、依存は貫通する &mdash; <code>user.name</code>を変えれば<code>user.display</code>を読んだものすべてが再描画される。エクスポートされたキーへの書き込みはアクセサのsetterを走らせるか、無ければthrowする。getterを隠すキーが木に生えることはない。見返りは<strong>自己再帰コンポーネント</strong>だ: 子ごとに<code>&lt;tree-node data-wcs="state: ."&gt;</code>を描く<code>&lt;tree-node&gt;</code>が、<code>this.$getAll("children.*.total")</code>の上に<code>get total()</code>を定義できる &mdash; 各階層の式は1階層分だけを閉じ込め、再帰は台帳が解決する。パスは再帰を表現できない。再帰はDOMに宿り、パスはその展開形だ。親は子が登録するより先に評価されるので、最初の読みは<code>undefined</code>になりうる: <code>(x ?? 0)</code>と書くこと。</p>
           <ul class="tag-features">
-            <li>Marker Paths Filtered Out</li>
-            <li>Root and Volume Alike</li>
-            <li>Unstable ids Never Escape</li>
-            <li>Dead name Surface Removed</li>
+            <li>Tree Key Wins, Warns Once</li>
+            <li>Per Row, Dependencies Flow</li>
+            <li>Setter or Throw, Never Shadow</li>
+            <li>Recursion Lives in the DOM</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.1.0</span>
-          <span class="tag-name">overlays()</span>
-          <h3>Devtools can see the mount</h3>
-          <p class="what-if">What if the invisible half of the tree had a window?</p>
-          <p>Private keys and component getters live in the overlay address space, which means they never appear in <code>keys()</code> or <code>read()</code> &mdash; correct for the runtime, but it left the devtools showing only half of what a mounted page holds. The State pane gains an <strong>Overlays</strong> section under the selected tree&rsquo;s key list: one entry per mount record, with its marker, mount table, delta and private/getter keys. The protocol member shipped in v2.0.0 unconsumed; this is the UI catching up, and it is called optionally &mdash; a runtime without <code>overlays()</code> hides the section entirely, and an empty array renders no heading. Alongside it, <code>state:watch-fired</code> and <code>state:token-emit</code> now carry the firing tree, so measurements stay attributed per tree on a page where several trees declare the same watch path.</p>
-          <p class="ja">私有キーとコンポーネントのgetterはオーバーレイのアドレス空間に居る。つまり<code>keys()</code>にも<code>read()</code>にも現れない &mdash; ランタイムとしては正しいが、devtoolsはマウントされたページの半分しか映せていなかった。Stateペインに、選択中の木のキー一覧の下へ<strong>Overlays</strong>セクションが加わる。マウント記録ごとに1エントリ、マーカー・マウント表・デルタ・私有/getterキーつき。プロトコルのメンバー自体はv2.0.0で未消費のまま出ていた。これはUIが追いついた形で、呼び出しはoptional &mdash; <code>overlays()</code>を持たないランタイムではセクションごと隠れ、空配列なら見出しも出ない。あわせて<code>state:watch-fired</code>と<code>state:token-emit</code>が発火した木を運ぶようになり、同じwatchパスを複数の木が宣言するページでも計測が木ごとに帰属する。</p>
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">$errorCallback</span>
+          <h3>An error boundary, in the page</h3>
+          <p class="what-if">What if a failing binding reported to the page instead of the console?</p>
+          <p>A binding whose application throws &mdash; a path getter or a filter threw, a structural directive failed &mdash; was already isolated: the rest of the batch still applies, nothing is rolled back, and the failure went to <code>console.error</code> and to DevTools. Declare <code>$errorCallback(error, info)</code> on the root state and the report comes to you instead. <code>info</code> is <code>{ path, bindingType, node }</code>, with the path as written in <code>data-wcs</code>, wildcards intact; <code>this</code> is the writable state proxy, so the usual shape is to write the message into state and render it like anything else. The hook runs once per failed binding after <code>$updatedCallback</code>, is not awaited, and its own exceptions are isolated, so it cannot take the drain down with it. DevTools keeps receiving <code>state:binding-apply-error</code> either way. Root-only &mdash; a volume declaring it is ignored &mdash; and it does not cover <code>$watch</code> handlers or <code>$connectedCallback</code>, which fail loudly on their own.</p>
+          <p class="ja">適用時にthrowするバインディング &mdash; パスgetterやフィルタが投げた、構造ディレクティブが失敗した &mdash; はすでに隔離されていた: バッチの残りは適用され、何もロールバックされず、失敗は<code>console.error</code>とDevToolsへ行く。ルートstateに<code>$errorCallback(error, info)</code>を宣言すれば、その報告があなたに届く。<code>info</code>は<code>{ path, bindingType, node }</code>で、<code>path</code>は<code>data-wcs</code>に書かれたままワイルドカードも保つ。<code>this</code>は書き込み可能なstateプロキシなので、定石はメッセージをstateに書いて他と同じように描画すること。失敗したバインディングごとに1回、<code>$updatedCallback</code>の後に走り、awaitされず、自身の例外も隔離されるのでフックがdrainを道連れにすることはない。DevToolsは変わらず<code>state:binding-apply-error</code>を受け取る。ルート専用 &mdash; ボリュームでの宣言は無視される &mdash; で、<code>$watch</code>ハンドラや<code>$connectedCallback</code>は対象外。それらは独自に大声で失敗する。</p>
           <ul class="tag-features">
-            <li>One Entry Per Mount Record</li>
-            <li>The Half keys() Never Showed</li>
-            <li>Optional, Degrades Silently</li>
-            <li>Measurements Per Tree</li>
+            <li>Getter, Filter, Directive</li>
+            <li>path As Written</li>
+            <li>After $updatedCallback, Not Awaited</li>
+            <li>Root-only, DevTools Still Sees It</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">&lt;wcs-media-query&gt;</span>
+          <h3>Dark mode is a boolean now</h3>
+          <p class="what-if">What if matchMedia was a tag?</p>
+          <p>A new I/O node. <code>&lt;wcs-media-query query="(prefers-color-scheme: dark)" data-wcs="matched: isDark"&gt;</code> wraps <code>window.matchMedia</code> and publishes <code>matched</code> / <code>media</code> / <code>supported</code> through one <code>wcs-media-query:change</code> event, with <code>:state(matched)</code> / <code>:state(supported)</code> reflected for CSS. A query that only changes styling still belongs in a stylesheet; this is for the answer that has to reach <strong>logic</strong> &mdash; a theme default, pausing a <code>&lt;wcs-raf&gt;</code> loop under <code>prefers-reduced-motion</code>, swapping a table for cards below a breakpoint, detecting <code>(display-mode: standalone)</code> for a PWA. Changing <code>query</code> while connected re-subscribes, generation-guarded so a stale list can never write, and old-Safari <code>addListener</code> is handled. The output is <code>matched</code>, not <code>matches</code>, because <code>Element.prototype.matches()</code> already exists on every element and a wc-bindable property is read straight off the Shell.</p>
+          <p class="ja">新しいI/Oノード。<code>&lt;wcs-media-query query="(prefers-color-scheme: dark)" data-wcs="matched: isDark"&gt;</code>は<code>window.matchMedia</code>を包み、<code>matched</code> / <code>media</code> / <code>supported</code>を1つの<code>wcs-media-query:change</code>イベントで公開し、CSS向けに<code>:state(matched)</code> / <code>:state(supported)</code>を反映する。スタイルだけを変えるクエリは今までどおりスタイルシートに置けばいい。これは答えが<strong>ロジック</strong>に届く必要がある場合のためだ &mdash; テーマの既定値、<code>prefers-reduced-motion</code>下で<code>&lt;wcs-raf&gt;</code>ループを止める、ブレークポイント以下でテーブルをカードに替える、PWAの<code>(display-mode: standalone)</code>検出。接続中の<code>query</code>変更は再購読し、世代ガードで古いリストは決して書き込めない。旧Safariの<code>addListener</code>も扱う。出力名が<code>matches</code>ではなく<code>matched</code>なのは、<code>Element.prototype.matches()</code>がすべての要素にすでに存在し、wc-bindableのプロパティはShellから直接読まれるからだ。</p>
+          <ul class="tag-features">
+            <li>matched / media / supported</li>
+            <li>Logic, Not Styling</li>
+            <li>Re-subscribes, Generation-guarded</li>
+            <li>matched, Not matches</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">trusted-types wcstack</span>
+          <h3>Signed only what you wrote</h3>
+          <p class="what-if">What if a strict CSP could stay strict?</p>
+          <p>Pages enforcing <code>require-trusted-types-for 'script'</code> now work with state (<code>innerHTML:</code> bindings), router (layout templates), fetch (<code>target=</code> HTML replace) and worker (<code>new Worker(src)</code>). The split is the point: wcstack signs <strong>only strings the page author wrote</strong> &mdash; a <code>&lt;wcs-layout&gt;</code> template, a worker <code>src</code> &mdash; with one shared policy named <code>wcstack</code>, and <strong>never signs remote data</strong>: an <code>innerHTML:</code> value or a fetched HTML body needs an adopter-supplied sanitizing policy, injected through a global slot or <code>setTrustedTypesPolicy()</code>, and that injected policy applies even on engines without Trusted Types, so a sanitizer never degrades to a pass-through. DCC definition no longer has a sink at all &mdash; the shadow tree is cloned node by node instead of round-tripping through <code>innerHTML</code>. Verified against an enforcing Chromium, which found two things: a blocked <code>target=</code> injection now reports instead of throwing (an automatic fetch had nobody to catch the rejection), and a refused <code>wcstack</code> policy with an injected fallback warns once instead of also logging an error.</p>
+          <p class="ja"><code>require-trusted-types-for 'script'</code>を強制するページが、state(<code>innerHTML:</code>バインディング)、router(レイアウトテンプレート)、fetch(<code>target=</code>のHTML置換)、worker(<code>new Worker(src)</code>)で動くようになった。要点は線引きだ: wcstackが署名するのは<strong>ページ作者が書いた文字列だけ</strong> &mdash; <code>&lt;wcs-layout&gt;</code>のテンプレート、workerの<code>src</code> &mdash; で、<code>wcstack</code>という1つの共有ポリシーを使う。そして<strong>リモートデータには決して署名しない</strong>: <code>innerHTML:</code>の値やfetchしたHTML本文には採用側が用意するサニタイズポリシーが必要で、グローバルスロットか<code>setTrustedTypesPolicy()</code>で注入する。注入されたポリシーはTrusted Typesの無いエンジンでも適用されるので、サニタイザが素通しに退化することはない。DCC定義にはもうsinkが無い &mdash; shadow treeは<code>innerHTML</code>を往復せずノード単位で複製される。強制モードのChromiumで検証し、2つ見つかった: ブロックされた<code>target=</code>の注入はthrowせず報告するようになり(自動fetchのrejectionは誰も受け取れなかった)、<code>wcstack</code>ポリシーが拒否され注入フォールバックがある場合はエラーも出さず一度だけ警告する。</p>
+          <ul class="tag-features">
+            <li>Author Strings Signed</li>
+            <li>Remote Data Never</li>
+            <li>One Policy, Four Packages</li>
+            <li>Blocked Means Reported</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v2.2.0</span>
+          <span class="tag-name">wcs/default-getter-mismatch</span>
+          <h3>A quiet page, made loud</h3>
+          <p class="what-if">What if a page that went silent told you why?</p>
+          <p>A two-way binding on a <code>static wcBindable</code> property that omits <code>getter</code> writes <code>e.detail</code> to state &mdash; the protocol&rsquo;s default. Two recent issues were diagnosed by staring at a page that had simply gone quiet: the element dispatched a plain <code>Event</code> with no <code>detail</code>, or wrapped it as <code>{ value: &hellip; }</code> while the property held a scalar. The runtime now warns once per element and property when <code>detail</code> cannot be what the property holds: <code>detail</code> is <code>undefined</code> while the property has a value, or <code>detail</code> is an object carrying a <code>&lt;propName&gt;</code> key while the property is not an object. The write is still applied as-is &mdash; this is a diagnostic, not a repair &mdash; and occurrence properties (<code>semantics: "event"</code>) are exempt. Declare an explicit <code>getter</code> to keep reading the property, and the warning has nothing to say.</p>
+          <p class="ja"><code>getter</code>を省いた<code>static wcBindable</code>プロパティへの双方向バインディングは、<code>e.detail</code>をstateに書く &mdash; プロトコルの既定だ。最近の2件のissueは、ただ黙ってしまったページを睨んで診断された: 要素が<code>detail</code>の無い素の<code>Event</code>を投げていた、あるいはプロパティがスカラーなのに<code>{ value: &hellip; }</code>で包んでいた。ランタイムはいま、<code>detail</code>がプロパティの持つ値ではありえないとき、要素とプロパティごとに一度だけ警告する: プロパティに値があるのに<code>detail</code>が<code>undefined</code>、あるいはプロパティがオブジェクトでないのに<code>detail</code>が<code>&lt;propName&gt;</code>キーを持つオブジェクト。書き込みはそのまま適用される &mdash; これは診断であって修復ではない &mdash; し、発生プロパティ(<code>semantics: "event"</code>)は対象外。明示的な<code>getter</code>を宣言してプロパティを読み続ければ、警告には言うことがない。</p>
+          <ul class="tag-features">
+            <li>Once Per Element and Property</li>
+            <li>undefined detail, Valued Property</li>
+            <li>{ value } Wrapper Caught</li>
+            <li>Write Unchanged, Events Exempt</li>
           </ul>
         </div>
       </div>
@@ -846,6 +888,7 @@
         <div class="io-node"><span class="io-tag">&lt;wcs-screen-orientation&gt;</span><span class="io-desc">Orientation monitor &amp; lock</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-idle&gt;</span><span class="io-desc">Idle Detection</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-network&gt;</span><span class="io-desc">Network Information monitor</span></div>
+          <div class="io-node"><span class="io-tag">&lt;wcs-media-query&gt;</span><span class="io-desc">matchMedia: dark mode, reduced motion, breakpoints</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-share&gt;</span><span class="io-desc">Web Share sheet</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-contacts&gt;</span><span class="io-desc">Contact Picker</span></div>
         <div class="io-node"><span class="io-tag">&lt;wcs-credential&gt;</span><span class="io-desc">Credential Management</span></div>

@@ -1,9 +1,9 @@
 # wcstack — complete authoring guide for LLMs
 
-> Everything needed to generate correct wcstack (v2.1.0) apps: workflow, exact data-wcs
+> Everything needed to generate correct wcstack (v2.2.0) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
 > silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
-> whose content is verified against the wcstack monorepo at v2.1.0.
+> whose content is verified against the wcstack monorepo at v2.2.0.
 
 Note: the guide below refers to three reference files (references/state-binding.md,
 router-and-scaffold.md, io-node-catalog.md). All three are included IN THIS FILE after
@@ -18,7 +18,7 @@ the main guide — no external fetches are needed.
 
 wcstack is a family of "standards-first, zero-config, buildless" Web Components packages. An app is correctly a **single HTML file + one-line CDN loads** — do not introduce bundlers, build steps, or npm install unless the user explicitly asks for them.
 
-Content verified against **wcstack v2.1.0** (READMEs, examples, and source as of 2026-09). v2 is the first breaking release: **one state tree per rootNode**, extended with mounts. `<wcs-state name>` and `path@name` are gone — the migration table is in `references/state-binding.md` §2. v2.1.0 is additive, and repairs the router accessibility policies (`references/router-and-scaffold.md` §5). If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
+Content verified against **wcstack v2.1.1** (READMEs, examples, and source as of 2026-09). v2 is the first breaking release: **one state tree per rootNode**, extended with mounts. `<wcs-state name>` and `path@name` are gone — the migration table is in `references/state-binding.md` §2. v2.1.0 is additive, and repairs the router accessibility policies (`references/router-and-scaffold.md` §5). v2.1.1 is a patch: `bindNode` in `@wcstack/signals` now applies the wc-bindable default getter (`references/io-node-catalog.md` § wc-bindable bridge), and `@wcstack/state` no longer pins an assigned value in an accessor pair's getter cache. If the installed/CDN version is much newer, spot-check syntax against the package READMEs.
 
 Generated-code accuracy lives in the exact syntax. **This file holds only the workflow, a cheat sheet, and the failure-mode matrix**; full syntax is split into references/ next to this file. Read the matching reference before entering each phase:
 
@@ -26,7 +26,7 @@ Generated-code accuracy lives in the exact syntax. **This file holds only the wo
 |---|---|
 | `references/state-binding.md` | writing `<wcs-state>` / `data-wcs` / filters / command- & event-tokens / `$listKeys` / `$watch` / DCC vs `bind-component` / mounts (`state: path`) / CSP + SRI loading / headless page tests |
 | `references/router-and-scaffold.md` | writing SPA routing / autoloader / index.html scaffold / server |
-| `references/io-node-catalog.md` | wiring I/O nodes (51 wcs-* tags) or writing a signals app |
+| `references/io-node-catalog.md` | wiring I/O nodes (52 wcs-* tags) or writing a signals app |
 
 ## Workflow
 
@@ -62,7 +62,7 @@ Generated-code accuracy lives in the exact syntax. **This file holds only the wo
 - An SPA **must have `<base href="/">` in `<head>`** (otherwise deep links break: basename gets misderived from the URL).
 - **Always set `<html lang>`** — as of v1.32 it is the default locale for the locale-dependent filters (`locale` / `date` / `time` / `datetime`; explicit `bootstrapState({ locale })` still wins). Changing `config.locale` later re-renders nothing, so the language must be set before the page renders.
 - The bare-name `wcstack` npm package is the **SPA-core bundle as of v1.32** (it was documentation-only before): `wcstack/auto` = state + router + fetch + storage + autoloader pre-linked into one self-contained file (~61 KB gzip, one request, one SRI hash). Use it when the app uses the SPA core anyway; per-package `/auto` tags stay the default (they fetch in parallel — no waterfall) and pay only for what the page uses. Loading both is safe (first evaluated copy wins; the other is inert). **Never merge files yourself via jsDelivr `/combine/`** — concatenated minified ESM does not even parse (top-level identifier collisions), and jsDelivr itself forbids SRI on it.
-- **Production / CSP (v1.26+)** — only when the user asks for hardening; `esm.run` stays the default for demos and prototypes. Pin the version and use the direct jsDelivr path so `integrity` works: `<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@2.1.0/dist/auto.min.js" integrity="sha384-…">`. `dist/auto.min.js` has zero static imports, so one hash covers the whole runtime; digests ship in the GitHub Release (`sri.json`), never taken from the CDN's own API. `esm.run` cannot be hashed (it redirects to a re-bundling `+esm` endpoint) and costs two CSP hosts. **The one CSP fact that silently breaks a working page: the inline `<script type="module">` inside `<wcs-state>` is imported through a `blob:` URL, so a strict policy needs `script-src blob:` — a page nonce does not help. Move the state to `src="./state.js"` instead.** Route guards are blob:-only with no `src=` escape. Details in `references/state-binding.md` §1–2.
+- **Production / CSP (v1.26+)** — only when the user asks for hardening; `esm.run` stays the default for demos and prototypes. Pin the version and use the direct jsDelivr path so `integrity` works: `<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@2.2.0/dist/auto.min.js" integrity="sha384-…">`. `dist/auto.min.js` has zero static imports, so one hash covers the whole runtime; digests ship in the GitHub Release (`sri.json`), never taken from the CDN's own API. `esm.run` cannot be hashed (it redirects to a re-bundling `+esm` endpoint) and costs two CSP hosts. **The one CSP fact that silently breaks a working page: the inline `<script type="module">` inside `<wcs-state>` is imported through a `blob:` URL, so a strict policy needs `script-src blob:` — a page nonce does not help. Move the state to `src="./state.js"` instead.** Route guards are blob:-only with no `src=` escape. Details in `references/state-binding.md` §1–2.
 
 ### 3. State design (state family)
 
@@ -102,7 +102,7 @@ Two shapes that sit outside those four forms:
   npx @wcstack/lint index.html
   ```
 
-  Pass every generated HTML file and `wcstack.manifest.json` sidecar as separate arguments when the app has more than one file. **External state files referenced by `<wcs-state src="...">` (`.json` / `.js` / `.ts`) are resolved automatically as of v1.28** — relative to the HTML, never URLs or absolute paths — so do not pass them as arguments, and expect a page whose paths could not be checked before (e.g. the CSP-driven `src="./state.js"` form) to surface real errors once its state resolves. Read the stable `wcs/*` diagnostic codes and `source:line:col` ranges, fix all errors and actionable warnings, then rerun. The CLI machine-checks the real contracts — `data-wcs` syntax / filters / state paths, wcs-* tag members (`command.` / `eventToken.` keys included, with typo suggestions), non-reactive nested/array mutations, `trigger` slots seeded `true`, storage seed clobber, missing `<base href>`, and signals dual-entry. The analyzer follows `$listKeys` (so `for: items.*.children` validates even when `items` starts `[]`). The `$watch` codes (v1.27+) are worth fixing on sight, because a `$watch` typo does not fail visibly the way a binding typo does, it just never fires: `wcs/watch-declaration-invalid` (error — an `@` cross-state key, a `$`-prefixed key, an empty path segment, a non-function handler, or — v1.29 — a whole `$watch` value that is definitely not an object) and `wcs/watch-path-missing` (warning — the key is absent from the state definition). v1.29 also lint-checks the structural single-binding rule (`wcs/template-syntax`): `for` / `if` / `elseif` / `else` sharing one `data-wcs` with any other binding is the shape the runtime raises on. v1.30 adds `wcs/spread-no-bindable` (error): a spread (`...: x`) on a built-in tag that has no `wcBindable` at all — the helper tags `wcs-fetch-header` / `wcs-fetch-body` / `wcs-infinite-scroll` / `wcs-voice` — which the runtime rejects at bind time. **v1.31 raises the non-reactive assignment family — `wcs/nested-assign` / `wcs/array-mutation` / `wcs/array-index-assign` — from warning to error**, so `--errors-only` now exits `1` on them: they always drop the update, so shipping one unnoticed costs more than failing CI. v1.31 also adds four semantic checks carrying the same codes the runtime raises with: `wcs/index-arity` (`$resolve` / `$getAll` index count vs the path's `*` count), `wcs/wildcard-rank` (a path's `*` count and `$N` vs the enclosing `for` nesting), `wcs/getter-cycle` (path getters in a dependency cycle), and `wcs/updated-callback-unbound` (`$updatedCallback` testing a path nothing binds — the static form of the "delete one display element and the feed stops" accident). v1.32 adds `wcs/aria-attr-unknown`: an `attr.aria-*` binding to an attribute name that is not real WAI-ARIA — `setAttribute` writes it happily and assistive technology ignores it — reported with a did-you-mean. **v2 raises `wcs/named-state-deprecated` to error** (every `name=` / `@name` / `{{ path@name }}` site, with its per-site replacement — the runtime fails fast and `@` is a parse error) and adds `wcs/mount-path-invalid` (error — a `mount=` value carrying `*`, `$`, `#`, `@` or an empty segment, mirroring the runtime check). `wcs/mount-own-key-shadow` (an own state key hiding a key at the component's mount point) stays a runtime warning.
+  Pass every generated HTML file and `wcstack.manifest.json` sidecar as separate arguments when the app has more than one file. **External state files referenced by `<wcs-state src="...">` (`.json` / `.js` / `.ts`) are resolved automatically as of v1.28** — relative to the HTML, never URLs or absolute paths — so do not pass them as arguments, and expect a page whose paths could not be checked before (e.g. the CSP-driven `src="./state.js"` form) to surface real errors once its state resolves. Read the stable `wcs/*` diagnostic codes and `source:line:col` ranges, fix all errors and actionable warnings, then rerun. The CLI machine-checks the real contracts — `data-wcs` syntax / filters / state paths, wcs-* tag members (`command.` / `eventToken.` keys included, with typo suggestions), non-reactive nested/array mutations, `trigger` slots seeded `true`, storage seed clobber, missing `<base href>`, and signals dual-entry. The analyzer follows `$listKeys` for **list paths only** (so `for: items.*.children` validates even when `items` starts `[]`) — it does not learn the other row fields from a key declaration. The row shape of a list that starts `[]` comes from the row literals in the assignments that add or replace rows (`this.items = this.items.concat({ id, kind: "general" })`, `.toSpliced(i, n, { … })`, `.with(i, { … })`, `[...this.items, { … }]`), anywhere in the script; a row passed as a variable (`concat(row)`) is invisible, so inline the literal or declare a `stateSchema` — otherwise `.kind` inside the `for` is `wcs/binding-path-missing`. The `$watch` codes (v1.27+) are worth fixing on sight, because a `$watch` typo does not fail visibly the way a binding typo does, it just never fires: `wcs/watch-declaration-invalid` (error — an `@` cross-state key, a `$`-prefixed key, an empty path segment, a non-function handler, or — v1.29 — a whole `$watch` value that is definitely not an object) and `wcs/watch-path-missing` (warning — the key is absent from the state definition). v1.29 also lint-checks the structural single-binding rule (`wcs/template-syntax`): `for` / `if` / `elseif` / `else` sharing one `data-wcs` with any other binding is the shape the runtime raises on. v1.30 adds `wcs/spread-no-bindable` (error): a spread (`...: x`) on a built-in tag that has no `wcBindable` at all — the helper tags `wcs-fetch-header` / `wcs-fetch-body` / `wcs-infinite-scroll` / `wcs-voice` — which the runtime rejects at bind time. **v1.31 raises the non-reactive assignment family — `wcs/nested-assign` / `wcs/array-mutation` / `wcs/array-index-assign` — from warning to error**, so `--errors-only` now exits `1` on them: they always drop the update, so shipping one unnoticed costs more than failing CI. v1.31 also adds four semantic checks carrying the same codes the runtime raises with: `wcs/index-arity` (`$resolve` / `$getAll` index count vs the path's `*` count), `wcs/wildcard-rank` (a path's `*` count and `$N` vs the enclosing `for` nesting), `wcs/getter-cycle` (path getters in a dependency cycle), and `wcs/updated-callback-unbound` (`$updatedCallback` testing a path nothing binds — the static form of the "delete one display element and the feed stops" accident). v1.32 adds `wcs/aria-attr-unknown`: an `attr.aria-*` binding to an attribute name that is not real WAI-ARIA — `setAttribute` writes it happily and assistive technology ignores it — reported with a did-you-mean. **v2 raises `wcs/named-state-deprecated` to error** (every `name=` / `@name` / `{{ path@name }}` site, with its per-site replacement — the runtime fails fast and `@` is a parse error) and adds `wcs/mount-path-invalid` (error — a `mount=` value carrying `*`, `$`, `#`, `@` or an empty segment, mirroring the runtime check). `wcs/mount-own-key-shadow` (an own state key hiding a key at the component's mount point) stays a runtime warning.
 - **Runtime errors echo the lint loop (v1.28+)**: misspelled filters, undeclared tokens, bad `$watch` shapes, and DCC `$bindables` / `$commands` typos now raise with a stable `[wcs/...]` code, a did-you-mean candidate (same edit-distance criterion as the CLI), and a pointer to `npx @wcstack/lint`. A bracketed code in the console means lint reproduces the same finding with a `source:line:col` range — run it and fix every instance, not just the one that threw. **v1.31 extends this to wired paths**: a bound path that provably does not resolve gets one `console.warn` at binding time (`wcs/binding-path-missing`, with did-you-mean), and a top-level typo throws with the same wording instead of an internal message. The check under-approximates on purpose — `null` parents, rows of an empty list, intermediate getter returns, mapped `bind-component` children and `$` namespaces stay silent — so **no warning proves nothing**; only lint checks exhaustively.
 - **Mount private keys and getters are invisible to `keys()` / `read()`** — the devtools State pane's **Overlays** section (v2.1.0) is the one place they surface, per mount record. A runtime without the protocol member simply hides the section.
 - **When wiring is silent and lint is clean, use the devtools coverage tab (v1.29+)**: load `@wcstack/devtools/auto` (before state) and open the wiring pane's coverage view. It joins declared against measured — `$watch` paths (fired ×N / never / *prerequisite-missing* when a wildcard's list is neither `for`-bound nor `$listKeys`-declared; v1.30 states it assertively: "this watch can never fire"), command/event tokens (emitted ×N / never), and bindings (attached / never-attached) — which is exactly the "declared but silently dead" class the matrix below describes.
@@ -253,7 +253,7 @@ For a full SPA with fetch wiring and layouts, start from the router-spa skeleton
 
 # @wcstack/state Reference
 
-Sources: `packages/state/README.ja.md` (normative), `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `src/filters/builtinFilters.ts`, `src/bindTextParser/*`, plus `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/architecture-hardening/15-state-component-mechanism-consistency.md`. All verified against real code at v2.1.0.
+Sources: `packages/state/README.ja.md` (normative), `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `src/filters/builtinFilters.ts`, `src/bindTextParser/*`, plus `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/architecture-hardening/15-state-component-mechanism-consistency.md`. All verified against real code at v2.2.0.
 
 ## 1. CDN Loading
 
@@ -274,13 +274,13 @@ Sources: `packages/state/README.ja.md` (normative), `packages/state/examples/*`,
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/state@2.1.0/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/state@2.2.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
 `dist/auto.min.js` is a **self-contained bundle with zero static imports**, so the usual ESM caveat — `integrity` covers the entry but not what it imports — does not apply: one hash covers every line of wcstack that runs. Rules that make it work:
 
-- **Use the version-pinned direct path on `cdn.jsdelivr.net`.** `esm.run` redirects to the `+esm` endpoint, which re-bundles server-side, so a fixed digest can never match there. jsDelivr's plain path does not resolve `package.json` `exports`, so name the real file (`/npm/@wcstack/state/auto` is a 404; `@2.1.0/dist/auto.min.js` is a 200).
+- **Use the version-pinned direct path on `cdn.jsdelivr.net`.** `esm.run` redirects to the `+esm` endpoint, which re-bundles server-side, so a fixed digest can never match there. jsDelivr's plain path does not resolve `package.json` `exports`, so name the real file (`/npm/@wcstack/state/auto` is a 404; `@2.2.0/dist/auto.min.js` is a 200).
 - **`crossorigin` is not needed** — `type="module"` is always fetched in CORS mode.
 - **Get digests from the GitHub Release** (a table in the body, plus a machine-readable `sri.json` asset), computed from the published tree. Never from jsDelivr's data API: the point of SRI is not trusting the CDN, so letting it self-report is circular.
 - **Not covered, by design**: your state definition (inline `<script>` or `src="./state.js"`), route guard scripts, and autoloader-resolved components — all page-supplied code that is dynamically imported at runtime. `dist/index.esm.min.js` is no longer published (v1.26); named imports from `dist/index.esm.js` need import-map `integrity` (Chrome 127 / Safari 18; not Firefox).
@@ -335,7 +335,7 @@ Resolution order: `state` attribute → `src` (.json/.js) → `json` attribute �
 - **`esm.run` needs two hosts** (`https://esm.run` *and* `https://cdn.jsdelivr.net`) because CSP re-checks the redirect target. The version-pinned direct path needs one.
 - **Inline import maps need a nonce** (`@wcstack/autoloader` depends on one) and cannot take `integrity`.
 - **`class.` / `style.` bindings do NOT need `style-src`** — they are CSSOM property assignments, not attribute parsing or `<style>` injection. And `data-wcs` is never evaluated: no `eval`, no `new Function` anywhere in the repo.
-- **Trusted Types (`require-trusted-types-for 'script'`) is unsupported**: it throws in `@wcstack/fetch`'s `html` binding, `<wcs-layout>` template expansion, and DCC definition.
+- **Trusted Types (`require-trusted-types-for 'script'`) is supported as of v2.2.0** (before that it threw in `<wcs-fetch>`'s `target=` HTML mode, `<wcs-layout>` expansion and DCC definition). The split is what matters. **Author-written strings are signed** by a shared identity policy named `wcstack` — `<wcs-layout>` templates and `new Worker(src)` — so add `trusted-types wcstack` to the policy **only if the page uses `<wcs-layout>` or `<wcs-worker>`**. **Remote and state data are never signed** — the `html:` / `innerHTML:` / `outerHTML:` / `srcdoc:` bindings and `<wcs-fetch target>` responses need a sanitizing policy *you* install, before the first fetch / layout / worker: `globalThis[Symbol.for("wcstack.trustedTypes.policy")] = trustedTypes.createPolicy("my-app", { createHTML: (s) => DOMPurify.sanitize(s, { RETURN_TRUSTED_TYPE: true }), createScriptURL: (s) => s })` from a nonced head script (bundles: `setTrustedTypesPolicy()` from `@wcstack/state` / `router` / `fetch` / `worker` — same slot). Without one those two sinks stay blocked, but v2.2 **reports once with the fix** instead of failing silently (the state property-write path swallows setter exceptions by design, so on ≤2.1 an `html:` binding under enforcement simply did nothing). DCC definition has no sink any more (it clones nodes). Chromium-only — elsewhere every path is a pass-through. Dynamic `import()` (inline state, guards, autoloader) is `script-src` territory, not a Trusted Types sink. Full sink table: `docs/csp.md` §7.
 - **Diagnosing it**: a CSP-blocked dynamic `import()` only rejects with `Failed to fetch dynamically imported module`. state/router subscribe to `securitypolicyviolation` during evaluation and say `... was blocked by Content-Security-Policy` only when a violation was actually observed — if you instead see `Failed to evaluate the inline <script> of state "…"`, it is usually a syntax error in your state module (original error in `cause`).
 
 ### Mounting additional state (`mount=`) — v2
@@ -351,7 +351,7 @@ There is **one state tree per rootNode** (document or shadowRoot). To split stat
 - The **root `<wcs-state>` is required** and may be empty (`<wcs-state></wcs-state>`). Volumes with no root are a loud error.
 - **Load order does not matter.** A volume connected before the root is grafted when the root registers; reads under a not-yet-loaded volume return `undefined` and are *not* reported as missing paths.
 - The mount path is **static and dotted** (`settings.theme` is fine). `*`, `$`, `#`, `@` and empty segments are rejected — at runtime and as `wcs/mount-path-invalid` (error) in lint. Changing `mount` after initialization is ignored, and **warns as of v2.1.0** (it was silently ignored on 2.0.0); setting it before initialization stays silent. Mounting onto a slot the root already owns throws, as does replacing a mount point's parent wholesale from the root (`this.settings = {...}` under `mount="settings.theme"`).
-- A volume may declare **getters, `$watch`, `$listKeys`, `$updatedCallback`, `$connectedCallback` / `$disconnectedCallback`** — all relative to its own mount path. It may **not** declare `$streams` (raises), and `$commandTokens` / `$eventTokens` / `$on` belong on the root.
+- A volume may declare **getters, `$watch`, `$listKeys`, `$updatedCallback`, `$connectedCallback` / `$disconnectedCallback`** — all relative to its own mount path. It may **not** declare `$streams` (raises); `$errorCallback` (v2.2+) is root-only — a binding failure is reported once, to the tree's owner, and a volume declaring it is ignored; and `$commandTokens` / `$eventTokens` / `$on` belong on the root.
 - Cross-module reads are ordinary paths: a root getter reading `this["cart.total"]` tracks the dependency like any other. The v1 "cross-state read" problem disappears with the name dimension.
 
 **Migrating from v1 named states** — `name=` and `path@name` were removed in v2:
@@ -735,7 +735,8 @@ Tooling knows the declaration (v1.27): `@wcstack/lint` and the VS Code extension
 
 ## 11. Other Features
 
-- **Lifecycle**: On the state object: `$connectedCallback` (async allowed, awaited, runs on every reconnection), `$disconnectedCallback` (sync only), `$updatedCallback(paths, indexesListByPath)` (async allowed, not awaited). On the Web Component side: `async $stateReadyCallback(stateProp)`.
+- **Lifecycle**: On the state object: `$connectedCallback` (async allowed, awaited, runs on every reconnection), `$disconnectedCallback` (sync only), `$updatedCallback(paths, indexesListByPath)` (async allowed, not awaited), `$errorCallback(error, info)` (v2.2+, see next bullet). On the Web Component side: `async $stateReadyCallback(stateProp)`.
+- **`$errorCallback(error, info)` is the in-page error boundary for bindings** (v2.2+). A binding whose application throws (a path getter / filter threw, a structural directive failed) is isolated — the rest of the batch applies, nothing is rolled back — and reported with `console.error` unless the **root** state declares this hook; then the report comes to it instead. `info` = `{ path, bindingType, node }` (`path` as written in `data-wcs`, wildcards intact); `this` is the writable proxy, so the canonical shape is `this.loadError = `${path}: ${error.message}`` and a plain `textContent:` bind. Runs once per failed binding after `$updatedCallback`, not awaited, own exceptions isolated; DevTools still gets `state:binding-apply-error`. Root-only (ignored on a `mount=` volume). Does **not** cover `$watch` handler failures or exceptions thrown by `$connectedCallback` / `$updatedCallback`.
 - **`$updatedCallback` is binding-driven, not write-driven** (spelled out in v1.26): `paths` lists only the paths whose **live DOM bindings** were applied in that drain. A state write with no binding never calls it and never appears in `paths`. So it cannot be used as a headless watcher — that job belongs to `$watch` (§10, v1.27+), which fires with no binding at all.
 - **A failure during binding initialization now rejects instead of hanging** (v1.26): `State.getBindingsReady()` used to stay pending forever if `buildBindings` / `hydrateBindings` threw — the symptom was a silent hang at `await`, not an error. It now rejects to the caller. The same reject is plumbed through `_connectedCallbackPromise`, so an `enable-ssr` block that fails makes `renderToString()` return an error and release its mutex instead of wedging.
 - **$streams**: `$streams: { name: { args?, source, fold?, initial? } }` — source is `(args, signal) => AsyncIterable|ReadableStream|Promise<same>`, honoring AbortSignal is mandatory, `initial` is required when `fold` is specified. status/error: `$streamStatus.<name>` (`"idle"|"active"|"done"|"error"`) / `$streamError.<name>`. args are synchronous, cannot read wildcards, self-dependency forbidden. Infinite streams require a bounded fold. **Bridging callback APIs (EventSource / WebSocket / DOM events) — v1.22+ canonical form**: wrap in a `ReadableStream` (enqueue in `start`, release the resource in `cancel()`); the runtime cancels the reader on restart/dispose, so the AbortSignal contract is satisfied automatically. Hand-written async generators must watch `signal` themselves — a generator parked on `await` cannot be force-released from outside. **Observing a stream without rendering it (v1.27+)**: `$watch` its value path — or, for status-driven work, mirror `$streamStatus.<name>` through a non-`$` getter and watch that (§10 rule 2). A mapped `bind-component` child cannot declare `$streams` (same blanking as `$watch`).
@@ -837,6 +838,29 @@ In v2 a Light DOM component is written exactly like the Shadow one — `<wcs-sta
 - **The host must wire it.** A plain, unwired Light DOM `bind-component` **cannot exist in v2** — an independent tree cannot share the parent's root — and it fails loudly with the fix: add `attachShadow`, or mount it from the host (`state: user` / `state.message: user.name`).
 - **`State.getBindingsReady(root)` now covers mounted scopes** once the mount record resolves (the v1 "never covers a bind-component child" carve-out is gone). Await the component's own `<wcs-state>` when you specifically need its contents rendered.
 
+### Your own `static wcBindable` element: what the two-way binding writes back
+
+A third option is a hand-written class that declares `static wcBindable` itself (it then gets spread, command tokens and event tokens like an I/O node). The one rule that is easy to miss: when the element dispatches `properties[].event`, the value written to state is **`getter(event)`**, and with no `getter` the wc-bindable default is **`(e) => e.detail` — the whole `detail`, as-is**. The declared property is *not* read off the element at that moment (only the initial sync reads it). Dispatching `detail: { value: 7 }` without a `getter` therefore writes the object `{ value: 7 }` to state, the write-back becomes `NaN`, and nothing warns — not the runtime, not `@wcstack/lint` (the payload shape is not static). Use one of the two conforming shapes:
+
+```javascript
+class YenInput extends HTMLElement {
+  static wcBindable = {
+    protocol: "wc-bindable", version: 1,
+    properties: [
+      { name: "value", event: "yen-input:value-changed" },                                   // (a) detail IS the value
+      // { name: "value", event: "yen-input:value-changed", getter: (e) => e.detail.value }, // (b) detail is an object
+      // { name: "value", event: "input",                  getter: (e) => e.target.value },  // (b) reusing a DOM event
+    ],
+    inputs: [{ name: "value" }],   // declare settable members in BOTH lists (§3 modifiers table, `#init=`)
+  };
+  #onInput() {
+    this.dispatchEvent(new CustomEvent("yen-input:value-changed", { detail: this.value, bubbles: true }));
+  }
+}
+```
+
+Keep `element.value` and the extracted event value the same logical state (initial sync reads the property, later updates read the event). Do not expect the default to change: it is normative for every wc-bindable adapter, and DCC's `$bindables` reading `e.target[name]` is a producer-side `getter` choice, not a different default.
+
 ## 13. Testing the page headlessly (v1.33+)
 
 A `<wcs-state>` page is plain DOM, so it tests under vitest + happy-dom with no browser and no test-only API. The one-import form is **`@wcstack/testing`** (`npm i -D @wcstack/testing @wcstack/state @wcstack/server vitest happy-dom` — state and server are peers):
@@ -895,13 +919,14 @@ app.unmount();
 28. The non-reactive assignment family (`wcs/nested-assign` / `wcs/array-mutation` / `wcs/array-index-assign`) is **error** severity since v1.31 — `wcs-validate` exits `1` on it, so a CI gate that passed on 1.30 can fail after upgrading the linter. That is the intended behavior; fix the assignments, not the gate.
 29. The filters' default locale is `<html lang>` as of v1.32 (was `'en'`) — a page that omits `lang` still formats in English, and changing `config.locale` after render updates nothing. Set `<html lang>` in the markup.
 30. `$setAll` broadcasts arrays by default — replacing each row with successive entries needs `{ spread: true }` (length mismatch throws). `undefined` from a mapper means "skip this row", never "write undefined". And omitted `$getAll` indexes default to the **loop context** as of v1.32 — inside a `for`-scoped getter that narrows to the current row; pass `[]` explicitly for "every match".
-31. A `stateSchema` in the nearest `wcstack.manifest.json` (generated by `wcs-schema emit src/state.ts`, or hand-written) turns a missing path into `wcs/path-nonexistent` (**error**) and `for:` on a non-array into `wcs/path-type-mismatch` — the discovery walks up from the HTML file, so a manifest in a parent directory applies to every page below it, and an explicit manifest argument replaces discovery for the whole run. **v2 carries a single `stateSchema` (`schemaVersion: 2`)**, matching the one tree per root; a volume contributes a subtree via `--mount=<path>`. Paths under a bare `{}` (a `Date`, `Map`, `Record<string, T>`, or the depth cut-off) stay silent; methods, getters and `$listKeys` from the inline script still count as existing. The manifest is derived from the type: gate CI with `wcs-schema check` and regenerate with `emit --merge` after changing the state type.
+31. A `stateSchema` in the nearest `wcstack.manifest.json` (generated by `wcs-schema emit src/state.ts`, or hand-written) turns a missing path into `wcs/path-nonexistent` (**error**) and `for:` on a non-array into `wcs/path-type-mismatch` — the discovery walks up from the HTML file, so a manifest in a parent directory applies to every page below it, and an explicit manifest argument replaces discovery for the whole run. **v2 carries a single `stateSchema` (`schemaVersion: 2`)**, matching the one tree per root; a volume contributes a subtree via `--mount=<path>`. Paths under a bare `{}` (a `Date`, `Map`, `Record<string, T>`, or the depth cut-off) stay silent; methods, getters and `$listKeys` from the inline script still count as existing, and so do row fields the analyzer reads from `concat({ … })` / `toSpliced` / `with` / spread-array assignments (a list that starts `[]` rarely needs a schema just to name its row fields). The manifest is derived from the type: gate CI with `wcs-schema check` and regenerate with `emit --merge` after changing the state type.
 32. Named state is **removed in v2**: `name=` fails fast at runtime and `@` anywhere in a path is a parse error, both printing the replacement; lint reports `wcs/named-state-deprecated` as an **error**. One tree per rootNode — split modules with `mount=` (§2), hand a component a subtree with `state: path` (§12). The v1 Light DOM exemption is gone with it.
 33. Mount rules (`state: path`): an array cannot be the mount root — mount the row (`state: .`) or the object holding it. An own key that shadows a mount-point key stays **private and hides the tree value** (rule R1), warning once as `wcs/mount-own-key-shadow`; a default declared for a *mapped* key (`state = { message: "" }` next to `state.message: ...`) must be dropped or the host value never arrives. One `<wcs-state bind-component>` per component; a wildcard-terminal accessor (`get "tags.*"()`) over a mounted list raises.
 34. `wcs-validate --strict` exits `1` on **warnings** too (severities are unchanged; only the exit threshold moves). It is the way to make a path typo (`wcs/binding-path-missing`, a warning) fail CI — but run it only once every `<wcs-state src>` resolves relative to its HTML, because an unresolvable external state leaves warnings that now fail the build. `--errors-only --strict` keeps the output quiet while still failing.
 35. The **root `<wcs-state>` is required** — a page with only `mount=` volumes is a loud error. `mount` must be a static dotted path; `*` / `$` / `#` / `@` / empty segments raise and lint as `wcs/mount-path-invalid`. Mounting onto a slot the root already owns throws, as does writing a mount point's parent wholesale from the root.
 36. `setInitialState()` cannot re-set a tree that already has volumes or mounts on it — it raises, because a wholesale replacement would silently discard grafted data, accessors and the merged declaration surfaces. Write the individual paths you want to change.
 37. A volume (`<wcs-state mount>`) hosts getters, `$watch`, `$listKeys`, `$updatedCallback` and the connected/disconnected callbacks **relative to its mount path** — but **`$streams` raises** there, and `$commandTokens` / `$eventTokens` / `$on` are root-only (a mounted declaration warns and does nothing). These four are the only migrations that are not a plain rename.
+38. On your own `static wcBindable` element, a two-way binding writes **`getter(event)`** to state, defaulting to the whole **`e.detail`** — never `element[propName]`. Dispatch the value itself as `detail`, or declare `getter: (e) => e.detail.value` / `(e) => e.target.value` (§12). A wrapper-object `detail` without a `getter` silently stores the object and the write-back becomes `NaN`; lint cannot see it.
 
 
 ---
@@ -912,7 +937,7 @@ app.unmount();
 
 # wcstack router / autoloader / app scaffold reference
 
-Sources: `packages/router/README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md`. All verified against the actual files at v2.1.0. The v2 breaking changes are all in `@wcstack/state` (see `state-binding.md` §2); the router surface changed only in v2.1.0, and only for accessibility (§5).
+Sources: `packages/router/README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md`. All verified against the actual files at v2.2.0. The v2 breaking changes are all in `@wcstack/state` (see `state-binding.md` §2); the router surface changed in v2.1.0 for accessibility only (§5), and additively in v2.2.0 — guards gained a third argument, an object return that loads data into the new `<wcs-router>.data` output, and a string return that redirects dynamically (§4); the README also corrected *when* `data-bind` parameters are visible to an element (§2).
 
 ## 1. Minimal SPA scaffold
 
@@ -932,7 +957,7 @@ Swap each `esm.run` line for a version-pinned direct path with an `integrity` at
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/router@2.1.0/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/router@2.2.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
@@ -972,7 +997,7 @@ Swap each `esm.run` line for a version-pinned direct path with an `integrity` at
 | `fallback` | Displayed when no route matches |
 | `fullpath` | Full path including ancestors (read-only) |
 | `name` | For identification |
-| `guard` | Enables the guard. The value is the absolute redirect path used when the guard cancels |
+| `guard` | Enables the guard. The value is the absolute redirect path used when the guard cancels with a falsy return (a non-empty string return redirects there instead, v2.2+ — §4) |
 
 Route elements are **detached controllers** after parsing (v1.32): they are not part of the live DOM, cannot be found with `querySelector`, and cannot be bound with `data-wcs`. Match results (`params` / `typedParams` / `routeName`) are read from the **`<wcs-router>` element** — see §5. `guardHandler` can still be set from JS on a route object obtained before parsing.
 
@@ -1014,7 +1039,7 @@ A value that fails the type check **does not match that route** (no error; it fa
 | `"attr"` | Set via `setAttribute()` |
 | `""` (empty string) | Direct property (`element.userId = value`) |
 
-Parameters are assigned before `connectedCallback` fires. For undefined custom elements, assignment is deferred until `customElements.whenDefined()` resolves (compatible with the autoloader).
+**Timing (corrected in the v2.2.0 README)**: for elements that are *already defined* when the route renders — built-ins, and custom elements whose `define()` ran before the router stamped the content — parameters are assigned **before** `connectedCallback` fires. For a custom element that is **not yet defined**, assignment waits for `customElements.whenDefined()`, which resolves *after* the upgrade — so the `connectedCallback` run by the upgrade does **not** see them yet (autoloader-compatible, but `this.props.userId` read there is `undefined`, with no error). Either read the params in the `props` / `states` / attribute setter (or `attributeChangedCallback`) instead, or make sure the element is defined before the route renders (load its script before `@wcstack/router/auto`). When the params are needed in state anyway, prefer (c).
 
 **(c) From state (via wc-bindable)** — bind `typedParams` / `routeName` on `<wcs-router>` and consume the **parsed** results; no path-string regex needed (see §5 and §7).
 
@@ -1079,7 +1104,7 @@ Manages the document `<head>` per route. Stack-based: the last one connected win
   <wcs-guard-handler>
     <script type="module">
       export default function(toPath, fromPath) {
-        return document.cookie.includes('session=');   // boolean | Promise<boolean>
+        return document.cookie.includes('session=');   // true | false | object | string, or a Promise of one (v2.2+ — table below)
       }
     </script>
   </wcs-guard-handler>
@@ -1088,6 +1113,35 @@ Manages the document `<head>` per route. Stack-based: the last one connected win
 ```
 
 `false` cancels → navigates to the path in the `guard` attribute. `<wcs-guard-handler>` is removed from the DOM after parsing. Ignored if placed outside a `<wcs-route>`. Can also be set from JS via `route.guardHandler = fn`.
+
+**Guard return values and the third argument (v2.2+)** — the guard is the one async step before the route content swaps, so it doubles as the route's **loader** and **dynamic redirect**:
+
+| Return | Effect |
+|---|---|
+| `true` | enter |
+| an object | enter **and** commit it as `<wcs-router>.data` (output-only, `wcs-router:data-changed`, fires first; nested chain shallow-merged parent → child; `null` on navigations whose guards return no object; same-match keeps it) |
+| a non-empty string | cancel and redirect **there** (wins over `guard=`) — e.g. `` return `/login?next=${encodeURIComponent(toPath)}` `` |
+| any falsy (`false` / `undefined` / `null` / `""`) | cancel → `guard=` path (unchanged: a forgotten `return` still rejects) |
+
+The third argument is a frozen `{ params, typedParams, searchParams, routeName }` snapshot of the match being entered — the same vocabulary the router exposes after the commit, readable before it. Canonical loader:
+
+```html
+<wcs-router data-wcs="data: routeData; typedParams: routeParams">
+  <wcs-route path="/users/:id(int)" name="user" guard="/users">
+    <wcs-guard-handler><script type="module">
+      export default async function (to, from, { typedParams }) {
+        const res = await fetch(`/api/users/${typedParams.id}`);
+        if (res.status === 404) return "/users";
+        if (!res.ok) return false;
+        return { user: await res.json() };
+      }
+    </script></wcs-guard-handler>
+    <h1 data-wcs="textContent: routeData.user.name"></h1>
+  </wcs-route>
+</wcs-router>
+```
+
+`data` is the one router output that is **not** frozen (it is the guard's own object) and the router does not cache it — same route with other params loads again. Use it when the page must not show the new route with empty content (a `<wcs-view-transition>` otherwise animates a blank frame). Still no `src=` escape from `blob:` under CSP.
 
 **Guards force `script-src blob:` under a CSP.** The handler is evaluated through a `blob:` URL, and unlike `<wcs-state>` there is **no `src=` form to escape to** — this asymmetry is known and unimplemented. If the policy must stay strict, drop guards and gate on the route-content side (a `<template data-wcs="if: isAuthed">` swap) instead.
 
@@ -1099,7 +1153,7 @@ Manages the document `<head>` per route. Stack-based: the last one connected win
 
 Resolution order: (1) `basename` attribute → (2) derived from `<base href>` → (3) empty string. Normalization: prepend leading `/`, collapse consecutive slashes, strip trailing `/`, strip trailing `*.html` (`/app/index.html` → `/app`). Multiple routers can coexist in the same document as long as their basenames differ.
 
-**Multilingual sites: the locale goes in the basename, not a route pattern** (v1.32 canon, `examples/router-i18n`). Write `<base href="/ja/">` from a synchronous `<head>` script once the locale is known. A `/:lang` route parameter *breaks* the language switch: the router intercepts every same-origin navigation under its basename, so a link to another language would be handled client-side and per-locale modules (dictionary, `Intl` formatters) would never re-evaluate — the language silently does not change. With the locale in the basename, a link to `/en/…` falls outside the router's own path, and the browser performs a real navigation. Consequences: route patterns and in-app links stay locale-free, and **every URL on the page must be absolute** (`<base>` changes relative resolution — including `<wcs-state src>`, which resolves against the document base URL as of v1.32). Repair a locale-less URL in that same head script via `location.replace`, not a route guard (a guard's redirect target is static and cannot preserve the path).
+**Multilingual sites: the locale goes in the basename, not a route pattern** (v1.32 canon, `examples/router-i18n`). Write `<base href="/ja/">` from a synchronous `<head>` script once the locale is known. A `/:lang` route parameter *breaks* the language switch: the router intercepts every same-origin navigation under its basename, so a link to another language would be handled client-side and per-locale modules (dictionary, `Intl` formatters) would never re-evaluate — the language silently does not change. With the locale in the basename, a link to `/en/…` falls outside the router's own path, and the browser performs a real navigation. Consequences: route patterns and in-app links stay locale-free, and **every URL on the page must be absolute** (`<base>` changes relative resolution — including `<wcs-state src>`, which resolves against the document base URL as of v1.32). Repair a locale-less URL in that same head script via `location.replace`, not a route guard (a guard *can* redirect dynamically since v2.2 by returning a string, but the head script runs before any module loads and the basename decision has to be made there anyway).
 
 ### Fallback route / catch-all
 
@@ -1128,7 +1182,8 @@ Resolution order: (1) `basename` attribute → (2) derived from `<base href>` �
 
 ```html
 <wcs-router data-wcs="path: path; typedParams: routeParams; searchParams: query;
-                      routeName: routeName; navigateUrl: navigateUrl; replaceUrl: replaceUrl">
+                      routeName: routeName; data: routeData;
+                      navigateUrl: navigateUrl; replaceUrl: replaceUrl">
 ```
 
 | Member | Direction | Notes |
@@ -1137,11 +1192,12 @@ Resolution order: (1) `basename` attribute → (2) derived from `<base href>` �
 | `params` / `typedParams` | output | Merged params of the matched chain; `typedParams` type-converted (`:id(int)` → number). `{}` on fallback / before init |
 | `searchParams` | output | Query as `Record<string,string>`; duplicate keys last-wins, `URLSearchParams` decoding; `{}` when none |
 | `routeName` | output | `name` of the deepest matched route (fallback route's `name` on a 404); `""` when unnamed |
+| `data` (v2.2+) | output | What the current navigation's guards **returned as an object** (§4 loader) — `null` when no guard returned one, including before init; a query-only same-match keeps the previous value. The one member that is **not** frozen: it is the guard's own object, passed through; the router neither copies nor caches it. Fires `wcs-router:data-changed` |
 | `navigateUrl` | write (null-idle transient) | Assign a target to **push**-navigate; resets itself to `null` on finish; `null`/`""` writes are no-ops |
 | `replaceUrl` | write (null-idle transient) | Same contract, but **replaces** the history entry |
 | `basename` | input | Mirrors the attribute |
 
-- Outputs are **read** when the binding attaches, then streamed via change events — a binding attaching after the first route resolution misses nothing. On a committed navigation all values commit first, then events fire `params` → `routeName` → `search` → `path`, each only when changed; a guard-rejected navigation updates and fires nothing. The exposed objects are **frozen snapshots** — copy, don't mutate.
+- Outputs are **read** when the binding attaches, then streamed via change events — a binding attaching after the first route resolution misses nothing. On a committed navigation all values commit first, then events fire `data` → `params` → `routeName` → `search` → `path`, each only when changed (`data` by identity); a guard-rejected navigation updates and fires nothing. The exposed objects are **frozen snapshots** — copy, don't mutate (`data` is the exception: it is owned by the guard that returned it).
 - **Choosing the write surface**: pagination/tabs (back button should step through) → `navigateUrl = "?page=2"`; search boxes/filters (history should not record keystrokes) → `replaceUrl = "?q=" + …` with `<wcs-debounce>` in front.
 - Commands `navigate(path)` / `replace(path)` are also declared (invocable via command tokens).
 
@@ -1331,6 +1387,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 - Write the tag directly inside the route and receive parameters via `data-bind` (§2).
 - **Defining is outside the router's responsibility** — the autoloader (§6) or a manual `customElements.define()` is required separately.
 - Alternative pattern (proven in router-spa): create no custom elements; put only `<wcs-head>` + static content in the routes, and switch the data-bound page DOM via `routeName`-derived getters in `<template data-wcs="if: ...">` directly under body. (Before v1.32 this was forced by §9-3; since the binder protocol it is a choice — bindings inside routes now work — but it remains the pattern the official demo ships.)
+- **Pick the shape per page, not per project (v2.2.0 README, "Where route content lives").** The route body is the default: stamped on entry, removed on exit, bindings bound on insertion, and everything the router offers — `<wcs-head>`, `focus="heading"` / `announce=`, the per-route view transition — is keyed to it. Switch to the body-level `<template data-wcs="if: …">` form **when the DOM must outlive the navigation** (a `<video>` mid-playback, a half-filled form, a scrolled list, a drawn `<canvas>`): stamping is a teardown, and a route body is rebuilt on every entry. What the exception costs: `focus="heading"` finds no heading in the empty route body and falls back to the browser-default reset (`announce=` still reads `document.title`), and a view transition wraps the state branch update rather than the route swap. router-spa shows both — About is the default shape, the product pages are the exception.
 
 ## 9. Pitfall checklist
 
@@ -1344,6 +1401,9 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 8. `undefined` is never written to an element (write-skip) — if a getter returns `undefined`, `<wcs-fetch>` stays silent. The auto-fetch guard compares against the last url **actually fetched**, and a state that fetches nothing (empty/`undefined` url) does not update it: leaving a detail route and coming straight back to the same id re-enters with the same url and is **skipped**. Use `command.fetch` when a genuine re-run is wanted.
 9. Autoloader load failures are not retried. (Before v1.31 a failed load additionally wedged every later lazy load on the page; fixed — waiters now settle on failure too.)
 10. Route guards require `script-src blob:` under a CSP and have no external-file form (§4).
+11. **`data-bind` params are invisible to the upgrade-time `connectedCallback` of a not-yet-defined element** — they are assigned after `whenDefined()` resolves, which is after the upgrade (an already-defined element does get them before `connectedCallback`). Read them in a setter / `attributeChangedCallback`, define the element before the router renders, or bind `typedParams` on `<wcs-router>` into state (§2).
+12. **A guard that forgets to `return` still rejects** (every falsy value cancels), and an **object return enters the route** — a guard that hands back the fetched record by accident also lets the user in. Do the authorization check first, then return `true` / a string / an object deliberately (§4).
+13. **`data` is `null` on any navigation whose guards return no object** — wrap content that reads it in `<template data-wcs="if: routeData">`. The router does not cache it: revisiting the same route with other params loads again, so keep anything worth reusing in your own state.
 
 
 ---
@@ -1354,7 +1414,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 
 # wcstack I/O Node Catalog + signals Quick Reference
 
-Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, and `examples/signals-live-search`. The 38 pre-v1.25 tags were cross-checked against source at v1.21.7 — attribute spellings, properties, commands, and the timing notes below are source-verified. Since then: v1.23.0 added `mountNode` to signals and normalized Core as a public headless surface; v1.24.0 declared observation semantics on every property (§0) and stopped the same-value guard from swallowing occurrences; **v1.25.0 added `@wcstack/audio` (11 tags) and `@wcstack/midi` (1 tag)**, bringing the catalog to **50 I/O node tags** — those two are read from v1.26.0 source. Every pre-existing tag/property/command name is unchanged; v1.27.0–v1.31.0 changed no tag/property/command names (v1.27 changed state `$watch` / filters / bind-component; v1.28–v1.30 are tooling — canonical parser, lint external-src resolution, VS Code lenses, devtools coverage — see `state-binding.md`), only the stream-commit recipe below moved to `$watch`. v1.31 added **scoped custom element registry** support across every package (Chrome/Edge 146+, Safari 26+): definedness checks resolve against the node's own registry with a global fallback (unchanged behavior when the feature is absent), every `registerComponents(registry?)` can define into a scoped registry (devtools deliberately stays global), and `<wcs-defined>` reports tags `missing` immediately when no registry governs them instead of pending forever. **v1.32 added `@wcstack/view-transition` (`<wcs-view-transition>`, a policy node — §1.2), bringing the catalog to 51 tags**, and gave `<wcs-raf>` an opt-in `reduced-motion` gate. v1.33 changed no I/O node surface (its two new packages — `@wcstack/typescript`, `@wcstack/testing` — are dev tools, not elements), and every element package now augments `HTMLElementTagNameMap`, so `document.querySelector("wcs-fetch")` is typed as `WcsFetch` in TS projects without a cast. **v2.0.0 changes no I/O node surface either** — its source changes are confined to `state` / `server` / `testing` / `typescript` / `devtools` / `vscode-wcs`, so every tag, property and command name in this catalog is unchanged; only the *paths* you bind them to follow the single-tree rules in `state-binding.md` §2. **v2.1.0 is additive and touches no I/O node tag either** — its one element-surface change is `<wcs-link>`, which now mirrors `lang` / `dir` to the generated anchor (`router-and-scaffold.md` §5).
+Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, and `examples/signals-live-search`. The 38 pre-v1.25 tags were cross-checked against source at v1.21.7 — attribute spellings, properties, commands, and the timing notes below are source-verified. Since then: v1.23.0 added `mountNode` to signals and normalized Core as a public headless surface; v1.24.0 declared observation semantics on every property (§0) and stopped the same-value guard from swallowing occurrences; **v1.25.0 added `@wcstack/audio` (11 tags) and `@wcstack/midi` (1 tag)**, bringing the catalog to **50 I/O node tags** — those two are read from v1.26.0 source. Every pre-existing tag/property/command name is unchanged; v1.27.0–v1.31.0 changed no tag/property/command names (v1.27 changed state `$watch` / filters / bind-component; v1.28–v1.30 are tooling — canonical parser, lint external-src resolution, VS Code lenses, devtools coverage — see `state-binding.md`), only the stream-commit recipe below moved to `$watch`. v1.31 added **scoped custom element registry** support across every package (Chrome/Edge 146+, Safari 26+): definedness checks resolve against the node's own registry with a global fallback (unchanged behavior when the feature is absent), every `registerComponents(registry?)` can define into a scoped registry (devtools deliberately stays global), and `<wcs-defined>` reports tags `missing` immediately when no registry governs them instead of pending forever. **v1.32 added `@wcstack/view-transition` (`<wcs-view-transition>`, a policy node — §1.2), bringing the catalog to 51 tags**, and gave `<wcs-raf>` an opt-in `reduced-motion` gate. v1.33 changed no I/O node surface (its two new packages — `@wcstack/typescript`, `@wcstack/testing` — are dev tools, not elements), and every element package now augments `HTMLElementTagNameMap`, so `document.querySelector("wcs-fetch")` is typed as `WcsFetch` in TS projects without a cast. **v2.0.0 changes no I/O node surface either** — its source changes are confined to `state` / `server` / `testing` / `typescript` / `devtools` / `vscode-wcs`, so every tag, property and command name in this catalog is unchanged; only the *paths* you bind them to follow the single-tree rules in `state-binding.md` §2. **v2.1.0 is additive and touches no I/O node tag either** — its one element-surface change is `<wcs-link>`, which now mirrors `lang` / `dir` to the generated anchor (`router-and-scaffold.md` §5). **v2.1.1 changes no tag either** — its one I/O-side change is `bindNode` in `@wcstack/signals` applying the wc-bindable default getter (§ wc-bindable bridge).
 
 ## 0. Common Conventions (all I/O nodes)
 
@@ -1645,6 +1705,8 @@ bound.dispose();                              // tear down everything (idempoten
 ```
 
 Typing via `bindNode<FetchShape>(el)`. Real-world pattern: `effect(() => bound.set("url", ...))` for the query → `<wcs-fetch>` auto-fetches → read `bound.signals.value` in a `computed` and render with `For` (examples/signals-live-search).
+
+**What a property signal receives** (`bound.signals.x` and `bound.on("x")`): `getter(event)` from the descriptor, and when `getter` is omitted the wc-bindable default `(e) => e.detail` — the same rule as a `data-wcs` two-way binding, so an element behaves identically under `state` and `signals` (fixed in wcstack#238; earlier signals releases read the element property instead). The initial seed is the one property read (`el[name]`, there is no event yet). Every wcs-* node dispatches its value as `detail`, so nothing changes for them; a third-party element whose `detail` is not the property value (`detail: { value }`, or no `detail`) needs an explicit `getter: (e) => e.target.value` in the descriptor you pass to `bindNode`.
 
 **`bindNode` is synchronous, so the class must already be registered when you call it** — it reads the descriptor from `el.constructor.wcBindable`, and an un-upgraded element has none (it throws). This is the structural asymmetry with `data-wcs`: the declarative layer can defer wiring until upgrade, an imperative API that returns values now cannot. Pick the idiom by who loads the node (v1.23+, `docs/signals-definition-timing.md`):
 
