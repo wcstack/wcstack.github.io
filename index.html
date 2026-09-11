@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.2.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.3.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,92 +647,92 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v2.2.0</h2>
-      <p class="section-sub">A real additive release: a route guard can load data and redirect dynamically, a mounted component&rsquo;s getters are readable from outside, bindings get an in-page error boundary, <code>matchMedia</code> becomes a tag, strict Trusted Types pages work, and a two-way binding that went quiet now says why.</p>
-      <p class="section-sub-ja">本格的な追加リリース。ルートガードはデータを読み込み動的にリダイレクトでき、マウントされたコンポーネントのgetterは外から読め、バインディングはページ内のエラー境界を得て、<code>matchMedia</code>はタグになり、Trusted Typesを強制するページで動き、黙ってしまった双方向バインディングは理由を告げる。</p>
+      <h2 class="section-title">Shipped in v2.3.0</h2>
+      <p class="section-sub">A path burns its depth into the string &mdash; and a tree&rsquo;s depth belongs to the data. <code>$recursion</code> closes that gap without the reactive core learning a new shape.</p>
+      <p class="section-sub-ja">パスは深さを文字列に焼き付ける &mdash; だが木の深さはデータに属する。<code>$recursion</code>はその隙間を、リアクティブコアに新しい形を覚えさせずに埋める。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">guard &rarr; data</span>
-          <h3>The guard was already the loader</h3>
-          <p class="what-if">What if a route could load its data without a new lifecycle phase?</p>
-          <p>A guard function was already the one asynchronous step that runs before the route content is swapped in. v2.2.0 lets it return more than a boolean. Return an <strong>object</strong> and the router enters the route and commits it as the new output-only <code>&lt;wcs-router&gt;.data</code> member (<code>wcs-router:data-changed</code>, fired first in the commit order) &mdash; so the page never shows the new route with empty content, and a <code>&lt;wcs-view-transition&gt;</code> animates real content instead of a blank frame. Return a <strong>non-empty string</strong> and the navigation is cancelled and redirected there, a dynamic target that wins over the static <code>guard=</code> attribute. The function also receives a third argument, a frozen <code>{ params, typedParams, searchParams, routeName }</code> snapshot of the match being entered, so <code>fetch(`/api/users/${typedParams.id}`)</code> needs no URL parsing. Every falsy return still cancels, so existing guards are untouched. On a nested chain each guard may return an object; they shallow-merge parent &rarr; child, and <code>data</code> is <code>null</code> on a navigation that loads nothing.</p>
-          <p class="ja">ガード関数はもともと、ルートの内容が差し替わる前に走る唯一の非同期ステップだった。v2.2.0はそこから真偽値以外も返せるようにする。<strong>オブジェクト</strong>を返せばrouterはルートに入り、それを新設の出力専用メンバー<code>&lt;wcs-router&gt;.data</code>としてコミットする(<code>wcs-router:data-changed</code>、コミット順の先頭で発火) &mdash; だからページが空の内容で新ルートを見せる瞬間はなく、<code>&lt;wcs-view-transition&gt;</code>は空白のフレームではなく実際の内容をアニメーションする。<strong>空でない文字列</strong>を返せばナビゲーションは取り消されそこへリダイレクトされる。静的な<code>guard=</code>属性に勝つ動的な行き先だ。関数は第3引数として、入ろうとしているマッチの凍結スナップショット<code>{ params, typedParams, searchParams, routeName }</code>も受け取るので、<code>fetch(`/api/users/${typedParams.id}`)</code>にURL解析は要らない。falsyな戻り値は今までどおり取り消しなので、既存のガードは無傷。ネストしたチェーンでは各ガードがオブジェクトを返してよく、親&rarr;子でshallow-mergeされる。何も読み込まないナビゲーションでは<code>data</code>は<code>null</code>。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">$recursion</span>
+          <h3>Depth belongs to the data</h3>
+          <p class="what-if">What if one getter covered every level of a tree?</p>
+          <p><code>nodes.*.children.*.total</code> has exactly two wildcard levels, and nothing about it stretches to three when the tree grows a level. <code>$recursion: { "nodes.*": "children.*" }</code> declares <strong>where the shape repeats</strong> &mdash; an anchor and the sub-path that descends one level &mdash; and <code>**</code> then stands for &ldquo;however deep this is&rdquo;. One definition covers every depth: <code>get "nodes.**.total"()</code> reads <code>this["nodes.**.value"]</code> and folds its direct children, and the same formula is the totals at depth 1 and depth 12. <code>$getAll(path, [])</code> unions every depth depth-first, so <code>treeTotal</code> is a one-liner over a forest whose shape nothing in the code knows; <code>$setAll(path, [], value)</code> broadcasts one value to every node. The declaration is what gives <code>**</code> a meaning at all &mdash; with no <code>$recursion</code>, it is not a path character, so the notation can never quietly slide into a descendant search.</p>
+          <p class="ja"><code>nodes.*.children.*.total</code>のワイルドカードはちょうど2段で、木が1段伸びても3段には届かない。<code>$recursion: { "nodes.*": "children.*" }</code>は<strong>形が繰り返される場所</strong>を宣言する &mdash; アンカーと、1段降りる部分パス &mdash; そして<code>**</code>が「ここが何段であろうと」を表す。定義1つがすべての深さを覆う: <code>get "nodes.**.total"()</code>は<code>this["nodes.**.value"]</code>を読んで直下の子を畳み込み、同じ式が深さ1の合計でも深さ12の合計でもある。<code>$getAll(path, [])</code>は全深さを深さ優先で連結するので、<code>treeTotal</code>は形をコードが知らない森に対する1行になる。<code>$setAll(path, [], value)</code>は1つの値を全ノードへ配る。<code>**</code>に意味を与えるのは宣言そのものだ &mdash; <code>$recursion</code>が無ければ<code>**</code>はパスの文字ですらないので、この記法が子孫検索へ黙って滑り込むことはありえない。</p>
           <ul class="tag-features">
-            <li>Object In, Route Entered</li>
-            <li>String In, Redirected</li>
-            <li>The Match, Frozen</li>
-            <li>Falsy Still Cancels</li>
+            <li>Anchor &rarr; Repeating Sub-path</li>
+            <li>One Getter, Every Depth</li>
+            <li>[] Unions the Whole Tree</li>
+            <li>No Declaration, No **</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">state: path</span>
-          <h3>A component&rsquo;s getters, readable from outside</h3>
-          <p class="what-if">What if a mounted component could answer questions the tree cannot?</p>
-          <p>A component mounted at <code>user</code> has always read the tree through its mount point. For getters the direction is now two-way: <strong>a read of a key the tree does not have is answered by the getter of the component mounted there</strong>. <code>&lt;span data-wcs="textContent: user.display"&gt;</code> renders the component&rsquo;s <code>get display()</code>; a key the tree does have still wins, with a one-time <code>wcs/mount-export-shadowed</code> warning, and private keys and methods are never visible. Row mounts export per row, so <code>$getAll("users.*.display")</code> and <code>text: .display</code> inside the same <code>for</code> read each row component&rsquo;s getter, and dependencies flow through &mdash; change <code>user.name</code> and everything that read <code>user.display</code> re-renders. Writing to an exported key runs the accessor&rsquo;s setter or throws, so the tree never grows a key that would hide the getter. The payoff is <strong>self-recursive components</strong>: a <code>&lt;tree-node&gt;</code> that renders <code>&lt;tree-node data-wcs="state: ."&gt;</code> for each child can define <code>get total()</code> over <code>this.$getAll("children.*.total")</code> &mdash; each level closes over one level, and the ledger resolves the recursion. Paths cannot express recursion; the recursion lives in the DOM, and the paths are its unrolled form. The parent evaluates before the child registers, so the first read may see <code>undefined</code>: write <code>(x ?? 0)</code>.</p>
-          <p class="ja"><code>user</code>にマウントされたコンポーネントは、ずっとマウント点を通して木を読んできた。getterについては、いまやその向きが双方向になる: <strong>木に無いキーの読みは、そこにマウントされたコンポーネントのgetterが答える</strong>。<code>&lt;span data-wcs="textContent: user.display"&gt;</code>はコンポーネントの<code>get display()</code>を描画する。木にあるキーは引き続き木が勝ち、<code>wcs/mount-export-shadowed</code>が一度だけ警告する。私有キーとメソッドは決して見えない。行マウントは行ごとにエクスポートするので、同じ<code>for</code>の中の<code>$getAll("users.*.display")</code>と<code>text: .display</code>は各行コンポーネントのgetterを読み、依存は貫通する &mdash; <code>user.name</code>を変えれば<code>user.display</code>を読んだものすべてが再描画される。エクスポートされたキーへの書き込みはアクセサのsetterを走らせるか、無ければthrowする。getterを隠すキーが木に生えることはない。見返りは<strong>自己再帰コンポーネント</strong>だ: 子ごとに<code>&lt;tree-node data-wcs="state: ."&gt;</code>を描く<code>&lt;tree-node&gt;</code>が、<code>this.$getAll("children.*.total")</code>の上に<code>get total()</code>を定義できる &mdash; 各階層の式は1階層分だけを閉じ込め、再帰は台帳が解決する。パスは再帰を表現できない。再帰はDOMに宿り、パスはその展開形だ。親は子が登録するより先に評価されるので、最初の読みは<code>undefined</code>になりうる: <code>(x ?? 0)</code>と書くこと。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">**</span>
+          <h3>Bound, or unioned</h3>
+          <p class="what-if">What if a depth variable read like a loop index?</p>
+          <p><code>**</code> is a variable over depth, and context decides whether it is <strong>bound</strong> or <strong>unioned</strong> &mdash; the same split <code>*</code> already has between &ldquo;the current row&rdquo; and &ldquo;every row&rdquo;. In a getter key and in reads inside it, <code>**</code> is bound to the depth being evaluated; <code>$getAll</code> with indexes <strong>omitted</strong> stays at that depth and expands only the wildcards after it; <code>$getAll(path, [])</code> unions every depth. That split is the whole game for aggregation: the omitted form sums the direct children, so each total folds its own subtree exactly once. Reach for <code>[]</code> inside the same getter and it asks for itself &mdash; you get <code>wcs/getter-cycle</code>, not a wrong number. The quiet mistake is the one made from outside: unioning an aggregate counts every grandchild once inside its parent&rsquo;s total and again as an element. Union the raw values, or add up the roots. Whether an aggregate double-counts is not decidable from the path string, so no diagnostic claims to catch it.</p>
+          <p class="ja"><code>**</code>は深さについての変数で、<strong>束縛</strong>されるか<strong>連結</strong>されるかは文脈が決める &mdash; <code>*</code>がすでに持つ「現在の行」と「すべての行」の対比と同じだ。getterのキーとその内側の読みでは、<code>**</code>は評価中の深さに束縛される。インデックスを<strong>省いた</strong><code>$getAll</code>はその深さに留まり、<code>**</code>より後ろのワイルドカードだけを展開する。<code>$getAll(path, [])</code>は全深さを連結する。集計ではこの対比がすべてだ: 省略形は直下の子を合計するので、各totalは自分の部分木をちょうど1回だけ畳み込む。同じgetterの中で<code>[]</code>に手を伸ばせば自分自身を要求することになり、間違った数ではなく<code>wcs/getter-cycle</code>が返る。静かな間違いは外から犯すほうだ: 集計値を連結すると、孫は親のtotalの中で1回、連結の要素としてもう1回数えられる。生の値を連結するか、根を足し合わせること。集計が二重計上かどうかはパス文字列からは決定できないので、これを捕まえると称する診断は無い。</p>
           <ul class="tag-features">
-            <li>Tree Key Wins, Warns Once</li>
-            <li>Per Row, Dependencies Flow</li>
-            <li>Setter or Throw, Never Shadow</li>
-            <li>Recursion Lives in the DOM</li>
+            <li>Getter Key Binds the Depth</li>
+            <li>Omitted: This Depth</li>
+            <li>[]: Every Depth, Pre-order</li>
+            <li>Double-counting Stays Yours</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">$errorCallback</span>
-          <h3>An error boundary, in the page</h3>
-          <p class="what-if">What if a failing binding reported to the page instead of the console?</p>
-          <p>A binding whose application throws &mdash; a path getter or a filter threw, a structural directive failed &mdash; was already isolated: the rest of the batch still applies, nothing is rolled back, and the failure went to <code>console.error</code> and to DevTools. Declare <code>$errorCallback(error, info)</code> on the root state and the report comes to you instead. <code>info</code> is <code>{ path, bindingType, node }</code>, with the path as written in <code>data-wcs</code>, wildcards intact; <code>this</code> is the writable state proxy, so the usual shape is to write the message into state and render it like anything else. The hook runs once per failed binding after <code>$updatedCallback</code>, is not awaited, and its own exceptions are isolated, so it cannot take the drain down with it. DevTools keeps receiving <code>state:binding-apply-error</code> either way. Root-only &mdash; a volume declaring it is ignored &mdash; and it does not cover <code>$watch</code> handlers or <code>$connectedCallback</code>, which fail loudly on their own.</p>
-          <p class="ja">適用時にthrowするバインディング &mdash; パスgetterやフィルタが投げた、構造ディレクティブが失敗した &mdash; はすでに隔離されていた: バッチの残りは適用され、何もロールバックされず、失敗は<code>console.error</code>とDevToolsへ行く。ルートstateに<code>$errorCallback(error, info)</code>を宣言すれば、その報告があなたに届く。<code>info</code>は<code>{ path, bindingType, node }</code>で、<code>path</code>は<code>data-wcs</code>に書かれたままワイルドカードも保つ。<code>this</code>は書き込み可能なstateプロキシなので、定石はメッセージをstateに書いて他と同じように描画すること。失敗したバインディングごとに1回、<code>$updatedCallback</code>の後に走り、awaitされず、自身の例外も隔離されるのでフックがdrainを道連れにすることはない。DevToolsは変わらず<code>state:binding-apply-error</code>を受け取る。ルート専用 &mdash; ボリュームでの宣言は無視される &mdash; で、<code>$watch</code>ハンドラや<code>$connectedCallback</code>は対象外。それらは独自に大声で失敗する。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">wcs/recursion-*</span>
+          <h3>The engine never sees a **</h3>
+          <p class="what-if">What if a new notation cost the core nothing?</p>
+          <p><code>**</code> is authoring notation only. Reading a concrete path materializes the accessor for <strong>that</strong> depth on demand, one per depth actually touched, and everything downstream &mdash; <code>PathInfo</code>, the dependency graph, <code>$1</code>&hellip;<code>$n</code>, <code>$resolve</code>, the list diff &mdash; still sees an ordinary fixed-arity path. That invariant is kept by refusing, loudly, everything it cannot express. At declaration time: a second anchor, mutual recursion, a recursive <em>setter</em>, a <code>**</code> getter naming the structure (<code>get "nodes.**.children"()</code> would hide the real child list at every depth), two getters expanding to one concrete path. At write time: anything targeting a recursive getter or its concrete expansions (<code>wcs/recursion-readonly</code>, before or after that depth exists), a broadcast at the structure itself (<code>wcs/recursion-structural-write</code>), a mapper or a non-empty prefix. And a bound <code>**</code> read where no depth exists is <code>wcs/recursion-context</code>, never a guess at which node you meant. The editor and <code>wcs-validate</code> report every statically decidable form under the same codes, and stay silent where the declaration cannot be read statically.</p>
+          <p class="ja"><code>**</code>は記述上の記法にすぎない。具体的なパスを読むとその深さのアクセサが必要に応じて実体化され、実際に触れた深さの分だけ作られる。その下流 &mdash; <code>PathInfo</code>、依存グラフ、<code>$1</code>&hellip;<code>$n</code>、<code>$resolve</code>、リスト差分 &mdash; が見るのは相変わらず固定アリティの普通のパスだ。この不変条件は、表現できないものを大声で拒むことで守られる。宣言時には: 2つ目のアンカー、相互再帰、再帰的な<em>setter</em>、構造を名指しする<code>**</code>getter(<code>get "nodes.**.children"()</code>は全深さで本物の子リストを隠してしまう)、同じ具体パスに展開される2つのgetter。書き込み時には: 再帰getterやその具体展開を狙うもの(<code>wcs/recursion-readonly</code>、その深さが実体化済みかどうかに関わらず)、構造そのものへのブロードキャスト(<code>wcs/recursion-structural-write</code>)、mapperや空でない前置インデックス。そして深さの無い場所で束縛形の<code>**</code>を読めば<code>wcs/recursion-context</code>であって、どのノードのつもりかの推測ではない。エディタと<code>wcs-validate</code>は静的に判定できる形をすべて同じコードで報告し、宣言が静的に読めない場所では黙る。</p>
           <ul class="tag-features">
-            <li>Getter, Filter, Directive</li>
-            <li>path As Written</li>
-            <li>After $updatedCallback, Not Awaited</li>
-            <li>Root-only, DevTools Still Sees It</li>
+            <li>Materialized Per Depth</li>
+            <li>Fixed Arity Downstream</li>
+            <li>Refused, Never Reinterpreted</li>
+            <li>Lint Uses the Same Codes</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">&lt;wcs-media-query&gt;</span>
-          <h3>Dark mode is a boolean now</h3>
-          <p class="what-if">What if matchMedia was a tag?</p>
-          <p>A new I/O node. <code>&lt;wcs-media-query query="(prefers-color-scheme: dark)" data-wcs="matched: isDark"&gt;</code> wraps <code>window.matchMedia</code> and publishes <code>matched</code> / <code>media</code> / <code>supported</code> through one <code>wcs-media-query:change</code> event, with <code>:state(matched)</code> / <code>:state(supported)</code> reflected for CSS. A query that only changes styling still belongs in a stylesheet; this is for the answer that has to reach <strong>logic</strong> &mdash; a theme default, pausing a <code>&lt;wcs-raf&gt;</code> loop under <code>prefers-reduced-motion</code>, swapping a table for cards below a breakpoint, detecting <code>(display-mode: standalone)</code> for a PWA. Changing <code>query</code> while connected re-subscribes, generation-guarded so a stale list can never write, and old-Safari <code>addListener</code> is handled. The output is <code>matched</code>, not <code>matches</code>, because <code>Element.prototype.matches()</code> already exists on every element and a wc-bindable property is read straight off the Shell.</p>
-          <p class="ja">新しいI/Oノード。<code>&lt;wcs-media-query query="(prefers-color-scheme: dark)" data-wcs="matched: isDark"&gt;</code>は<code>window.matchMedia</code>を包み、<code>matched</code> / <code>media</code> / <code>supported</code>を1つの<code>wcs-media-query:change</code>イベントで公開し、CSS向けに<code>:state(matched)</code> / <code>:state(supported)</code>を反映する。スタイルだけを変えるクエリは今までどおりスタイルシートに置けばいい。これは答えが<strong>ロジック</strong>に届く必要がある場合のためだ &mdash; テーマの既定値、<code>prefers-reduced-motion</code>下で<code>&lt;wcs-raf&gt;</code>ループを止める、ブレークポイント以下でテーブルをカードに替える、PWAの<code>(display-mode: standalone)</code>検出。接続中の<code>query</code>変更は再購読し、世代ガードで古いリストは決して書き込めない。旧Safariの<code>addListener</code>も扱う。出力名が<code>matches</code>ではなく<code>matched</code>なのは、<code>Element.prototype.matches()</code>がすべての要素にすでに存在し、wc-bindableのプロパティはShellから直接読まれるからだ。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">one ledger</span>
+          <h3>A list nothing rendered</h3>
+          <p class="what-if">What if an aggregate stopped depending on being displayed?</p>
+          <p>The baseline that <code>$getAll</code> and the dependency walk compare against used to be written <strong>only when a <code>for</code> rendered the list</strong>. So a structural write to a list nothing rendered &mdash; a sort, an insert, a parent re-assignment &mdash; minted a fresh <code>ListIndex</code> generation while the child ledgers kept pointing at the old one. The aggregate over that list went permanently stale, or threw <code>ListIndexes not found</code>, and the fix was the absurd one: render the list somewhere to make the number correct. The baseline now lives in a <strong>state-owned ledger</strong> shared by reads, rendering and the dependency walk, committed at the end of each update batch. A recursive <code>$setAll</code> commits what it observed for the same reason. Rendering is no longer a prerequisite for a correct read &mdash; which is also what makes an aggregate over a deep tree trustworthy when only the top level is on screen.</p>
+          <p class="ja"><code>$getAll</code>と依存の走査が比較するベースラインは、これまで<strong><code>for</code>がそのリストを描画したときにだけ</strong>書かれていた。つまり、どこにも描画されていないリストへの構造的な書き込み &mdash; ソート、挿入、親ごとの再代入 &mdash; は新しい<code>ListIndex</code>世代を作り、子の台帳は古い世代を指したままになる。そのリストに対する集計は永久に古びるか、<code>ListIndexes not found</code>を投げた。そして直し方は馬鹿げていた: 数を正しくするためにリストをどこかに描画する。ベースラインはいま、読み・描画・依存走査が共有する<strong>state所有の台帳</strong>に置かれ、更新バッチの終わりにコミットされる。再帰的な<code>$setAll</code>も同じ理由で観測結果をコミットする。正しい読みのために描画は前提ではなくなった &mdash; 深い木の集計が、画面には最上層しか出ていなくても信用できるのは、これが理由でもある。</p>
           <ul class="tag-features">
-            <li>matched / media / supported</li>
-            <li>Logic, Not Styling</li>
-            <li>Re-subscribes, Generation-guarded</li>
-            <li>matched, Not matches</li>
+            <li>Baseline Left the Render Path</li>
+            <li>Sort, Insert, Re-assign</li>
+            <li>No More ListIndexes Not Found</li>
+            <li>Committed Per Batch</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">trusted-types wcstack</span>
-          <h3>Signed only what you wrote</h3>
-          <p class="what-if">What if a strict CSP could stay strict?</p>
-          <p>Pages enforcing <code>require-trusted-types-for 'script'</code> now work with state (<code>innerHTML:</code> bindings), router (layout templates), fetch (<code>target=</code> HTML replace) and worker (<code>new Worker(src)</code>). The split is the point: wcstack signs <strong>only strings the page author wrote</strong> &mdash; a <code>&lt;wcs-layout&gt;</code> template, a worker <code>src</code> &mdash; with one shared policy named <code>wcstack</code>, and <strong>never signs remote data</strong>: an <code>innerHTML:</code> value or a fetched HTML body needs an adopter-supplied sanitizing policy, injected through a global slot or <code>setTrustedTypesPolicy()</code>, and that injected policy applies even on engines without Trusted Types, so a sanitizer never degrades to a pass-through. DCC definition no longer has a sink at all &mdash; the shadow tree is cloned node by node instead of round-tripping through <code>innerHTML</code>. Verified against an enforcing Chromium, which found two things: a blocked <code>target=</code> injection now reports instead of throwing (an automatic fetch had nobody to catch the rejection), and a refused <code>wcstack</code> policy with an injected fallback warns once instead of also logging an error.</p>
-          <p class="ja"><code>require-trusted-types-for 'script'</code>を強制するページが、state(<code>innerHTML:</code>バインディング)、router(レイアウトテンプレート)、fetch(<code>target=</code>のHTML置換)、worker(<code>new Worker(src)</code>)で動くようになった。要点は線引きだ: wcstackが署名するのは<strong>ページ作者が書いた文字列だけ</strong> &mdash; <code>&lt;wcs-layout&gt;</code>のテンプレート、workerの<code>src</code> &mdash; で、<code>wcstack</code>という1つの共有ポリシーを使う。そして<strong>リモートデータには決して署名しない</strong>: <code>innerHTML:</code>の値やfetchしたHTML本文には採用側が用意するサニタイズポリシーが必要で、グローバルスロットか<code>setTrustedTypesPolicy()</code>で注入する。注入されたポリシーはTrusted Typesの無いエンジンでも適用されるので、サニタイザが素通しに退化することはない。DCC定義にはもうsinkが無い &mdash; shadow treeは<code>innerHTML</code>を往復せずノード単位で複製される。強制モードのChromiumで検証し、2つ見つかった: ブロックされた<code>target=</code>の注入はthrowせず報告するようになり(自動fetchのrejectionは誰も受け取れなかった)、<code>wcstack</code>ポリシーが拒否され注入フォールバックがある場合はエラーも出さず一度だけ警告する。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">&lt;wcs-ssr&gt;</span>
+          <h3>A snapshot of data, not of derivations</h3>
+          <p class="what-if">What if serializing a page never ran a getter?</p>
+          <p>An SSR snapshot used to evaluate the state object&rsquo;s own enumerable getters &mdash; a <code>{ get count() { &hellip; } }</code> written in the object literal &mdash; and it evaluated them with the <strong>raw object</strong> as <code>this</code>, outside the proxy. A path getter therefore serialized as <code>null</code>, and a getter calling <code>$getAll</code> threw and took the whole page&rsquo;s server render down with it. Snapshots now carry data only. Derived values are recomputed on the client from the same definition, which is where they were always going to be recomputed anyway, so the rendered HTML is unchanged. The one thing to check: a consumer that reached into the snapshot JSON for a getter&rsquo;s value should read the data it derives from instead.</p>
+          <p class="ja">SSRのスナップショットは、stateオブジェクト自身の列挙可能なgetter &mdash; オブジェクトリテラルに書かれた<code>{ get count() { &hellip; } }</code> &mdash; を評価していた。しかもプロキシの外で、<strong>生のオブジェクト</strong>を<code>this</code>として評価していた。そのためパスgetterは<code>null</code>として直列化され、<code>$getAll</code>を呼ぶgetterは例外を投げてページ全体のサーバーレンダリングを道連れにした。スナップショットはいまデータだけを運ぶ。派生値は同じ定義からクライアントで再計算される &mdash; どのみち再計算される場所だ &mdash; ので、出力されるHTMLは変わらない。確認すべき点は1つ: スナップショットのJSONからgetterの値を取り出していた利用側は、その導出元のデータを読むように変えること。</p>
           <ul class="tag-features">
-            <li>Author Strings Signed</li>
-            <li>Remote Data Never</li>
-            <li>One Policy, Four Packages</li>
-            <li>Blocked Means Reported</li>
+            <li>Getters No Longer Evaluated</li>
+            <li>Path Getter Was null</li>
+            <li>$getAll Took the Page Down</li>
+            <li>Recomputed on the Client</li>
           </ul>
         </div>
         <div class="topic-card">
-          <span class="topic-ver">v2.2.0</span>
-          <span class="tag-name">wcs/default-getter-mismatch</span>
-          <h3>A quiet page, made loud</h3>
-          <p class="what-if">What if a page that went silent told you why?</p>
-          <p>A two-way binding on a <code>static wcBindable</code> property that omits <code>getter</code> writes <code>e.detail</code> to state &mdash; the protocol&rsquo;s default. Two recent issues were diagnosed by staring at a page that had simply gone quiet: the element dispatched a plain <code>Event</code> with no <code>detail</code>, or wrapped it as <code>{ value: &hellip; }</code> while the property held a scalar. The runtime now warns once per element and property when <code>detail</code> cannot be what the property holds: <code>detail</code> is <code>undefined</code> while the property has a value, or <code>detail</code> is an object carrying a <code>&lt;propName&gt;</code> key while the property is not an object. The write is still applied as-is &mdash; this is a diagnostic, not a repair &mdash; and occurrence properties (<code>semantics: "event"</code>) are exempt. Declare an explicit <code>getter</code> to keep reading the property, and the warning has nothing to say.</p>
-          <p class="ja"><code>getter</code>を省いた<code>static wcBindable</code>プロパティへの双方向バインディングは、<code>e.detail</code>をstateに書く &mdash; プロトコルの既定だ。最近の2件のissueは、ただ黙ってしまったページを睨んで診断された: 要素が<code>detail</code>の無い素の<code>Event</code>を投げていた、あるいはプロパティがスカラーなのに<code>{ value: &hellip; }</code>で包んでいた。ランタイムはいま、<code>detail</code>がプロパティの持つ値ではありえないとき、要素とプロパティごとに一度だけ警告する: プロパティに値があるのに<code>detail</code>が<code>undefined</code>、あるいはプロパティがオブジェクトでないのに<code>detail</code>が<code>&lt;propName&gt;</code>キーを持つオブジェクト。書き込みはそのまま適用される &mdash; これは診断であって修復ではない &mdash; し、発生プロパティ(<code>semantics: "event"</code>)は対象外。明示的な<code>getter</code>を宣言してプロパティを読み続ければ、警告には言うことがない。</p>
+          <span class="topic-ver">v2.3.0</span>
+          <span class="tag-name">wcs/getter-depth-exceeded</span>
+          <h3>Deep is not circular</h3>
+          <p class="what-if">What if the error told you which of the two it was?</p>
+          <p>Exceeding the 128-frame address stack was always reported as a possible circular dependency, even for a straight chain that never visited an address twice. The two are now told apart by <strong>address identity</strong>: a real cycle stays <code>wcs/getter-cycle</code>, and data that is simply that deep is <code>wcs/getter-depth-exceeded</code>. For a recursive walk the depth check trips first, at 128 wildcard levels, naming the anchor, the depth reached and the path it was building &mdash; and nothing is truncated on the way, because a partial aggregate would be a wrong number reported as a right one. Two more edges close alongside: <code>$129</code>, <code>$0</code> and <code>$01</code> used to fall through to ordinary property resolution and read as <code>undefined</code>, and now throw (<code>wcs/index-param-range</code>); a <code>$getAll</code> whose <code>indexes</code> is not an array names the argument and the two valid forms instead of a raw <code>TypeError</code>. The linter also reads a substitution-free template literal as a literal path, so <code>$getAll(`items.*.price`, [0])</code> is checked like a quoted one &mdash; which may surface new diagnostics on existing pages.</p>
+          <p class="ja">128フレームのアドレススタックを超えたとき、たとえ同じアドレスを二度と訪れない一直線の連鎖であっても、報告は常に「循環依存の可能性」だった。いまは<strong>アドレスの同一性</strong>で両者が区別される: 本物の循環は<code>wcs/getter-cycle</code>のまま、単にそれだけ深いデータは<code>wcs/getter-depth-exceeded</code>。再帰的な走査では深さ検査が先に、ワイルドカード128段で作動し、アンカー・到達した深さ・構築中だったパスを名指しする。途中で打ち切られるものは何も無い。部分的な集計は、正しい数のふりをした間違った数だからだ。周辺の穴も2つ塞がった: <code>$129</code>・<code>$0</code>・<code>$01</code>は通常のプロパティ解決に落ちて<code>undefined</code>と読まれていたが、いまは投げる(<code>wcs/index-param-range</code>)。<code>indexes</code>が配列でない<code>$getAll</code>は、生の<code>TypeError</code>ではなく引数名と2つの有効な形を告げる。linterは置換の無いテンプレートリテラルもリテラルなパスとして読むので、<code>$getAll(`items.*.price`, [0])</code>は引用符付きと同じく検査される &mdash; 既存ページに新しい指摘が出ることがある。</p>
           <ul class="tag-features">
-            <li>Once Per Element and Property</li>
-            <li>undefined detail, Valued Property</li>
-            <li>{ value } Wrapper Caught</li>
-            <li>Write Unchanged, Events Exempt</li>
+            <li>Cycle or Depth, By Identity</li>
+            <li>Nothing Truncated</li>
+            <li>$0 / $129 Throw Now</li>
+            <li>Template Literals Linted</li>
           </ul>
         </div>
       </div>

@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v2.2.0</span>
+        <span class="pill accent">v2.3.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -498,6 +498,36 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
   return this["categories.*.name"] + " / " + this["categories.*.items.*.name"];
 }</code></pre>
       </div>
+
+      <h3>Recursive paths (<code>$recursion</code>)</h3>
+      <p>A path burns its depth into the string, but a tree&rsquo;s depth belongs to the data. <strong>v2.3.0</strong>: declare where the shape repeats &mdash; an <strong>anchor</strong> and the sub-path that descends one level &mdash; and <code>**</code> stands for &ldquo;however deep this is&rdquo;. One getter then covers every depth, and each depth&rsquo;s accessor is materialized the first time it is read.</p>
+      <p class="ja">パスは深さを文字列に焼き付けるが、木の深さはデータに属する。<strong>v2.3.0</strong>: 形が繰り返される場所 &mdash; <strong>アンカー</strong>と1段降りる部分パス &mdash; を宣言すれば、<code>**</code>が「ここが何段であろうと」を表す。getter 1つがすべての深さを覆い、各深さのアクセサは最初に読まれたときに実体化される。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js</span><span>One getter, every depth</span></div>
+<pre><code class="language-javascript">export default {
+  $recursion: { "nodes.*": "children.*" },   // anchor → repeating sub-path
+
+  nodes: [ { value: 1, children: [ { value: 10, children: [] } ] } ],
+
+  // `**` is bound to the depth being evaluated; the index-omitted
+  // $getAll reads exactly the direct children of that node.
+  get "nodes.**.total"() {
+    return this["nodes.**.value"]
+         + this.$getAll("nodes.**.children.*.total").reduce((a, b) =&gt; a + b, 0);
+  },
+  // `[]` unions every depth — depth-first, pre-order, ascending index
+  get treeTotal() {
+    return this.$getAll("nodes.**.value", []).reduce((a, b) =&gt; a + b, 0);
+  },
+  clearSelection() {
+    this.$setAll("nodes.**.selected", [], false);   // broadcast to every node
+  }
+};</code></pre>
+      </div>
+      <p><strong>Bound or unioned</strong> is decided by context, the same split <code>*</code> has between &ldquo;the current row&rdquo; and &ldquo;every row&rdquo;: a getter key and reads inside it are bound to the depth being evaluated, <code>$getAll</code> with indexes <strong>omitted</strong> stays at that depth, and <code>$getAll(path, [])</code> unions every depth. The omitted form is what makes an aggregate fold its own subtree exactly once; unioning an aggregate from outside double-counts, and that is not decidable from the path string, so no diagnostic claims to catch it. Bound reads need a depth, so they resolve only inside a recursive getter, a row getter under the anchor, or a handler bound to such a row &mdash; elsewhere it is <code>wcs/recursion-context</code>.</p>
+      <p class="ja"><strong>束縛か連結か</strong>は文脈が決める。<code>*</code>の「現在の行」と「すべての行」と同じ対比だ: getterのキーとその内側の読みは評価中の深さに束縛され、インデックスを<strong>省いた</strong><code>$getAll</code>はその深さに留まり、<code>$getAll(path, [])</code>は全深さを連結する。集計が自分の部分木をちょうど1回だけ畳み込むのは省略形のおかげ。外から集計値を連結すると二重計上になるが、これはパス文字列からは決定できないので、捕まえると称する診断は無い。束縛形の読みは深さを必要とするため、再帰getter・アンカー配下の行getter・その行に束縛されたハンドラの中でのみ解決する。それ以外では<code>wcs/recursion-context</code>。</p>
+      <p><code>**</code> is <strong>authoring notation only</strong> &mdash; <code>PathInfo</code>, the dependency graph, <code>$1</code>&hellip;<code>$n</code>, <code>$resolve</code> and the list diff only ever see ordinary fixed-arity paths. What cannot be expressed that way is refused rather than reinterpreted, under the <code>wcs/recursion-*</code> codes the linter shares: a recursive getter is <strong>read-only</strong> (write what it derives from), a broadcast at the structure itself is refused, <code>**</code> in markup / <code>$watch</code> / <code>$listKeys</code> / <code>$resolve</code> is <code>wcs/recursion-unsupported</code>, and this version takes exactly one self-recursive anchor per state, a tree as input (a shared child array or a cycle is named) and 128 wildcard levels. <code>$recursion</code> and <code>**</code> getters are <strong>root-only</strong>. Rendering a tree stays with a self-referential component: <code>**</code> cannot appear in markup, and inside each scope only one level of path is ever used.</p>
+      <p class="ja"><code>**</code>は<strong>記述上の記法にすぎない</strong> &mdash; <code>PathInfo</code>・依存グラフ・<code>$1</code>&hellip;<code>$n</code>・<code>$resolve</code>・リスト差分が見るのは、常に固定アリティの普通のパスだ。そう表現できないものは再解釈されずに拒まれる。コードはlinterと共通の<code>wcs/recursion-*</code>: 再帰getterは<strong>読み取り専用</strong>(導出元に書くこと)、構造そのものへのブロードキャストは拒否、マークアップ・<code>$watch</code>・<code>$listKeys</code>・<code>$resolve</code>中の<code>**</code>は<code>wcs/recursion-unsupported</code>。このバージョンが受け付けるのはstateごとに自己再帰アンカー1つ、入力は木(子配列の共有や循環は名指しされる)、ワイルドカードは128段まで。<code>$recursion</code>と<code>**</code>getterは<strong>ルート専用</strong>。木の描画は従来どおり自己参照コンポーネントが担う: <code>**</code>はマークアップに書けず、各スコープの中で使うパスは常に1段だけだ。</p>
 
       <h3>Proxy APIs (inside state)</h3>
       <div class="table-wrap">
@@ -1076,6 +1106,9 @@ const html = await renderToString(template, {
   baseUrl: "http://localhost:3000"
 });</code></pre>
       </div>
+
+      <p><strong>v2.3.0</strong>: a snapshot no longer evaluates the state object&rsquo;s own enumerable getters (a <code>{ get count() { &hellip; } }</code> in the object literal). They were evaluated with the raw object as <code>this</code>, so a path getter serialized as <code>null</code> and a getter calling <code>$getAll</code> threw and took the whole page&rsquo;s SSR down. Derived values are recomputed on the client from the same definition; a consumer that read a getter&rsquo;s value out of the snapshot should read the data it derives from instead.</p>
+      <p class="ja"><strong>v2.3.0</strong>: スナップショットはstateオブジェクト自身の列挙可能なgetter(オブジェクトリテラル中の<code>{ get count() { &hellip; } }</code>)を評価しなくなった。従来は生のオブジェクトを<code>this</code>として評価していたため、パスgetterは<code>null</code>として直列化され、<code>$getAll</code>を呼ぶgetterは例外を投げてページ全体のSSRを倒していた。派生値は同じ定義からクライアントで再計算される。スナップショットからgetterの値を読んでいた利用側は、その導出元のデータを読むように変えること。</p>
 
       <h3>SVG support</h3>
       <p>All bindings work inside <code>&lt;svg&gt;</code> &mdash; use <code>attr.NAME</code> for SVG attributes.</p>
