@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>&lt;wcs-state&gt; — Reactive State · wcstack</title>
-  <meta name="description" content="Deep dive into &lt;wcs-state&gt;: path-string data binding, path getters, 46 built-in filters, structural directives, command/event tokens, $streams, $watch, the wc-bindable protocol, SSR, and TypeScript support.">
+  <meta name="description" content="Deep dive into &lt;wcs-state&gt;: path-string data binding, path getters, 46 built-in filters, structural directives, command/event tokens, $streams, $scan, $watch, the wc-bindable protocol, SSR, and TypeScript support.">
   <meta property="og:title" content="&lt;wcs-state&gt; — Reactive State · wcstack">
   <meta property="og:description" content="The HTML-first reactive core of wcstack. The only contract between UI and state is a path string.">
   <meta property="og:type" content="article">
@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v2.3.0</span>
+        <span class="pill accent">v2.4.0</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -343,6 +343,7 @@
           <li><a href="#filters">Filters (46 built-in)</a></li>
           <li><a href="#events">Events &amp; tokens</a></li>
           <li><a href="#streams">Streams ($streams)</a></li>
+          <li><a href="#scan">Scan ($scan)</a></li>
           <li><a href="#watch">Watch ($watch)</a></li>
           <li><a href="#components">Building components</a></li>
           <li><a href="#bindable">wc-bindable protocol</a></li>
@@ -459,6 +460,8 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
       </div>
       <p><code>$errorCallback(error, info)</code> (v2.2.0) is the in-page <strong>error boundary</strong> for bindings. When applying a binding throws &mdash; a path getter or filter threw, a structural directive failed &mdash; the failure is isolated (the rest of the batch still applies) and, without the hook, reported with <code>console.error</code>. Declare it on the root state and the report comes to you instead: <code>info</code> is <code>{ path, bindingType, node }</code> with the path as written in <code>data-wcs</code>, <code>this</code> is the writable state proxy, and the hook runs once per failed binding after <code>$updatedCallback</code>, is not awaited, and has its own exceptions isolated. Root-only (a volume declaring it is ignored); DevTools still receives <code>state:binding-apply-error</code>.</p>
       <p class="ja"><code>$errorCallback(error, info)</code>(v2.2.0)はバインディングのページ内<strong>エラー境界</strong>。バインディング適用時のthrow &mdash; パスgetterやフィルタの例外、構造ディレクティブの失敗 &mdash; は隔離され(バッチの残りは適用される)、フックが無ければ<code>console.error</code>に報告される。ルートstateに宣言すればその報告が届く: <code>info</code>は<code>{ path, bindingType, node }</code>で<code>path</code>は<code>data-wcs</code>に書かれたまま、<code>this</code>は書き込み可能なstateプロキシ、失敗したバインディングごとに<code>$updatedCallback</code>の後に1回走り、awaitされず、自身の例外も隔離される。ルート専用(ボリュームでの宣言は無視される)。DevToolsは変わらず<code>state:binding-apply-error</code>を受け取る。</p>
+      <p><strong>v2.4.0</strong>: a root element that fails to initialize no longer hangs the page. A throw from a <code>$</code> declaration validator, a state source, the <code>enable-ssr</code> merge, DCC or <code>bind-component</code> setup &mdash; or from a second root <code>&lt;wcs-state&gt;</code> &mdash; is reported once with <code>console.error</code> and rejects <code>connectedCallbackPromise</code> with the original error, so <code>renderToString()</code>, <code>mount()</code> and <code>getBindingsReady(root)</code> fail instead of waiting forever. <code>initializePromise</code> still resolves, only the duplicate root is refused, and <code>setInitialState()</code> on a failed element throws &mdash; replace the element. Detaching an element while its source is still loading is not a failure. Re-setting a state object (<code>setInitialState()</code>, or assigning <code>_state</code> again) now reads the new generation, but established bindings are not re-applied yet (#267): write individual paths instead.</p>
+      <p class="ja"><strong>v2.4.0</strong>: 初期化に失敗したルート要素はもうページを止めない。<code>$</code>宣言バリデータ・stateソース・<code>enable-ssr</code>のマージ・DCCや<code>bind-component</code>のセットアップ &mdash; あるいは2つ目のルート<code>&lt;wcs-state&gt;</code> &mdash; からのthrowは<code>console.error</code>で一度だけ報告され、元のエラーで<code>connectedCallbackPromise</code>をrejectする。だから<code>renderToString()</code>・<code>mount()</code>・<code>getBindingsReady(root)</code>は永久に待たずに失敗する。<code>initializePromise</code>は引き続きresolveし、拒否されるのは重複したルートだけで、失敗した要素への<code>setInitialState()</code>はthrowする &mdash; 要素を置き換えること。ソースの読み込み中に要素を外すのは失敗ではない。stateオブジェクトの再セット(<code>setInitialState()</code>、または<code>_state</code>への再代入)はいま新しい世代を読むが、確立済みのバインディングはまだ再適用されない(#267): 個々のパスに書くこと。</p>
     </div>
   </section>
 
@@ -528,6 +531,8 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
       <p class="ja"><strong>束縛か連結か</strong>は文脈が決める。<code>*</code>の「現在の行」と「すべての行」と同じ対比だ: getterのキーとその内側の読みは評価中の深さに束縛され、インデックスを<strong>省いた</strong><code>$getAll</code>はその深さに留まり、<code>$getAll(path, [])</code>は全深さを連結する。集計が自分の部分木をちょうど1回だけ畳み込むのは省略形のおかげ。外から集計値を連結すると二重計上になるが、これはパス文字列からは決定できないので、捕まえると称する診断は無い。束縛形の読みは深さを必要とするため、再帰getter・アンカー配下の行getter・その行に束縛されたハンドラの中でのみ解決する。それ以外では<code>wcs/recursion-context</code>。</p>
       <p><code>**</code> is <strong>authoring notation only</strong> &mdash; <code>PathInfo</code>, the dependency graph, <code>$1</code>&hellip;<code>$n</code>, <code>$resolve</code> and the list diff only ever see ordinary fixed-arity paths. What cannot be expressed that way is refused rather than reinterpreted, under the <code>wcs/recursion-*</code> codes the linter shares: a recursive getter is <strong>read-only</strong> (write what it derives from), a broadcast at the structure itself is refused, <code>**</code> in markup / <code>$watch</code> / <code>$listKeys</code> / <code>$resolve</code> is <code>wcs/recursion-unsupported</code>, and this version takes exactly one self-recursive anchor per state, a tree as input (a shared child array or a cycle is named) and 128 wildcard levels. <code>$recursion</code> and <code>**</code> getters are <strong>root-only</strong>. Rendering a tree stays with a self-referential component: <code>**</code> cannot appear in markup, and inside each scope only one level of path is ever used.</p>
       <p class="ja"><code>**</code>は<strong>記述上の記法にすぎない</strong> &mdash; <code>PathInfo</code>・依存グラフ・<code>$1</code>&hellip;<code>$n</code>・<code>$resolve</code>・リスト差分が見るのは、常に固定アリティの普通のパスだ。そう表現できないものは再解釈されずに拒まれる。コードはlinterと共通の<code>wcs/recursion-*</code>: 再帰getterは<strong>読み取り専用</strong>(導出元に書くこと)、構造そのものへのブロードキャストは拒否、マークアップ・<code>$watch</code>・<code>$listKeys</code>・<code>$resolve</code>中の<code>**</code>は<code>wcs/recursion-unsupported</code>。このバージョンが受け付けるのはstateごとに自己再帰アンカー1つ、入力は木(子配列の共有や循環は名指しされる)、ワイルドカードは128段まで。<code>$recursion</code>と<code>**</code>getterは<strong>ルート専用</strong>。木の描画は従来どおり自己参照コンポーネントが担う: <code>**</code>はマークアップに書けず、各スコープの中で使うパスは常に1段だけだ。</p>
+      <p><strong>v2.4.0</strong>: replacing row objects while keeping their <code>children</code> arrays &mdash; <code>this.nodes = this.nodes.map(n =&gt; ({ ...n }))</code> &mdash; no longer freezes that row&rsquo;s <code>nodes.*.total</code> (on 2.3.0 the leaf, the deeper totals and the <code>[]</code> unions stayed right and only that one number stopped, with no diagnostic). The child list&rsquo;s rows are re-pointed at the live row instead of rebuilt, so a <code>bind-component</code> child scope keeps its rendered rows &mdash; and an open <code>&lt;details&gt;</code>, focus or a JS marker with them. Keep one <code>children</code> array per node when a child getter reads upward: an array has exactly one set of rows.</p>
+      <p class="ja"><strong>v2.4.0</strong>: <code>children</code>配列を保ったまま行オブジェクトを置き換える &mdash; <code>this.nodes = this.nodes.map(n =&gt; ({ ...n }))</code> &mdash; と、その行の<code>nodes.*.total</code>が凍る問題は無くなった(2.3.0では葉・より深いtotal・<code>[]</code>連結は正しいまま、その1つの数だけが診断なしに止まった)。子リストの行は作り直されずに生きている行へ付け替えられるので、<code>bind-component</code>の子スコープは描いた行を保つ &mdash; 開いた<code>&lt;details&gt;</code>・フォーカス・JSのマーカーもそのまま。子のgetterが上を読むなら、ノードごとに<code>children</code>配列を持たせること: 配列が持つ行はちょうど1組だ。</p>
 
       <h3>Proxy APIs (inside state)</h3>
       <div class="table-wrap">
@@ -811,6 +816,8 @@ removeItem(event, index) {
       <div class="note">
         <p><strong><code>$on</code> handlers are never awaited.</strong> That is specified behaviour &mdash; do not sequence work on the return value; let async work write its own state slot when it settles. Since v1.24.0 a rejecting async handler is caught and reported through <code>console.error</code> naming the state and the handler, instead of surfacing as a bare unhandled rejection. Synchronous throws still propagate as programmer errors.</p>
         <p class="ja"><code>$on</code>ハンドラはawaitされない(仕様)。戻り値に処理を連ねず、非同期処理は完了時に自分で状態を書く。v1.24.0以降、rejectした非同期ハンドラは握りつぶされず、state名とハンドラ名つきで<code>console.error</code>に報告される。同期的なthrowは従来どおり伝播する。</p>
+        <p><strong>v2.4.0</strong>: moving the root <code>&lt;wcs-state&gt;</code> in the DOM (<code>host.remove(); document.body.appendChild(host)</code>) no longer silently stops <code>$on</code> handlers, <code>on</code> scans and command-token subscriptions. Disconnect used to throw both token registries away, and nothing re-subscribed on reconnect; it now keeps them, as it already kept the <code>$streams</code> and <code>$watch</code> registries. Nothing fires while the element is detached.</p>
+        <p class="ja"><strong>v2.4.0</strong>: ルートの<code>&lt;wcs-state&gt;</code>をDOM内で動かしても(<code>host.remove(); document.body.appendChild(host)</code>)、<code>$on</code>ハンドラ・<code>on</code>スキャン・コマンドトークンの購読が黙って止まることはなくなった。切断は両方のトークンレジストリを捨て、再接続で購読し直すものは無かった。いまは保持する &mdash; <code>$streams</code>と<code>$watch</code>のレジストリはすでにそうだった。要素が外れている間は何も発火しない。</p>
       </div>
     </div>
   </section>
@@ -855,6 +862,80 @@ removeItem(event, index) {
       </div>
       <p>To react to a stream that nothing renders, declare <a href="#watch"><code>$watch</code></a> on its value path &mdash; <code>$updatedCallback</code> is binding-driven and will not see it.</p>
       <p class="ja">どこにも描画されないstreamに反応するには、値のパスに<a href="#watch"><code>$watch</code></a>を宣言する。<code>$updatedCallback</code>はバインディング駆動なので届かない。</p>
+      <p>A <code>fold</code> accumulates within one run and returns to <code>initial</code> on every restart. An accumulation that has to outlive restarts &mdash; an infinite-scroll feed built across page runs &mdash; belongs in <a href="#scan"><code>$scan</code></a> (v2.4.0).</p>
+      <p class="ja"><code>fold</code>は1回の実行の中で蓄積し、再起動のたびに<code>initial</code>へ戻る。再起動を越えて残るべき蓄積 &mdash; ページ実行をまたいで組み立てる無限スクロールのフィード &mdash; は<a href="#scan"><code>$scan</code></a>(v2.4.0)に置く。</p>
+    </div>
+  </section>
+
+  <!-- Scan -->
+  <section class="doc" id="scan">
+    <div class="container">
+      <h2>Scan: <code style="font-family:var(--mono)">$scan</code> <a class="anchor" href="#scan">#</a></h2>
+      <p>A getter derives from current values, a <code>$streams</code> <code>fold</code> accumulates <strong>within one run</strong> and returns to <code>initial</code> on every restart, and <code>$watch</code> owns no value. <strong>v2.4.0</strong>: <code>$scan</code> declares the value that has to outlive all of them &mdash; an accumulation over time, with an owner, a firing unit and a reset condition.</p>
+      <p class="ja">getterは現在の値から導き、<code>$streams</code>の<code>fold</code>は<strong>1回の実行の中</strong>で蓄積して再起動のたびに<code>initial</code>へ戻り、<code>$watch</code>は値を持たない。<strong>v2.4.0</strong>: <code>$scan</code>はそのどれよりも長く生きる値 &mdash; 持ち主・発火の単位・リセット条件を持つ、時間にわたる蓄積 &mdash; を宣言する。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">state.js + index.html</span><span>$scan</span></div>
+<pre><code class="language-javascript">export default {
+  page: 1,
+  host: "a.example",
+  $eventTokens: ["message"],
+  $streams: { pageResult: { args: (s) =&gt; s.page, source: loadPage } },
+
+  $scan: {
+    feed: {                                  // from: each landing of a state path
+      from: "pageResult",
+      initial: { items: [], pages: [] },
+      fold: (feed, chunk) =&gt;
+        chunk?.kind === "success" &amp;&amp; !feed.pages.includes(chunk.page)
+          ? { items: feed.items.concat(chunk.items), pages: [...feed.pages, chunk.page] }
+          : feed                             // returning acc itself writes nothing
+    },
+    log: {                                   // on: each event of a declared token
+      on: "message",
+      initial: [],
+      fold: (log, event) =&gt; [...log.slice(-49), event.detail],   // keep it bounded
+      resetOn: ["host"]                      // back to [] whenever host is written
+    }
+  }
+};</code></pre>
+<pre><code class="language-html">&lt;template data-wcs="for: feed.items"&gt;&lt;li data-wcs="textContent: .name"&gt;&lt;/li&gt;&lt;/template&gt;
+&lt;wcs-sse url="/events" data-wcs="eventToken.message: message"&gt;&lt;/wcs-sse&gt;</code></pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Field</th><th>Required</th><th>Contract</th></tr>
+          <tr><td><code>from</code></td><td>one of <code>from</code> / <code>on</code></td><td>A state path; a wildcard folds per row. Never a getter or a path under one</td></tr>
+          <tr><td><code>on</code></td><td>one of <code>from</code> / <code>on</code></td><td>An event-token name declared in <code>$eventTokens</code></td></tr>
+          <tr><td><code>initial</code></td><td>&#10004;</td><td>The seed, and what <code>resetOn</code> returns to. Plain arrays and objects are copied each time they are placed on the output</td></tr>
+          <tr><td><code>fold</code></td><td>&#10004;</td><td><code>from</code>: <code>(acc, cur, prev, ...indexes)</code>; <code>on</code>: <code>(acc, event, ...indexes)</code>. Synchronous, no <code>this</code>, returns a new value &mdash; returning <code>acc</code> itself writes nothing</td></tr>
+          <tr><td><code>resetOn</code></td><td>&mdash;</td><td>Plain paths (no <code>*</code>) whose write returns the output to <code>initial</code>. An ancestor of <code>from</code> is allowed; a path under it raises</td></tr>
+        </table>
+      </div>
+      <p>The two sources fire at different moments. A <code>from</code> scan folds <strong>once per address that landed in an update batch</strong>, at the end of the drain, in a fixed order: <code>$updatedCallback</code> &rarr; <code>$scan</code> &rarr; <code>$watch</code> &rarr; the dependency-driven <code>$streams</code> restart. Writes in one job coalesce (<code>cur</code> is the settled value, <code>prev</code> the value at the start of the batch, following <code>$watch</code>&rsquo;s ledger), an equal primitive write never lands, and a wildcard <code>from</code> has the same prerequisite as a row watch &mdash; a <code>for</code>-rendered or <code>$listKeys</code>-declared list. An <code>on</code> scan folds <strong>once per event</strong>, synchronously inside the event and before that token&rsquo;s <code>$on</code> handlers, which therefore already see the folded output. Take element occurrences through <code>on</code>: a bound property as <code>from</code> also folds the binding&rsquo;s initial sync, and drops equal writes.</p>
+      <p class="ja">2つのソースは発火の瞬間が違う。<code>from</code>スキャンは<strong>更新バッチに着地したアドレスごとに1回</strong>、drainの終わりに、決まった順序で畳み込む: <code>$updatedCallback</code> &rarr; <code>$scan</code> &rarr; <code>$watch</code> &rarr; 依存駆動の<code>$streams</code>再起動。1つのジョブ内の書き込みはまとめられ(<code>cur</code>は確定値、<code>prev</code>はバッチ開始時点の値で、<code>$watch</code>と同じ台帳に従う)、等しいプリミティブの書き込みは着地せず、ワイルドカードの<code>from</code>には行watchと同じ前提 &mdash; <code>for</code>で描画されているか<code>$listKeys</code>で宣言されたリスト &mdash; がある。<code>on</code>スキャンは<strong>イベントごとに1回</strong>、イベントの中で同期的に、そのトークンの<code>$on</code>ハンドラより先に畳み込むので、<code>$on</code>ハンドラは畳み込み済みの出力を見る。要素の出来事は<code>on</code>で受けること: バインドされたプロパティを<code>from</code>にすると、バインディングの初期同期も畳み込み、等しい書き込みは落ちる。</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Rule</th><th>Consequence</th></tr>
+          <tr><td>Reset wins</td><td>A <code>from</code> scan skips the fold of the batch that writes a <code>resetOn</code> path. An object path resets only when the object itself is written, not a child &mdash; list the leaf paths or bump a nonce</td></tr>
+          <tr><td>Restart wins</td><td>A chunk landing in the same batch as its stream&rsquo;s restart belongs to the aborted run and is not folded</td></tr>
+          <tr><td>Never fold a getter</td><td>A getter (or a path under one) as <code>from</code> / <code>resetOn</code> raises <code>wcs/scan-source-computed</code> &mdash; the fold would count re-evaluations, not occurrences</td></tr>
+          <tr><td>No feedback loop</td><td>A stream whose <code>args</code> derive from its own scan output raises <code>wcs/scan-feedback-loop</code>. Keep the cursor a plain property advanced from an event</td></tr>
+          <tr><td>Once per landing</td><td>Not once per page: a Retry after <code>done</code>, or a re-attached element, lands the same page again &mdash; keep an idempotency key in the accumulator</td></tr>
+          <tr><td>Bounded folds</td><td>No backpressure: <code>[...log.slice(-99), x]</code> or a count, never <code>[...log, x]</code> over an infinite source</td></tr>
+          <tr><td>Root-only</td><td>A volume refuses <code>$scan</code> before grafting; a mounted <code>bind-component</code> scope ignores it with a one-time warning</td></tr>
+        </table>
+      </div>
+      <p><strong>The runtime owns the output</strong>, like a <code>$streams</code> value: a flat key materialized from <code>initial</code> when the state lacks it, bound like any other path. It survives stream restarts, disconnect and reconnect, and a re-set of the same object; SSR materializes it without folding. A name colliding with a getter, setter, method or <code>$streams</code> entry, scans that feed each other and malformed entries raise at declaration (<code>wcs/scan-declaration-invalid</code>). A throw, a returned Promise or an unreadable value in the fold is reported to the console and DevTools (<code>state:watch-error</code>, path <code>$scan.&lt;output&gt;</code>) and writes nothing, while the other scans, watches and restarts still run. <code>wcs-validate</code> and the VS Code extension check the declaration under the same codes and add <code>wcs/scan-path-missing</code> for a <code>from</code> / <code>resetOn</code> typo &mdash; one that would otherwise just never fold.</p>
+      <p class="ja"><strong>出力はランタイムが持つ</strong>。<code>$streams</code>の値と同じく、stateに無ければ<code>initial</code>から実体化されるフラットなキーで、他のパスと同じようにバインドする。streamの再起動・切断と再接続・同じオブジェクトの再セットを越えて残り、SSRでは畳み込まずに実体化だけされる。getter・setter・メソッド・<code>$streams</code>エントリと衝突する名前、互いを畳み込み合うスキャン、形の崩れたエントリは宣言時に投げる(<code>wcs/scan-declaration-invalid</code>)。fold内のthrow・返されたPromise・読めない値はコンソールとDevTools(<code>state:watch-error</code>、パス<code>$scan.&lt;output&gt;</code>)に報告されて何も書かず、他のスキャン・watch・再起動は走り続ける。<code>wcs-validate</code>とVS Code拡張は宣言を同じコードで検査し、<code>from</code> / <code>resetOn</code>のタイプミス &mdash; 放っておけば黙って一度も畳み込まない &mdash; を<code>wcs/scan-path-missing</code>として加える。</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>You want to</th><th>Use</th></tr>
+          <tr><td>compute from current values</td><td>a getter (<code>$getAll(...).reduce</code>, a wildcard getter)</td></tr>
+          <tr><td>fold within one run, where a restart may discard it</td><td><code>$streams</code> <code>fold</code></td></tr>
+          <tr><td>accumulate across runs and events</td><td><code>$scan</code></td></tr>
+          <tr><td>react with a side effect (emit a command, write outside)</td><td><code>$watch</code> / <code>$on</code></td></tr>
+        </table>
+      </div>
     </div>
   </section>
 
@@ -893,7 +974,8 @@ removeItem(event, index) {
           <tr><td>Batches coalesce</td><td><code>a &rarr; b &rarr; c</code> in one batch fires once with <code>cur = c</code>, <code>prev = a</code></td></tr>
           <tr><td>Row watches want <code>$listKeys</code></td><td>Without it a whole-array assignment fires every row with <code>prev === undefined</code>; <strong>headless</strong> row watching (no rendered <code>for</code>) fires <em>zero</em> times without it</td></tr>
           <tr><td>Wildcard getters stay lazy</td><td><code>items.*.tax</code> is not primed (that would sweep the list) &mdash; it fires only when also DOM-bound</td></tr>
-          <tr><td>Mounted <code>bind-component</code> scopes excluded</td><td>A mounted scope does not execute declaration surfaces &mdash; the declaration is ignored with a one-time console warning (same for <code>$streams</code>). Declare on the root, or on a volume</td></tr>
+          <tr><td>Rows fire as the list stands</td><td>A wildcard watch fires once per changed row as the list stands at the drain (v2.4.0): rows added by replacing a nested list with a longer array fire, and a row written and then removed or replaced in the same job does not</td></tr>
+          <tr><td>Mounted <code>bind-component</code> scopes excluded</td><td>A mounted scope does not execute declaration surfaces &mdash; the declaration is ignored with a one-time console warning (same for <code>$streams</code> and <code>$scan</code>). Declare on the root, or on a volume</td></tr>
         </table>
       </div>
       <p>Tooling follows the declaration: <code>@wcstack/lint</code> and the VS Code extension check every <code>$watch</code> key statically (<code>wcs/watch-declaration-invalid</code>, <code>wcs/watch-path-missing</code>) &mdash; worth heeding, because a <code>$watch</code> typo does not fail visibly the way a binding typo does; it just never fires. The devtools timeline records <code>watch-error</code> and <code>watch-chain-limit</code> events, and as of v1.29.0 firing itself is measured: the runtime emits <code>state:watch-fired</code>, and the devtools coverage tab joins declared keys against it &mdash; each path shows <em>fired &times;N</em>, <em>never</em>, or <em>prerequisite-missing</em>, kept distinct from &ldquo;never&rdquo;. Since v1.30.0 that prerequisite is exact: a wildcard&rsquo;s list counts as satisfied when it is <code>for</code>-bound <strong>or</strong> <code>$listKeys</code>-declared &mdash; the same two conditions the rules table states &mdash; and when neither holds the note says assertively that the watch can never fire. Since v1.28.0 the runtime&rsquo;s own declaration errors carry the same <code>[wcs/watch-declaration-invalid]</code> code plus a lint pointer, so console and CLI speak one vocabulary.</p>
