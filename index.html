@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.5.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v2.5.1</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,9 +647,9 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v2.5.0</h2>
-      <p class="section-sub">Hand <code>&lt;wcs-state&gt;</code> a whole new state object and the page re-draws itself &mdash; <code>setInitialState()</code> re-applies every established binding before it returns. Two changes and five fixes, all in <code>@wcstack/state</code>, and every one of them a place where the page and the state quietly disagreed: a re-set, a hydrated row, a mount slot nothing could reclaim, a row swapped by writing it, a row written and replaced in one batch.</p>
-      <p class="section-sub-ja"><code>&lt;wcs-state&gt;</code>に新しいstateオブジェクトを渡せば、ページは自分で描き直す &mdash; <code>setInitialState()</code>は戻る前に確立済みのバインディングをすべて再適用する。変更2つと修正5つ、すべて<code>@wcstack/state</code>の中。どれもページとstateが黙って食い違っていた場所だ: 再セット、ハイドレートされた行、誰も取り戻せないマウントスロット、書き込みで入れ替えた行、1つのバッチで書かれて置き換えられた行。</p>
+      <h2 class="section-title">Shipped in v2.5.0 &rarr; v2.5.1</h2>
+      <p class="section-sub">Hand <code>&lt;wcs-state&gt;</code> a whole new state object and the page re-draws itself &mdash; <code>setInitialState()</code> re-applies every established binding before it returns. Two changes and five fixes, all in <code>@wcstack/state</code>, and every one of them a place where the page and the state quietly disagreed: a re-set, a hydrated row, a mount slot nothing could reclaim, a row swapped by writing it, a row written and replaced in one batch. <strong>v2.5.1</strong> follows as a patch with nothing to re-learn: the lookup behind a cached getter probes each tier once instead of twice, taking about 3.7 ns off a getter read and 3.8 ns off a row getter read (of roughly 46 and 125 ns &mdash; a plain path read never goes through it and is unchanged), and the absolute address that DevTools hook events carry drops two undocumented properties nothing read.</p>
+      <p class="section-sub-ja"><code>&lt;wcs-state&gt;</code>に新しいstateオブジェクトを渡せば、ページは自分で描き直す &mdash; <code>setInitialState()</code>は戻る前に確立済みのバインディングをすべて再適用する。変更2つと修正5つ、すべて<code>@wcstack/state</code>の中。どれもページとstateが黙って食い違っていた場所だ: 再セット、ハイドレートされた行、誰も取り戻せないマウントスロット、書き込みで入れ替えた行、1つのバッチで書かれて置き換えられた行。<strong>v2.5.1</strong>は覚え直すことが何も無いパッチだ: キャッシュされたgetterの背後にある探索が段ごとに2回ではなく1回になり、getterの読みから約3.7 ns、行getterの読みから約3.8 ns(それぞれおよそ46 nsと125 nsのうち)を削った &mdash; 素のパスの読みはそこを通らないので変わらない。そしてDevToolsのフックイベントが運ぶ絶対アドレスから、誰も読んでいなかった未公開のプロパティが2つ消えた。</p>
       <div class="topics-grid fade-in">
         <div class="topic-card">
           <span class="topic-ver">v2.5.0</span>

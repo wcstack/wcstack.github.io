@@ -320,7 +320,7 @@
       <p class="pkg-sub">Reactive state management with declarative data binding. The <strong>only</strong> contract between UI and state is a path string &mdash; <code style="font-family:var(--mono)">user.name</code>, <code style="font-family:var(--mono)">cart.items.*.subtotal</code>. No virtual DOM, no build step, no hooks.</p>
       <p class="pkg-sub-ja">パス文字列だけがUIと状態の契約。仮想DOMなし、ビルドなし、フックなし。ES Proxyによる純粋なリアクティビティ。</p>
       <div class="pill-row">
-        <span class="pill accent">v2.5.0</span>
+        <span class="pill accent">v2.5.1</span>
         <span class="pill">@wcstack/state</span>
         <span class="pill">0 dependencies</span>
         <span class="pill">buildless</span>
@@ -1273,6 +1273,8 @@ bootstrapState({
         <li><strong>Memory</strong>: a bounded row pool keeps list repopulation efficient.</li>
       </ul>
       <p class="ja">対話的操作はミリ秒以下。バルク操作はsignals比で約2.5〜3.5倍遅いが、その分の帳簿がDevToolsタイムラインとSSRハイドレーションを支えている。</p>
+      <p><strong>v2.5.1</strong>: reading a <em>cached</em> getter got a little cheaper. The lookup of a path&rsquo;s tree-pinned node probed each tier twice (<code>has</code>, then <code>get</code>) and kept its inner table as a <code>WeakMap</code> keyed by an object that lives for as long as the page does; it is a plain <code>Map</code> now, and each tier is one <code>get</code>. Measured against 2.5.0 on the release build in the same session: a getter read 3.7 ns faster, a row getter read 3.8 ns faster, and a plain path read unchanged &mdash; it never passes through that lookup (the three reads cost about 46 / 125 / 42 ns). Nothing else moved: no behaviour changed, and the release is otherwise a removal of two undocumented properties on the absolute address that DevTools hook events carry.</p>
+      <p class="ja"><strong>v2.5.1</strong>: <em>キャッシュ済み</em>のgetterの読みが少し安くなった。パスの木に固定されたノードの探索は、段ごとに2回(<code>has</code>のあと<code>get</code>)調べたうえ、内側の表をページと同じだけ生きるオブジェクトをキーにした<code>WeakMap</code>で持っていた &mdash; いまは素の<code>Map</code>で、各段は<code>get</code>1回だ。2.5.0に対し、同じセッションのリリースビルドで実測: getterの読みが3.7 ns、行getterの読みが3.8 ns速くなり、素のパスの読みは変わらない(そこを通らないため)。3つの読みはそれぞれおよそ46 / 125 / 42 nsである。ほかは動いていない &mdash; 挙動の変更は無く、このリリースの残りはDevToolsのフックイベントが運ぶ絶対アドレスから未公開のプロパティを2つ取り除いたことだけだ。</p>
       <div class="note">
         <p>Need raw throughput with the same tags? The JS-first core <a href="../signals/"><code>@wcstack/signals</code></a> drives the same <code>wc-bindable</code> I/O nodes with a &asymp;3.1&thinsp;KB fine-grained runtime.</p>
         <p class="ja">スループット最優先なら、同じタグ群を駆動できるJSファーストの@wcstack/signalsへ。</p>
