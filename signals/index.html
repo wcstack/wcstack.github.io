@@ -308,7 +308,7 @@
       <p class="pkg-sub">A signals-based, <strong>fine-grained</strong> reactive core &mdash; <code style="font-family:var(--mono)">signal</code> / <code style="font-family:var(--mono)">computed</code> / <code style="font-family:var(--mono)">effect</code>, async resources, a no-VDOM DOM layer, and bridges for wc-bindable elements or their headless Cores. Zero runtime dependencies, buildless, standards-first.</p>
       <p class="pkg-sub-ja">シグナルベースの細粒度リアクティブコア。TC39形のAPI、非同期resource、VDOMなしのDOM層、wc-bindable要素とヘッドレスCoreのブリッジ。ランタイム依存ゼロ。</p>
       <div class="pill-row">
-        <span class="pill accent">v3.1.0</span>
+        <span class="pill accent">v3.2.0</span>
         <span class="pill">@wcstack/signals</span>
         <span class="pill">core &asymp;3.1 KB gz</span>
         <span class="pill">dom +&asymp;3.8 KB gz</span>
@@ -439,8 +439,8 @@ id.set(2); // aborts the in-flight request, starts fresh</code></pre>
       </div>
 
       <h3><code>streamResource()</code> &mdash; continuous flows, folded</h3>
-      <p>Folds async iterables and <code>ReadableStream</code>s into a reactive value. Returns <code>{ value, status, error, dispose }</code> with <code>status</code> one of <code>"idle" | "active" | "done" | "error"</code>. The tag-side counterpart is <a href="../state/#streams"><code>$streams</code> in <code>&lt;wcs-state&gt;</code></a>.</p>
-      <p class="ja">非同期イテラブルやReadableStreamをリアクティブな値に畳み込む。タグ側の対応物が&lt;wcs-state&gt;の$streams。</p>
+      <p>Folds async iterables and <code>ReadableStream</code>s into a reactive value. Returns <code>{ value, status, error, dispose }</code> with <code>status</code> one of <code>"idle" | "active" | "done" | "error"</code>. The tag-side counterpart is <a href="../state/#streams"><code>$stream</code> in <code>&lt;wcs-state&gt;</code></a>.</p>
+      <p class="ja">非同期イテラブルやReadableStreamをリアクティブな値に畳み込む。タグ側の対応物が&lt;wcs-state&gt;の$stream。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">log.ts</span><span>streamResource</span></div>
 <pre><code class="language-javascript">import { streamResource } from "@wcstack/signals";

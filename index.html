@@ -611,7 +611,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v3.1.0</a>
+      <a class="release-pill" href="https://github.com/wcstack/wcstack/releases" target="_blank" rel="noopener"><span class="dot"></span>Latest release: v3.2.0</a>
       <h1>What if the browser<br>had <em>these</em> built in?</h1>
       <p class="subtitle">wcstack is a thought experiment turned into code. We imagine what future web standards <em>could</em> look like &mdash; reactive data binding, declarative routing, and thirty-plus Web APIs as plain HTML tags &mdash; and build them as if they already existed in the browser.</p>
       <p class="subtitle-ja">未来のWeb標準を想像し、それがすでにブラウザに存在するかのようにコードにする思考実験。30以上のWeb APIをHTMLタグに。</p>
@@ -647,10 +647,38 @@
   <section class="topics" id="topics">
     <div class="container">
       <p class="section-label">What's New</p>
-      <h2 class="section-title">Shipped in v3.0.0 &rarr; v3.1.0</h2>
-      <p class="section-sub">3.0 reads a binding as written, or refuses it by name &mdash; and the core of <code>@wcstack/state</code> is split from its features. Forms that 2.x rounded off silently &mdash; a second <code>#</code>, a value after <code>else:</code>, an unterminated quote &mdash; now fail with <code>[wcs/binding-syntax]</code>, and forms whose intent is clear are read the way they are written: <code>done|eq(true)</code> matches a boolean, <code>join('; ')</code> keeps its semicolon, an <code>undefined</code> caption removes <code>alt</code> instead of writing <code>"undefined"</code>. There is <strong>no compatibility layer</strong>: 2.6 named every one of these forms as <code>wcs/v3-migration</code>, so upgrade to 2.6.1, clear those warnings, then move to 3.0 &mdash; the <a href="state/#v3-migration">migration table</a> lists each form with what to write instead. <code>@wcstack/state</code> and <code>/auto</code> still carry every feature, so a page that does not opt into the split entries loads as before. The changes are all in <code>@wcstack/state</code> and its tooling; every other package moves to 3.0.0 only to keep the lockstep version. <strong>v3.1.0</strong> follows with two additions: a <code>mount=</code> volume can take a root path under a name of its own (<code>state.taxRate: settings.taxRate</code>), in the vocabulary a component&rsquo;s partial mount already used, and a leading dot binds a property whose name starts with <code>on</code> (<code>.online: isOnline</code>) instead of listening for an event.</p>
-      <p class="section-sub-ja">3.0はバインディングを書かれたとおりに読むか、名指しで拒む &mdash; そして<code>@wcstack/state</code>のコアを機能から切り離す。2.xが黙って丸めていた書き方 &mdash; 2つ目の<code>#</code>、<code>else:</code>の後ろの値、閉じていない引用符 &mdash; は<code>[wcs/binding-syntax]</code>で失敗し、意図の明らかな書き方は書かれたとおりに読まれる: <code>done|eq(true)</code>は真偽値に一致し、<code>join('; ')</code>はセミコロンを保ち、<code>undefined</code>のキャプションは<code>"undefined"</code>を書く代わりに<code>alt</code>を取り除く。<strong>互換層は無い</strong>: 2.6がこれらの書き方をすべて<code>wcs/v3-migration</code>として名指ししてきたので、2.6.1に上げて警告を消し、それから3.0へ移る &mdash; 書き方ごとの書き換え先は<a href="state/#v3-migration">移行表</a>にある。<code>@wcstack/state</code>と<code>/auto</code>は今もすべての機能を載せているので、分割エントリを選ばないページは以前どおりに読み込まれる。変更はすべて<code>@wcstack/state</code>とそのツールの中にあり、他のパッケージはロックステップのバージョンを揃えるためだけに3.0.0になる。<strong>v3.1.0</strong>は2つの追加で続く: <code>mount=</code>のボリュームがルートのパスを自分の名前で受け取れるようになり(<code>state.taxRate: settings.taxRate</code>)、語彙はコンポーネントの部分マウントがすでに使っていたものと同じだ。そして先頭のドットは、<code>on</code>で始まる名前のプロパティを、イベントを待ち受ける代わりにプロパティとしてバインドする(<code>.online: isOnline</code>)。</p>
+      <h2 class="section-title">Shipped in v3.0.0 &rarr; v3.2.0</h2>
+      <p class="section-sub">3.0 reads a binding as written, or refuses it by name &mdash; and the core of <code>@wcstack/state</code> is split from its features. Forms that 2.x rounded off silently &mdash; a second <code>#</code>, a value after <code>else:</code>, an unterminated quote &mdash; now fail with <code>[wcs/binding-syntax]</code>, and forms whose intent is clear are read the way they are written: <code>done|eq(true)</code> matches a boolean, <code>join('; ')</code> keeps its semicolon, an <code>undefined</code> caption removes <code>alt</code> instead of writing <code>"undefined"</code>. There is <strong>no compatibility layer</strong>: 2.6 named every one of these forms as <code>wcs/v3-migration</code>, so upgrade to 2.6.1, clear those warnings, then move to 3.0 &mdash; the <a href="state/#v3-migration">migration table</a> lists each form with what to write instead. <code>@wcstack/state</code> and <code>/auto</code> still carry every feature, so a page that does not opt into the split entries loads as before. The changes are all in <code>@wcstack/state</code> and its tooling; every other package moves to 3.0.0 only to keep the lockstep version. <strong>v3.1.0</strong> follows with two additions: a <code>mount=</code> volume can take a root path under a name of its own (<code>state.taxRate: settings.taxRate</code>), in the vocabulary a component&rsquo;s partial mount already used, and a leading dot binds a property whose name starts with <code>on</code> (<code>.online: isOnline</code>) instead of listening for an event. <strong>v3.2.0</strong> gives names that read as the wrong operation their canonical spelling &mdash; <code>upper</code>, <code>toFixed</code>, <code>$dependOn</code>, <code>$renderedCallback</code>, <code>$stream</code> &mdash; with the old names kept as aliases through 3.x, and adds <code>coalesce</code> and <code>padEnd</code>. The rest of 3.0 &mdash; <code>$resolve</code> by argument count, readonly proxies and <code>#ro</code> mounts that refuse writes, rows created 18.7&nbsp;% faster &mdash; is in the <a href="state/#v3-migration">migration table</a> and <a href="state/#performance">Performance</a>.</p>
+      <p class="section-sub-ja">3.0はバインディングを書かれたとおりに読むか、名指しで拒む &mdash; そして<code>@wcstack/state</code>のコアを機能から切り離す。2.xが黙って丸めていた書き方 &mdash; 2つ目の<code>#</code>、<code>else:</code>の後ろの値、閉じていない引用符 &mdash; は<code>[wcs/binding-syntax]</code>で失敗し、意図の明らかな書き方は書かれたとおりに読まれる: <code>done|eq(true)</code>は真偽値に一致し、<code>join('; ')</code>はセミコロンを保ち、<code>undefined</code>のキャプションは<code>"undefined"</code>を書く代わりに<code>alt</code>を取り除く。<strong>互換層は無い</strong>: 2.6がこれらの書き方をすべて<code>wcs/v3-migration</code>として名指ししてきたので、2.6.1に上げて警告を消し、それから3.0へ移る &mdash; 書き方ごとの書き換え先は<a href="state/#v3-migration">移行表</a>にある。<code>@wcstack/state</code>と<code>/auto</code>は今もすべての機能を載せているので、分割エントリを選ばないページは以前どおりに読み込まれる。変更はすべて<code>@wcstack/state</code>とそのツールの中にあり、他のパッケージはロックステップのバージョンを揃えるためだけに3.0.0になる。<strong>v3.1.0</strong>は2つの追加で続く: <code>mount=</code>のボリュームがルートのパスを自分の名前で受け取れるようになり(<code>state.taxRate: settings.taxRate</code>)、語彙はコンポーネントの部分マウントがすでに使っていたものと同じだ。そして先頭のドットは、<code>on</code>で始まる名前のプロパティを、イベントを待ち受ける代わりにプロパティとしてバインドする(<code>.online: isOnline</code>)。<strong>v3.2.0</strong>は違う操作に読める名前に正規の綴りを与え &mdash; <code>upper</code>・<code>toFixed</code>・<code>$dependOn</code>・<code>$renderedCallback</code>・<code>$stream</code> &mdash; 旧名は3.xの間は別名として残し、<code>coalesce</code>と<code>padEnd</code>を加える。3.0の残り &mdash; 引数の個数で決まる<code>$resolve</code>、書き込みを拒むreadonlyのプロキシと<code>#ro</code>マウント、18.7&nbsp;%速くなった行の生成 &mdash; は<a href="state/#v3-migration">移行表</a>と<a href="state/#performance">Performance</a>にある。</p>
       <div class="topics-grid fade-in">
+        <div class="topic-card">
+          <span class="topic-ver">v3.2.0</span>
+          <span class="tag-name">upper &middot; toFixed &middot; $stream</span>
+          <h3>Names that say what they do</h3>
+          <p class="what-if">What if every name read as the operation it performs?</p>
+          <p>Some names read as the wrong operation, or were abbreviated away from JavaScript&rsquo;s own. 3.2 gives them <strong>canonical names</strong> and keeps the old ones as aliases. Filters: <code>inc</code> / <code>dec</code> &rarr; <code>add</code> / <code>sub</code>, <code>fix</code> &rarr; <code>toFixed</code>, <code>uc</code> / <code>lc</code> / <code>cap</code> &rarr; <code>upper</code> / <code>lower</code> / <code>capitalize</code>, <code>rep</code> / <code>rev</code> &rarr; <code>repeat</code> / <code>reverse</code>, <code>pad</code> &rarr; <code>padStart</code>, and <code>null</code> &rarr; <code>nullIfEmpty</code>, which is what it always did. Proxy APIs: <code>$trackDependency</code> / <code>$untrackDependency</code> &rarr; <code>$dependOn</code> / <code>$untracked</code> &mdash; the old pair read as inverses of each other, and they are not. Declaration keys: <code>$updatedCallback</code> &rarr; <code>$renderedCallback</code>, because it observes applied bindings, not every update, and <code>$streams</code> &rarr; <code>$stream</code>, singular like <code>$watch</code> and <code>$scan</code>. The old names work the same <strong>through 3.x</strong> and are removed in 4.0: the filter registry resolves an old name to the canonical implementation and arity, and an old key is moved onto the canonical one once, when the state enters the runtime &mdash; declaring both spellings is <code>[wcs/declaration-alias]</code>. Lint and the VS Code extension flag each old name as <code>wcs/name-alias</code> at <strong>info</strong> with the canonical one; the runtime warns only in the last 3.x minor.</p>
+          <p class="ja">違う操作に読める名前や、JavaScript自身の名前から省略されすぎた名前がある。3.2はそれらに<strong>正規の名前</strong>を与え、古い名前を別名として残す。フィルタ: <code>inc</code> / <code>dec</code> &rarr; <code>add</code> / <code>sub</code>、<code>fix</code> &rarr; <code>toFixed</code>、<code>uc</code> / <code>lc</code> / <code>cap</code> &rarr; <code>upper</code> / <code>lower</code> / <code>capitalize</code>、<code>rep</code> / <code>rev</code> &rarr; <code>repeat</code> / <code>reverse</code>、<code>pad</code> &rarr; <code>padStart</code>、そして<code>null</code> &rarr; <code>nullIfEmpty</code> &mdash; 実際にずっとしてきたことの名前だ。プロキシAPI: <code>$trackDependency</code> / <code>$untrackDependency</code> &rarr; <code>$dependOn</code> / <code>$untracked</code> &mdash; 旧名の2つは互いの逆に読めるが、そうではない。宣言キー: <code>$updatedCallback</code> &rarr; <code>$renderedCallback</code>(見ているのはすべての更新ではなく適用されたバインディングだから)、<code>$streams</code> &rarr; <code>$stream</code>(<code>$watch</code>や<code>$scan</code>と同じ単数形)。旧名は<strong>3.xの間</strong>同じに動き、4.0で取り除かれる: フィルタのレジストリは旧名を正規の実装とアリティに解決し、旧キーはstateがランタイムに入るときに一度だけ正規のキーへ移される &mdash; 両方の綴りの宣言は<code>[wcs/declaration-alias]</code>だ。lintとVS Code拡張は旧名ごとに正規の名前を添えて<code>wcs/name-alias</code>を<strong>info</strong>で出す。ランタイムが警告するのは3.xの最後のマイナーだけだ。</p>
+          <ul class="tag-features">
+            <li>Old Names Work Through 3.x</li>
+            <li>Removed in 4.0</li>
+            <li>Both Spellings Refused</li>
+            <li>wcs/name-alias at Info</li>
+          </ul>
+        </div>
+        <div class="topic-card">
+          <span class="topic-ver">v3.2.0</span>
+          <span class="tag-name">count|coalesce(0)</span>
+          <h3>Zero is a value</h3>
+          <p class="what-if">What if a fallback replaced only what is actually missing?</p>
+          <p><code>defaults(v)</code> replaces every falsy value &mdash; right for a name that may be empty, wrong for a count that may be <code>0</code>: <code>count|defaults(&hellip;)</code> overwrites a real zero. <code>coalesce(v)</code> is the <code>??</code> of filters: it replaces <strong>only</strong> <code>null</code> / <code>undefined</code>, so <code>0</code>, <code>false</code> and <code>""</code> stay. <code>padEnd(n, c?)</code> joins <code>padStart</code> and pads the end, with a space by default, for fixed-width codes and columns. That makes 48 built-in filters. One fix rides along: <code>add</code> / <code>sub</code> (<code>inc</code> / <code>dec</code>) require their argument, as documented &mdash; the arity table said it was optional, so lint let a bare <code>inc</code> through and the runtime then failed without a code. It now fails as <code>[wcs/filter-arity]</code>, the same code and bounds in the editor and on the page. Like the new names, the new filters exist from 3.2: on a page pinned to 3.1 or earlier, keep the old spellings.</p>
+          <p class="ja"><code>defaults(v)</code>はあらゆる偽の値を置き換える &mdash; 空かもしれない名前には正しく、<code>0</code>かもしれない件数には誤りだ: <code>count|defaults(&hellip;)</code>は本物のゼロを上書きしてしまう。<code>coalesce(v)</code>はフィルタ版の<code>??</code>で、<code>null</code> / <code>undefined</code><strong>だけ</strong>を置き換えるので、<code>0</code>・<code>false</code>・<code>""</code>は残る。<code>padEnd(n, c?)</code>は<code>padStart</code>の対として末尾を埋め、既定は空白 &mdash; 固定幅のコードや列のためのものだ。これで組み込みフィルタは48個になる。修正が1つ同乗する: <code>add</code> / <code>sub</code>(<code>inc</code> / <code>dec</code>)は文書どおり引数を必須とする &mdash; アリティ表が省略可能としていたため、lintは引数の無い<code>inc</code>を通し、ランタイムはその後コード無しで失敗していた。いまは<code>[wcs/filter-arity]</code>で失敗し、エディタでもページでも同じコード、同じ範囲だ。新しい名前と同じく、新しいフィルタも3.2からのもの: 3.1以前に固定したページでは古い綴りのままにすること。</p>
+          <ul class="tag-features">
+            <li>Only null / undefined Replaced</li>
+            <li>padEnd Beside padStart</li>
+            <li>48 Built-in Filters</li>
+            <li>add / sub Arity Enforced</li>
+          </ul>
+        </div>
         <div class="topic-card">
           <span class="topic-ver">v3.1.0</span>
           <span class="tag-name">state.taxRate: settings.taxRate</span>
@@ -733,34 +761,6 @@
             <li>Seven Feature Entries</li>
             <li>A Missing Feature Throws by Name</li>
             <li>Never Through esm.run</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v3.0.0</span>
-          <span class="tag-name">state#ro: user</span>
-          <h3>Writes that keep their word</h3>
-          <p class="what-if">What if <code>#ro</code> on a mount meant read-only, and a readonly proxy never wrote?</p>
-          <p>Several write paths in 2.x accepted a promise and ignored it. <code>$resolve(path, indexes, undefined)</code> was a read; in 3.0 <strong>the argument count decides</strong>, so it writes <code>undefined</code>, and <code>$resolve(path, indexes)</code> is the read. <code>$resolve</code> and <code>$setAll</code> &mdash; the <code>**</code> broadcast included &mdash; wrote straight through a readonly proxy; they now throw <code>This state is readonly.</code> exactly as a direct assignment does. A component mounted with <code>state#ro: user</code> could write the host&rsquo;s tree; now its writes throw <code>[wcs/mount-readonly]</code> and a two-way input inside it does not write back, while the host can still write the path. And a component&rsquo;s own default for a key that an explicit partial mount covers (<code>state.message: user.name</code>) no longer hides the host value &mdash; the mount wins. What each scope runs is now one table: a root runs every declaration, a volume and a mounted component each run a stated subset, and nothing outside that subset is ignored silently.</p>
-          <p class="ja">2.xのいくつかの書き込み経路は、約束を受け取っておきながら無視していた。<code>$resolve(path, indexes, undefined)</code>は読みだった。3.0では<strong>引数の個数が決める</strong>ので、これは<code>undefined</code>を書き、読みは<code>$resolve(path, indexes)</code>だ。<code>$resolve</code>と<code>$setAll</code>は &mdash; <code>**</code>のブロードキャストを含めて &mdash; readonlyのプロキシを素通りして書いていた。いまは直接の代入と同じく<code>This state is readonly.</code>をthrowする。<code>state#ro: user</code>でマウントされたコンポーネントはホストの木に書けた。いまはその書き込みが<code>[wcs/mount-readonly]</code>をthrowし、中の双方向の入力も書き戻さない。ホストは今もそのパスに書ける。そして明示的な部分マウント(<code>state.message: user.name</code>)が覆うキーにコンポーネント自身が既定値を持っていても、もうホストの値を隠さない &mdash; マウントが勝つ。どのスコープが何を実行するかは1つの表になった: ルートはすべての宣言を実行し、ボリュームとマウントされたコンポーネントはそれぞれ決まった部分集合を実行し、その外にあるものは黙って無視されない。</p>
-          <ul class="tag-features">
-            <li>The Argument Count Decides</li>
-            <li>Readonly Means Readonly</li>
-            <li>#ro Mounts Honoured</li>
-            <li>An Explicit Mount Wins</li>
-          </ul>
-        </div>
-        <div class="topic-card">
-          <span class="topic-ver">v3.0.0</span>
-          <span class="tag-name">10,000 rows</span>
-          <h3>Faster rows, smaller file</h3>
-          <p class="what-if">What if a major release made the list you already have cheaper?</p>
-          <p>A plan row now renders straight from its row object, each row keeps one record, a list shares one binding session, and the cold row path stops allocating per node. Medians against 2.5.1 on the audit bench: creating 10,000 rows cold <strong>&minus;18.7&nbsp;%</strong>, appending 1,000 rows <strong>&minus;15.9&nbsp;%</strong>, clearing 10,000 rows <strong>&minus;14.7&nbsp;%</strong>; creating 1,000 rows warm is unchanged, and no measure regressed. The heap per row goes from <strong>3.6 to 3.0&nbsp;KB</strong>. The file the package name resolves to, <code>dist/index.esm.js</code>, is minified now: <strong>321&nbsp;KB &rarr; 79&nbsp;KB gzip</strong> for a bundler that took it as it was &mdash; build from source with <code>WCS_STATE_UNMINIFIED=1</code> for readable names in a profile. One number goes the other way, and it is stated: <code>auto.min.js</code> grows from 71.6&nbsp;KB to about <strong>77&nbsp;KB gzip</strong>, for the feature receptacles and the fixes on this page. In DevTools, the State pane gains a <strong>Keyed selection</strong> section with the <code>$eq</code> / <code>$eqPath</code> / <code>$eqIndex</code> subscriptions per path, and a <code>tracked</code> badge on a path that fell back to re-evaluating every row.</p>
-          <p class="ja">プランの行はいま行オブジェクトから直接描画され、各行が持つ記録は1つ、リストはバインディングのセッションを1つ共有し、冷えた状態の行の経路はノードごとの確保をやめた。監査ベンチでの2.5.1比の中央値: 1万行の生成(コールド)<strong>&minus;18.7&nbsp;%</strong>、1,000行の追加<strong>&minus;15.9&nbsp;%</strong>、1万行のクリア<strong>&minus;14.7&nbsp;%</strong>。1,000行の生成(ウォーム)は変わらず、悪化した計測は無い。1行あたりのヒープは<strong>3.6から3.0&nbsp;KB</strong>になった。パッケージ名が解決する先の<code>dist/index.esm.js</code>はいまminifyされている: そのまま取り込んでいたバンドラにとっては<strong>321&nbsp;KB &rarr; 79&nbsp;KB gzip</strong>。プロファイルで読める名前が要るなら<code>WCS_STATE_UNMINIFIED=1</code>でソースからビルドする。逆に動く数字も1つあり、それも書いておく: <code>auto.min.js</code>は機能の受け口とこのページの修正のぶん、71.6&nbsp;KBから約<strong>77&nbsp;KB gzip</strong>に増える。DevToolsでは、Stateペインに<strong>Keyed selection</strong>の節が加わり、パスごとの<code>$eq</code> / <code>$eqPath</code> / <code>$eqIndex</code>の購読と、全行の再評価に戻ったパスに付く<code>tracked</code>バッジを見せる。</p>
-          <ul class="tag-features">
-            <li>Cold Create &minus;18.7 %</li>
-            <li>3.6 &rarr; 3.0 KB per Row</li>
-            <li>index.esm.js Minified</li>
-            <li>auto.min.js About 77 KB</li>
           </ul>
         </div>
       </div>
@@ -1075,7 +1075,7 @@
     export default {
       prompt: "",
       // Fold an async producer into one reactive property.
-      $streams: {
+      $stream: {
         tokens: {
           args:    (state) =&gt; state.prompt,            // dependency captured here
           source:  (prompt, signal) =&gt; llmStream(prompt, signal),
