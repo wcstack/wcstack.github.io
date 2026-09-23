@@ -642,7 +642,7 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
       <p>General form &mdash; multiple bindings separated by <code>;</code>:</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">syntax</span><span>General form</span></div>
-<pre><code class="language-none">property[#modifier]: path[@state][|filter[|filter(args)...]]</code></pre>
+<pre><code class="language-none">property[#modifier]: path[|filter[|filter(args)...]]</code></pre>
       </div>
       <div class="code-block">
         <div class="code-header"><span class="filename">index.html</span><span>Multiple bindings</span></div>
@@ -733,7 +733,6 @@ this.items.push({ id: 4 });                  // ✗ in-place mutation not detect
           <tr><td><code>.name</code></td><td><code>users.*.name</code></td></tr>
           <tr><td><code>.</code></td><td><code>users.*</code> (current element)</td></tr>
           <tr><td><code>.name|upper</code></td><td><code>users.*.name|upper</code> (filters preserved)</td></tr>
-          <tr><td><code>.name@state</code></td><td><code>users.*.name@state</code> (state name preserved)</td></tr>
         </table>
       </div>
       <div class="code-block">
@@ -1063,7 +1062,7 @@ removeItem(event, index) {
       <div class="table-wrap">
         <table>
           <tr><th>Rule</th><th>Consequence</th></tr>
-          <tr><td>Own state only</td><td>A key may not carry <code>@stateName</code> &mdash; rejected at declaration</td></tr>
+          <tr><td>Paths of the tree only</td><td>A key may not contain <code>@</code> (the v1 name selector) &mdash; rejected at declaration</td></tr>
           <tr><td>No <code>$</code>-prefixed keys</td><td><code>$streamStatus.x</code> cannot be watched directly &mdash; mirror it through a one-line non-<code>$</code> getter and watch that (the eager rule makes it work unrendered)</td></tr>
           <tr><td>Batches coalesce</td><td><code>a &rarr; b &rarr; c</code> in one batch fires once with <code>cur = c</code>, <code>prev = a</code></td></tr>
           <tr><td>Row watches want <code>$listKeys</code></td><td>Without it a whole-array assignment fires every row with <code>prev === undefined</code>; <strong>headless</strong> row watching (no rendered <code>for</code>) fires <em>zero</em> times without it</td></tr>
