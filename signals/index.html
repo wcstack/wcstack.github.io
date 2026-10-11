@@ -308,7 +308,7 @@
       <p class="pkg-sub">A signals-based, <strong>fine-grained</strong> reactive core &mdash; <code style="font-family:var(--mono)">signal</code> / <code style="font-family:var(--mono)">computed</code> / <code style="font-family:var(--mono)">effect</code>, async resources, a no-VDOM DOM layer, and bridges for wc-bindable elements or their headless Cores. Zero runtime dependencies, buildless, standards-first.</p>
       <p class="pkg-sub-ja">シグナルベースの細粒度リアクティブコア。TC39形のAPI、非同期resource、VDOMなしのDOM層、wc-bindable要素とヘッドレスCoreのブリッジ。ランタイム依存ゼロ。</p>
       <div class="pill-row">
-        <span class="pill accent">v3.5.4</span>
+        <span class="pill accent">v4.0.0</span>
         <span class="pill">@wcstack/signals</span>
         <span class="pill">core &asymp;3.1 KB gz</span>
         <span class="pill">dom +&asymp;3.8 KB gz</span>
@@ -570,12 +570,13 @@ render(view, document.body);</code></pre>
           <tr><td><code>bound.signals.&lt;prop&gt;.get()</code></td><td>Read-only signal snapshots of observable properties</td></tr>
           <tr><td><code>bound.on("prop", { fold?, initial? })</code></td><td>Event-token streams (latest-by-default fold)</td></tr>
           <tr><td><code>bound.set("input", value)</code></td><td>Imperative input write</td></tr>
-          <tr><td><code>bound.bindInput("input", sig)</code></td><td>Reactive mirror with same-value guard</td></tr>
+          <tr><td><code>bound.bindInput("input", sig)</code></td><td>Reactive mirror with same-value guard. v4.0.0: writes <code>undefined</code> only after the signal had another value (the wc-bindable applier profile&rsquo;s A2, as React 19 does), so a first <code>undefined</code> leaves the element&rsquo;s initial state alone</td></tr>
           <tr><td><code>bound.command("cmd", ...args)</code></td><td>Imperative command invocation</td></tr>
           <tr><td><code>bound.bindCommand("cmd", trigger, mapArgs?)</code></td><td>Fire a command when a trigger changes</td></tr>
           <tr><td><code>bound.dispose()</code></td><td>Detach all listeners / effects; adapter becomes inert</td></tr>
         </table>
       </div>
+      <p class="ja">v4.0.0: <code>bindInput</code>が<code>undefined</code>を書くのは、signalが別の値を持った後だけになった(wc-bindableのapplierプロファイルのA2。React 19と同じ)。最初の評価や<code>undefined</code>の後の<code>undefined</code>は「まだ値が無い」として書かず、要素自身の初期状態(既定値やマークアップの値)を残す。値の後の<code>undefined</code>は書くので、要素はその状態に戻る。</p>
       <p><code>nodeSource(bound, run, { abort? })</code> wraps a node as a <code>resource</code> source, wiring the resource's <code>AbortSignal</code> to the node's cancel command (default <code>"abort"</code>).</p>
 
       <h3><code>mountNode</code>: create, bind, and connect safely</h3>
