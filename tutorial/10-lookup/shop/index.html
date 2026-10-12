@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Little Roastery</title>
+  <link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css">
+  <script type="module" src="https://esm.run/@wcstack/state@4/auto"></script>
+  <script type="module" src="https://esm.run/@wcstack/fetch@4/auto"></script>
+</head>
+<body>
+
+<wcs-state>
+  <script type="module">
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &&
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.product"() {
+        const id = this["cart.*.id"];
+        return this.products.find(product => product.id === id);
+      },
+      get "cart.*.name"() {
+        return this["cart.*.product"]?.name ?? "…";
+      },
+      get "cart.*.price"() {
+        return this["cart.*.product"]?.price ?? 0;
+      },
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) => sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) => sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal >= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item => item.id === product.id);
+        if (line >= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  </script>
+</wcs-state>
+
+<wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"></wcs-fetch>
+
+<header class="shop-header">
+  <h1>Little Roastery</h1>
+  <p class="cart-badge">Cart: <span data-wcs="textContent: itemCount"></span></p>
+</header>
+
+<p class="status" data-wcs="hidden: loading|not">Loading products…</p>
+<p class="status error" data-wcs="hidden: loadError|not">
+  Couldn't load the products.
+  <button type="button" data-wcs="onclick: retry">Try again</button>
+</p>
+
+<main class="shop" data-wcs="hidden: catalogReady|not">
+  <section class="catalog">
+    <h2>Products</h2>
+    <div class="toolbar">
+      <input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query">
+      <fieldset class="categories">
+        <legend class="visually-hidden">Category</legend>
+        <label><input type="radio" name="category" value="all" data-wcs="radio: category"> All</label>
+        <label><input type="radio" name="category" value="coffee" data-wcs="radio: category"> Coffee</label>
+        <label><input type="radio" name="category" value="tea" data-wcs="radio: category"> Tea</label>
+        <label><input type="radio" name="category" value="tools" data-wcs="radio: category"> Tools</label>
+      </fieldset>
+    </div>
+    <div class="grid">
+      <template data-wcs="for: products">
+        <article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)">
+          <div class="card-icon">{{ .icon }}</div>
+          <h3>{{ .name }}</h3>
+          <p>{{ .description }}</p>
+          <p class="price">${{ .price|toFixed(2) }}</p>
+          <p class="badge" data-wcs="hidden: .stock|ne(0)">Sold out</p>
+          <button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)">Add to cart</button>
+        </article>
+      </template>
+    </div>
+    <p class="no-results" data-wcs="hidden: matchCount|ne(0)">No products match.</p>
+  </section>
+
+  <aside class="cart">
+    <h2>Cart</h2>
+    <template data-wcs="if: cart.length|eq(0)">
+      <p class="empty">Your cart is empty.</p>
+    </template>
+    <template data-wcs="else:">
+      <ul class="cart-lines">
+        <template data-wcs="for: cart">
+          <li>
+            <span class="line-name">{{ .name }}</span>
+            <span class="line-total">${{ .lineTotal|toFixed(2) }}</span>
+            <span class="stepper">
+              <button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)">−</button>
+              <span>{{ .quantity }}</span>
+              <button type="button" aria-label="Increase" data-wcs="onclick: increase">+</button>
+            </span>
+            <button type="button" class="remove" data-wcs="onclick: remove">Remove</button>
+          </li>
+        </template>
+      </ul>
+      <dl class="totals">
+        <dt>Subtotal</dt><dd>${{ subtotal|toFixed(2) }}</dd>
+        <dt>Shipping</dt><dd>${{ shipping|toFixed(2) }}</dd>
+        <dt class="grand">Total</dt><dd class="grand">${{ total|toFixed(2) }}</dd>
+      </dl>
+      <p class="hint" data-wcs="hidden: shipping|eq(0)">Free shipping on orders of $50 or more.</p>
+    </template>
+  </aside>
+</main>
+
+</body>
+</html>

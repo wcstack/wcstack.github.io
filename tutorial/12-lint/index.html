@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="12. Check the page again — wcstack tutorial" data-title-ja="12. もう一度ページを検査する — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>12. Check the page again — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 12: the mistakes of Part 2 don't break the page, they lose data later. @wcstack/lint reads the wcs-* tags too and reports them before you reload. / Part 2の間違いはページを壊さず、後でデータを失う。@wcstack/lintはそれを再読み込みの前に報告する。">
+  <meta property="og:title" content="12. Check the page again — wcstack tutorial">
+  <meta property="og:description" content="The mistakes of Part 2 lose data later. @wcstack/lint reports them before you reload.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/12-lint/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/12-lint/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 2 · Step 5 of 5</span><span lang="ja">チュートリアル · Part 2 · ステップ 5/5</span></p>
+      <h1 class="page-title"><span lang="en">Check the page again</span><span lang="ja">もう一度ページを検査する</span></h1>
+      <p class="lead" lang="en">The mistakes of Part 2 don't break the page. It runs, it looks right &mdash; and it loses the cart after a reload. The checker reads the <code>wcs-*</code> tags too, and reports them before you reload.</p>
+      <p class="lead" lang="ja">Part 2の間違いはページを壊しません。ページは動き、正しく見え、そして再読み込みの後でカートを失います。検査器は<code>wcs-*</code>タグも読み、再読み込みの前にそれを報告します。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../08-fetch/" class="done">8</a></li>
+        <li><a href="../09-retry/" class="done">9</a></li>
+        <li><a href="../10-lookup/" class="done">10</a></li>
+        <li><a href="../11-storage/" class="done">11</a></li>
+        <li><a href="../12-lint/" aria-current="page">12</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="run">
+      <h2><span lang="en">Run it</span><span lang="ja">実行する</span></h2>
+      <p lang="en">In the folder of your <code>index.html</code> from step 11:</p>
+      <p lang="ja">ステップ11の<code>index.html</code>があるフォルダで実行します。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
+
+<span class="ok">0 error(s), 0 warning(s), 0 info</span></pre>
+      </div>
+      <p lang="en">If you see seven warnings about <code>.stock</code>, <code>.name</code> and <code>.price</code> instead, <code>npx</code> ran a checker older than 4.0.2, which doesn't read the type comments of step 8. Run <code>npx @wcstack/lint@latest index.html</code>.</p>
+      <p lang="ja">代わりに<code>.stock</code>・<code>.name</code>・<code>.price</code>についての警告が7つ出たら、<code>npx</code>が4.0.2より古い検査器を実行しています。その版はステップ8の型のコメントを読みません。<code>npx @wcstack/lint@latest index.html</code>を実行してください。</p>
+      <p lang="en">The checker knows every <code>wcs-*</code> tag: the properties each one has, which of them are outputs, inputs and commands, and how <code>&lt;wcs-storage&gt;</code> and a trigger behave at startup. That is what the three mistakes below need.</p>
+      <p lang="ja">検査器はすべての<code>wcs-*</code>タグを知っています。それぞれがどんなプロパティを持ち、そのどれが出力・入力・命令か、<code>&lt;wcs-storage&gt;</code>やtriggerが起動時にどう振る舞うかです。下の3つの間違いには、それが要ります。</p>
+    </section>
+
+    <section class="doc" id="break">
+      <h2><span lang="en">Break it on purpose</span><span lang="ja">わざと壊してみる</span></h2>
+      <p lang="en">Make each change in your step-11 page, try it in the browser, run the checker, then undo it. The line numbers are those of the step-11 file.</p>
+      <p lang="ja">ステップ11のページに変更を1つずつ加え、ブラウザで試し、検査器を実行し、変更を元に戻します。行番号はステップ11のファイルのものです。</p>
+
+      <h3><span lang="en">1. Bind the cart itself</span><span lang="ja">1. カートそのものをバインドする</span></h3>
+      <p lang="en">Change the tag's binding to <code>data-wcs="value: cart"</code>. In the browser, add House Blend twice: the page says 2, the stored cart says 1. Reload: the cart is gone. The checker gives both reasons:</p>
+      <p lang="ja">タグのバインディングを<code>data-wcs="value: cart"</code>に変えます。ブラウザでHouse Blendを2回入れると、ページは2、保存されたカートは1です。再読み込みするとカートは消えます。検査器は両方の理由を挙げます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
+index.html:107:13 <span class="warn">warning</span> wcs/storage-seed-clobber The &lt;wcs-storage&gt; value-bound slot "cart" is seeded with []. The initial write-back overwrites the persisted value on every load — add #init=element to the binding (`value#init=element: cart`) so the stored value wins, and seed the slot with null (what an empty key loads as)
+index.html:107:20 <span class="warn">warning</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
+
+0 error(s), 2 warning(s), 0 info</pre>
+      </div>
+      <p lang="en">The first is the reload: the starting <code>[]</code> is saved over the stored cart. The second is the quantity: <code>addToCart</code> and the stepper write <code>cart.*.quantity</code>, below the bound path. Step 11's <code>savedCart</code> answers both.</p>
+      <p lang="ja">1つ目は再読み込みの件です。最初の<code>[]</code>が保存済みのカートの上に保存されます。2つ目は数量の件です。<code>addToCart</code>と数量のボタンは、バインドしたパスの下の<code>cart.*.quantity</code>に書きます。ステップ11の<code>savedCart</code>が、どちらにも答えています。</p>
+
+      <h3><span lang="en">2. Let the element win, with the cart</span><span lang="ja">2. カートのまま要素を勝たせる</span></h3>
+      <p lang="en">Now try <code>data-wcs="value#init=element: cart"</code>, in a private window so that <code>localStorage</code> starts empty. “Add to cart” does nothing, and the console says <code>Cannot read properties of null (reading 'findIndex')</code>: the empty key loaded as <code>null</code>, and <code>#init=element</code> wrote it into <code>cart</code>. The checker:</p>
+      <p lang="ja">次は<code>data-wcs="value#init=element: cart"</code>を、<code>localStorage</code>が空で始まるプライベートウィンドウで試します。「Add to cart」は何もせず、コンソールに<code>Cannot read properties of null (reading 'findIndex')</code>が出ます。空のキーが<code>null</code>を読み、<code>#init=element</code>がそれを<code>cart</code>に書いたのです。検査器の結果は次のとおりです。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
+index.html:107:13 <span class="warn">warning</span> wcs/storage-init-seed The &lt;wcs-storage&gt; value-bound slot "cart" is seeded with [], but #init=element pulls the element's value into it. On a first visit (an empty key) that is null, so the seed is replaced by null — seed it with null and supply the default where you read it (`this.cart ?? …`), or bind an accessor pair whose setter ignores null
+index.html:107:33 <span class="warn">warning</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
+
+0 error(s), 2 warning(s), 0 info</pre>
+      </div>
+      <p lang="en">“An accessor pair whose setter ignores null” is <code>savedCart</code>.</p>
+      <p lang="ja">「nullを無視するsetterを持つアクセサペア」とは、<code>savedCart</code>のことです。</p>
+
+      <h3><span lang="en">3. A typo in the type</span><span lang="ja">3. 型の打ち間違い</span></h3>
+      <p lang="en">In the <code>@typedef</code>, change <code>name: string</code> to <code>nmae: string</code>. The page is unaffected &mdash; the comment is not code &mdash; but the checker believes it:</p>
+      <p lang="ja"><code>@typedef</code>の<code>name: string</code>を<code>nmae: string</code>に変えます。ページには影響しません(コメントはコードではないので)。けれども検査器はそれを信じます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
+index.html:137:18 <span class="warn">warning</span> wcs/binding-path-missing Path ".name" does not exist in the state definition (expanded: products.*.name)
+
+0 error(s), 1 warning(s), 0 info</pre>
+      </div>
+      <p lang="en">The warning points at the product card, and the mistake is in the comment. The type is a promise about the file; when the two disagree, check the file first.</p>
+      <p lang="ja">警告は商品カードを指していますが、間違いはコメントの中にあります。型はファイルについての約束です。食い違ったら、まずファイルを確かめましょう。</p>
+
+      <div class="note">
+        <span class="callout-label"><span lang="en">What the checker can't see</span><span lang="ja">検査器に見えないもの</span></span>
+        <p lang="en">Forgetting <code>#init=element</code> on <code>savedCart</code> (step 11) passes the checker: it would have to know what a getter returns at startup. Neither can it see the file a page fetches, beyond the type you declare. Keep the habit the demos teach: add something, reload, and look.</p>
+        <p lang="ja"><code>savedCart</code>の<code>#init=element</code>を忘れても(ステップ11)、検査器は通ります。getterが起動時に何を返すかを知る必要があるからです。ページが読み込むファイルも、宣言した型より先は見えません。デモが教える習慣を続けましょう。何かを入れて、再読み込みして、見ることです。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="done">
+      <h2><span lang="en">Part 2 complete</span><span lang="ja">Part 2 完了</span></h2>
+      <p lang="en">The shop now loads its catalog from a file, says so when that fails, and keeps the cart across reloads and tabs &mdash; with two tags and no <code>fetch()</code>, <code>localStorage</code> or <code>try</code> / <code>catch</code> in your code. Along the way:</p>
+      <p lang="ja">ショップは商品一覧をファイルから読み、失敗したらそれを伝え、カートを再読み込みやタブをまたいで残すようになりました。使ったのはタグ2つで、コードには<code>fetch()</code>も<code>localStorage</code>も<code>try</code> / <code>catch</code>もありません。その途中で学んだこと:</p>
+      <ul class="list" lang="en">
+        <li>A <code>wcs-*</code> tag is an element with properties: attributes configure it, <code>data-wcs</code> binds its outputs (<code>value</code>, <code>loading</code>, <code>error</code>) and inputs (<code>trigger</code>, <code>value</code>).</li>
+        <li>A getter in front of outside data (<code>catalog ?? []</code>) keeps <code>null</code> away from the rest of the page; a path doesn't care whether it is stored or computed.</li>
+        <li>Store each fact once: the cart keeps ids and quantities, and row getters look up the rest.</li>
+        <li>A binding is re-applied when its own path is assigned. Bind a getter that reads every field by path, and use <code>#init=element</code> so the stored value wins at load.</li>
+        <li>JSDoc <code>@typedef</code> / <code>@type</code> tell the checker the shape of data it cannot see.</li>
+      </ul>
+      <ul class="list" lang="ja">
+        <li><code>wcs-*</code>タグはプロパティを持つ要素。属性で設定し、<code>data-wcs</code>で出力(<code>value</code>・<code>loading</code>・<code>error</code>)と入力(<code>trigger</code>・<code>value</code>)をバインドする。</li>
+        <li>外から来るデータの前に置いたgetter(<code>catalog ?? []</code>)が、<code>null</code>をページの残りから遠ざける。パスは保存された値か計算された値かを問わない。</li>
+        <li>1つの事実は1か所に。カートはIDと数量を持ち、残りは行getterで引く。</li>
+        <li>バインディングは自分のパスへの代入で当て直される。フィールドをすべてパスで読むgetterをバインドし、<code>#init=element</code>で読み込み時に保存値を勝たせる。</li>
+        <li>JSDocの<code>@typedef</code> / <code>@type</code>が、検査器に見えないデータの形を伝える。</li>
+      </ul>
+
+      <h3><span lang="en">Coming next</span><span lang="ja">この先</span></h3>
+      <p lang="en"><strong>Part 3 &mdash; Grow into an app</strong> adds product pages with <code>&lt;wcs-router&gt;</code>, splits the page into components, tests it with <code>@wcstack/testing</code>, and publishes it with pinned versions. It is in preparation; until then, the <a href="../../state/">state page</a> is the complete reference.</p>
+      <p lang="ja"><strong>Part 3 アプリに育てる</strong>では、<code>&lt;wcs-router&gt;</code>で商品ページを加え、ページを部品に分け、<code>@wcstack/testing</code>でテストし、バージョンを固定して公開します。準備中です。それまでは<a href="../../state/">stateのページ</a>が完全なリファレンスです。</p>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../11-storage/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">11. Keep the cart across reloads</span><span lang="ja">11. 再読み込みしてもカートを残す</span></span></a>
+      <a class="next" href="../"><span class="dir"><span lang="en">Back to →</span><span lang="ja">戻る →</span></span><span class="name"><span lang="en">Tutorial overview</span><span lang="ja">チュートリアルの概要</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

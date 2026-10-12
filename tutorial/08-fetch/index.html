@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="8. Load the catalog from a file — wcstack tutorial" data-title-ja="8. 商品一覧をファイルから読む — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8. Load the catalog from a file — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 8: the products move into a JSON file and a <wcs-fetch> tag loads them into state — no fetch(), no await, no loading flag by hand. / 商品をJSONファイルに移し、<wcs-fetch>タグでstateへ読み込む。">
+  <meta property="og:title" content="8. Load the catalog from a file — wcstack tutorial">
+  <meta property="og:description" content="The products move into a JSON file, and a <wcs-fetch> tag loads them into state.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/08-fetch/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/08-fetch/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 2 · Step 1 of 5</span><span lang="ja">チュートリアル · Part 2 · ステップ 1/5</span></p>
+      <h1 class="page-title"><span lang="en">Load the catalog from a file</span><span lang="ja">商品一覧をファイルから読む</span></h1>
+      <p class="lead" lang="en">The products move out of the page into a JSON file, and a <code>&lt;wcs-fetch&gt;</code> tag loads them. You add a tag and a few lines of state &mdash; no <code>fetch()</code>, no <code>await</code>, no loading flag to manage by hand.</p>
+      <p class="lead" lang="ja">商品をページの外のJSONファイルに移し、<code>&lt;wcs-fetch&gt;</code>タグで読み込みます。増えるのはタグ1つとstateの数行です。<code>fetch()</code>も<code>await</code>も、手で管理する読み込み中フラグもいりません。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../08-fetch/" aria-current="page">8</a></li>
+        <li><a href="../09-retry/">9</a></li>
+        <li><a href="../10-lookup/">10</a></li>
+        <li><a href="../11-storage/">11</a></li>
+        <li><a href="../12-lint/">12</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">It looks like the shop of step 6 &mdash; that is the point. The products now come from a file on the server. While the request is on its way, the page says “Loading products…”; on a fast connection you will hardly see it.</p>
+      <p lang="ja">ステップ6のショップと同じに見えます。それが狙いです。商品はサーバー上のファイルから届くようになりました。リクエストが届くまでの間、ページには「Loading products…」と出ます。速い回線ではほとんど見えないでしょう。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 8" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="file">
+      <h2><span lang="en">The catalog file</span><span lang="ja">商品一覧のファイル</span></h2>
+      <p lang="en">The seven products of Part 1 are in <a href="../data/products.json" target="_blank" rel="noopener"><code>https://wcstack.github.io/tutorial/data/products.json</code></a>, as JSON:</p>
+      <p lang="ja">Part 1の7つの商品は、<a href="../data/products.json" target="_blank" rel="noopener"><code>https://wcstack.github.io/tutorial/data/products.json</code></a>にJSONで置いてあります。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">products.json</span></div>
+        <pre><code class="language-json" data-excerpt="../data/products.json">[
+  { "id": 1, "name": "House Blend", "category": "coffee", "description": "Chocolate, caramel, a hint of citrus.", "price": 14, "stock": 12, "icon": "☕" },
+  …
+]</code></pre>
+      </div>
+      <p lang="en">Your page reads it by its full URL, so it works even when you open <code>index.html</code> by double-clicking it: the site lets any page read its files. To use a file of your own, put <code>products.json</code> next to <code>index.html</code>, write <code>url="products.json"</code>, and open the folder through a local server (<code>npx serve</code>, for example) &mdash; a page opened as a file may not read other files.</p>
+      <p lang="ja">ページはこのファイルを完全なURLで読むので、<code>index.html</code>をダブルクリックで開いても動きます(このサイトは、どのページにもファイルの読み取りを許しています)。自分のファイルを使うなら、<code>products.json</code>を<code>index.html</code>の隣に置いて<code>url="products.json"</code>と書き、フォルダをローカルサーバー(たとえば<code>npx serve</code>)で開きます。ファイルとして開いたページは、ほかのファイルを読めないことがあるからです。</p>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Start from your page of step 6. In <code>&lt;head&gt;</code>, load the fetch package after the state package:</p>
+      <p lang="ja">ステップ6のページから始めます。<code>&lt;head&gt;</code>で、stateのパッケージの後にfetchのパッケージを読み込みます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">new line</span><span lang="ja">1行追加</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <p lang="en">In the state, the <code>products</code> array goes away. Put a type comment above <code>export default</code>, and replace the array with <code>catalog</code>, <code>loading</code> and two getters:</p>
+      <p lang="ja">stateからは<code>products</code>の配列がなくなります。<code>export default</code>の上に型のコメントを置き、配列を<code>catalog</code>・<code>loading</code>とgetter 2つに置き換えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">/** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+export default {
+  /** @type {Product[] | null} */
+  catalog: null,
+  loading: false,
+  cart: [],
+  query: "",
+  category: "all",
+
+  get products() {
+    return this.catalog ?? [];
+  },
+  get catalogReady() {
+    return this.catalog !== null;
+  },</code></pre>
+      </div>
+      <p lang="en">In <code>&lt;body&gt;</code>, add the <code>&lt;wcs-fetch&gt;</code> tag after <code>&lt;/wcs-state&gt;</code>, a loading line after the header, and hide the shop until the catalog is there:</p>
+      <p lang="ja"><code>&lt;body&gt;</code>では、<code>&lt;/wcs-state&gt;</code>の後に<code>&lt;wcs-fetch&gt;</code>タグを、ヘッダーの後に読み込み中の行を加え、商品一覧が届くまでショップを隠します。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;body&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading"&gt;&lt;/wcs-fetch&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;!-- … --&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;</code></pre>
+      </div>
+      <p lang="en">Nothing else changes: not the catalog template, not <code>products.*.matches</code>, not <code>addToCart</code>.</p>
+      <p lang="ja">ほかは何も変わりません。商品一覧のテンプレートも、<code>products.*.matches</code>も、<code>addToCart</code>もそのままです。</p>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">A tag with properties</span><span lang="ja">プロパティを持つタグ</span></h3>
+      <p lang="en"><code>&lt;wcs-fetch&gt;</code> is an element like <code>&lt;input&gt;</code>: you configure it with attributes and bind what changes. Its <code>url</code> attribute says what to load, and it loads as soon as it is on the page. Two of its properties are outputs: <code>value</code>, the parsed JSON once the response arrives, and <code>loading</code>, <code>true</code> while the request is in flight. <code>value: catalog</code> carries the first into state the way <code>value: query</code> carried the search box in step 6; the element announces each change with an event, and <code>data-wcs</code> listens. The tag shows nothing itself &mdash; it is plumbing, written in HTML.</p>
+      <p lang="ja"><code>&lt;wcs-fetch&gt;</code>は<code>&lt;input&gt;</code>と同じような要素です。属性で設定し、変わるものをバインドします。<code>url</code>属性が読むものを決め、ページに置かれるとすぐに読み込みます。プロパティのうち2つは出力です。<code>value</code>は応答が届いたときのパース済みのJSON、<code>loading</code>はリクエストの間<code>true</code>になります。<code>value: catalog</code>は、ステップ6で<code>value: query</code>が検索欄を運んだのと同じように、前者をstateへ運びます。要素は変化のたびにイベントで知らせ、<code>data-wcs</code>がそれを聞いています。タグ自体は何も表示しません。HTMLで書いた配管です。</p>
+
+      <h3><span lang="en">A getter in front of the data</span><span lang="ja">データの前に置いたgetter</span></h3>
+      <p lang="en"><code>products</code> used to be data; now it is a getter that returns <code>catalog</code>, or an empty list until there is one. The rest of the page didn't notice: <code>for: products</code>, the row getter <code>products.*.matches</code> and <code>this.products[index]</code> in <code>addToCart</code> read a path, and a path doesn't care whether its value is stored or computed. The <code>?? []</code> matters: <code>catalog</code> is <code>null</code> before the response &mdash; and, in the next step, after a failed one &mdash; and the getter keeps that <code>null</code> away from everything that expects a list.</p>
+      <p lang="ja"><code>products</code>はデータでしたが、<code>catalog</code>を返す(まだ無ければ空のリストを返す)getterになりました。ページの残りはそれに気づいていません。<code>for: products</code>も、行getterの<code>products.*.matches</code>も、<code>addToCart</code>の<code>this.products[index]</code>もパスを読んでいて、パスはその値が保存されたものか計算されたものかを問わないからです。<code>?? []</code>には意味があります。<code>catalog</code>は応答の前(次のステップでは、失敗した後も)<code>null</code>で、getterがその<code>null</code>を、リストを期待するすべての場所から遠ざけます。</p>
+
+      <h3><span lang="en">Show the shop when there is something to show</span><span lang="ja">見せるものがあるときにショップを見せる</span></h3>
+      <p lang="en">Before the response, the catalog is empty, so “No products match.” would show. <code>catalogReady</code> is <code>true</code> once <code>catalog</code> holds a list, and <code>hidden: catalogReady|not</code> keeps the whole shop out of sight until then. The loading line does the opposite with <code>loading</code>. Neither needs code that runs at the right moment: each is a value derived from state, and the page follows.</p>
+      <p lang="ja">応答の前は商品一覧が空なので、「No products match.」が出てしまいます。<code>catalogReady</code>は<code>catalog</code>がリストを持った時点で<code>true</code>になり、<code>hidden: catalogReady|not</code>はそれまでショップ全体を隠します。読み込み中の行は<code>loading</code>で逆のことをします。どちらにも、ちょうどよいときに実行するコードはいりません。それぞれstateから導いた値で、ページはそれに従います。</p>
+
+      <h3><span lang="en">Tell the checker the shape</span><span lang="ja">検査器に形を教える</span></h3>
+      <p lang="en">In step 7 the checker knew <code>.name</code> because it could read the products in your state. Now they are in a file the checker never sees. The two comments say what will arrive: <code>@typedef</code> names the shape of one product, and <code>@type {Product[] | null}</code> says <code>catalog</code> holds a list of them, or <code>null</code>. These are standard JSDoc &mdash; VS Code understands them too &mdash; and they change nothing at runtime. They need <code>@wcstack/lint</code> 4.0.2 or later.</p>
+      <p lang="ja">ステップ7で検査器が<code>.name</code>を知っていたのは、stateの中の商品を読めたからです。商品は今、検査器が見ることのないファイルの中にあります。2つのコメントが、何が届くかを伝えます。<code>@typedef</code>が商品1つの形に名前を付け、<code>@type {Product[] | null}</code>が<code>catalog</code>はそのリストか<code>null</code>を持つと言います。標準のJSDocで(VS Codeも理解します)、実行時には何も変えません。<code>@wcstack/lint</code> 4.0.2以降が必要です。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Watch the loading line. Open the browser's developer tools, set the network speed to “Slow 4G” on the Network tab, and reload: “Loading products…” stays for a moment, then the shop appears.</p>
+        <p lang="ja">読み込み中の行を見てみましょう。ブラウザの開発者ツールを開き、Networkタブで通信速度を「Slow 4G」にして再読み込みすると、「Loading products…」がしばらく表示されてからショップが現れます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Leaving out the type</span><span lang="ja">型を書かない</span></h3>
+        <p lang="en">The page runs the same without the <code>@type</code> line. The checker, though, now sees <code>catalog: null</code> and nothing else, and every field you read in a product card is unknown to it:</p>
+        <p lang="ja"><code>@type</code>の行がなくても、ページは同じように動きます。ただ検査器には<code>catalog: null</code>しか見えず、商品カードで読むフィールドはどれも知らないものになります。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">npx @wcstack/lint index.html</span></div>
+          <pre class="terminal">index.html:102:79 <span class="warn">warning</span> wcs/binding-path-missing Path ".stock" does not exist in the state definition (expanded: products.*.stock)
+index.html:103:37 <span class="warn">warning</span> wcs/binding-path-missing Path ".icon" does not exist in the state definition (expanded: products.*.icon)
+index.html:104:18 <span class="warn">warning</span> wcs/binding-path-missing Path ".name" does not exist in the state definition (expanded: products.*.name)
+<span class="dim">…</span>
+0 error(s), 7 warning(s), 0 info</pre>
+        </div>
+        <p lang="en">Seven warnings that are not mistakes hide the one that is. With the type, a typo such as <code>.nmae</code> is the only warning again.</p>
+        <p lang="ja">間違いではない7つの警告が、本当の間違い1つを隠してしまいます。型があれば、<code>.nmae</code>のような打ち間違いがまた唯一の警告になります。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">A relative URL in a page opened as a file</span><span lang="ja">ファイルとして開いたページで相対URL</span></h3>
+        <p lang="en">With <code>url="products.json"</code> and <code>index.html</code> opened by double-clicking, the page stays on “Loading products…” for an instant and then shows nothing: the browser refuses to let a file read another file, and says so in the console (Chrome: <code>URL scheme "file" is not supported</code>). Keep the full URL, or serve the folder.</p>
+        <p lang="ja"><code>url="products.json"</code>と書いて<code>index.html</code>をダブルクリックで開くと、ページは一瞬「Loading products…」になった後、何も表示しません。ブラウザがファイルからほかのファイルを読むことを拒み、そのことをコンソールに出します(Chromeでは<code>URL scheme "file" is not supported</code>)。完全なURLのままにするか、フォルダをサーバーで開きます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 8</span><span lang="ja">ステップ8</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      cart: [],
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading"&gt;&lt;/wcs-fetch&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="toolbar"&gt;
+      &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+      &lt;fieldset class="categories"&gt;
+        &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+    &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../07-lint/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">7. Check your page</span><span lang="ja">7. ページを検査する</span></span></a>
+      <a class="next" href="../09-retry/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">9. When loading fails</span><span lang="ja">9. 読み込みに失敗したら</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

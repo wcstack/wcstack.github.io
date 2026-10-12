@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="10. Keep only ids in the cart — wcstack tutorial" data-title-ja="10. カートにはIDと数量だけ — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10. Keep only ids in the cart — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 10: a cart line keeps the product id and the quantity; row getters look up the name and the price in the catalog, and the template does not change. / カートの行はIDと数量だけを持ち、名前と価格は行getterで商品一覧から引く。">
+  <meta property="og:title" content="10. Keep only ids in the cart — wcstack tutorial">
+  <meta property="og:description" content="A cart line keeps the product id and the quantity; row getters look up the rest in the catalog.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/10-lookup/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/10-lookup/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 2 · Step 3 of 5</span><span lang="ja">チュートリアル · Part 2 · ステップ 3/5</span></p>
+      <h1 class="page-title"><span lang="en">Keep only ids in the cart</span><span lang="ja">カートにはIDと数量だけ</span></h1>
+      <p class="lead" lang="en">Before the cart is kept across reloads, decide what it should remember. A line keeps the product's id and the quantity; the name and the price are looked up in the catalog whenever they are shown.</p>
+      <p class="lead" lang="ja">カートを再読み込みの後まで残す前に、カートが何を覚えるべきかを決めます。行が持つのは商品のIDと数量だけで、名前と価格は表示するたびに商品一覧から引きます。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../08-fetch/" class="done">8</a></li>
+        <li><a href="../09-retry/" class="done">9</a></li>
+        <li><a href="../10-lookup/" aria-current="page">10</a></li>
+        <li><a href="../11-storage/">11</a></li>
+        <li><a href="../12-lint/">12</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">Nothing on the page changed. What changed is what a line of the cart is made of: <code>{ id: 4, quantity: 2 }</code> instead of a copy of the product's name and price.</p>
+      <p lang="ja">ページは何も変わっていません。変わったのはカートの行の中身で、商品の名前と価格の写しの代わりに<code>{ id: 4, quantity: 2 }</code>を持ちます。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 10" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">In <code>addToCart</code>, a new line no longer copies the name and the price:</p>
+      <p lang="ja"><code>addToCart</code>で、新しい行に名前と価格を写すのをやめます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — addToCart</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">} else {
+  this.cart = this.cart.concat({ id: product.id, quantity: 1 });
+}</code></pre>
+      </div>
+      <p lang="en">And three row getters, before <code>"cart.*.lineTotal"</code>, put them back:</p>
+      <p lang="ja">代わりに、<code>"cart.*.lineTotal"</code>の前に置く3つの行getterがそれを取り戻します。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">get "cart.*.product"() {
+  const id = this["cart.*.id"];
+  return this.products.find(product =&gt; product.id === id);
+},
+get "cart.*.name"() {
+  return this["cart.*.product"]?.name ?? "…";
+},
+get "cart.*.price"() {
+  return this["cart.*.product"]?.price ?? 0;
+},
+get "cart.*.lineTotal"() {</code></pre>
+      </div>
+      <p lang="en">The cart template and <code>"cart.*.lineTotal"</code> stay as they are.</p>
+      <p lang="ja">カートのテンプレートと<code>"cart.*.lineTotal"</code>はそのままです。</p>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">A copy goes stale</span><span lang="ja">写しは古くなる</span></h3>
+      <p lang="en">The catalog lives in a file now, and a file changes: a price goes up, a name gets corrected. A line that copied the name and the price keeps the old ones. In the next step the cart outlives the page &mdash; a customer may come back days later &mdash; so this would really happen. Keep each fact in one place: the catalog knows the products, and the cart knows what the customer chose.</p>
+      <p lang="ja">商品一覧はファイルに移り、ファイルは変わります。価格が上がり、名前が直されます。名前と価格を写した行は、古いままです。次のステップでカートはページより長く生きる(お客さんが何日も後に戻ってくるかもしれない)ので、これは実際に起こります。1つの事実は1か所に置きましょう。商品を知っているのは商品一覧で、カートが知っているのはお客さんが選んだものです。</p>
+
+      <h3><span lang="en">The template can't tell</span><span lang="ja">テンプレートには区別がつかない</span></h3>
+      <p lang="en"><code>{{ .name }}</code> in a cart row used to read a field of the line; now it reads the getter <code>"cart.*.name"</code>. <code>"cart.*.lineTotal"</code> reads <code>this["cart.*.price"]</code> the same way. Neither changed &mdash; the idea of step 8's <code>products</code> getter, one level down: a path is a name for a value, and whether the value is stored or computed is the state's business.</p>
+      <p lang="ja">カートの行の<code>{{ .name }}</code>は、行のフィールドを読んでいましたが、今はgetterの<code>"cart.*.name"</code>を読みます。<code>"cart.*.lineTotal"</code>も同じように<code>this["cart.*.price"]</code>を読みます。どちらも変わっていません。ステップ8の<code>products</code>のgetterと同じ考え方を、1段下で使っています。パスは値の名前で、値が保存されたものか計算されたものかはstateの側の事情です。</p>
+
+      <h3><span lang="en">A row getter that reads another list</span><span lang="ja">別のリストを読む行getter</span></h3>
+      <p lang="en"><code>"cart.*.product"</code> finds the product with the line's id. It reads <code>this.products</code>, so it depends on the catalog: when the catalog arrives or changes, every line looks its product up again. <code>?.</code> and <code>??</code> cover a line whose product isn't known &mdash; before the catalog arrives, or after a product is removed from the file &mdash; with “…” and a price of 0 instead of an error.</p>
+      <p lang="ja"><code>"cart.*.product"</code>は、行のIDを持つ商品を探します。<code>this.products</code>を読むので、商品一覧に依存します。商品一覧が届いたり変わったりすると、どの行も商品を引き直します。<code>?.</code>と<code>??</code>は、商品が分からない行(商品一覧が届く前や、商品がファイルから消えた後)を、エラーではなく「…」と価格0で受け止めます。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Show the unit price on each line. After the name, add <code>&lt;span&gt;${{ .price|toFixed(2) }} each&lt;/span&gt;</code>: <code>.price</code> is the getter you just wrote, read like any other path.</p>
+        <p lang="ja">各行に単価を出してみましょう。名前の後に<code>&lt;span&gt;${{ .price|toFixed(2) }} each&lt;/span&gt;</code>を加えます。<code>.price</code>は今書いたgetterで、ほかのパスと同じように読めます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Reading through a product that isn't there</span><span lang="ja">無い商品の先を読む</span></h3>
+        <p lang="en">Write <code>return this["cart.*.product"].name;</code> without <code>?.</code> and this step still works: a line can only be added from the catalog, so its product is always found. From the next step on, though, the saved cart is restored before the catalog arrives. Then every line's name fails with <code>Cannot read properties of undefined (reading 'name')</code> in the console. Write the getter for the moment the data isn't there yet.</p>
+        <p lang="ja"><code>?.</code>を付けずに<code>return this["cart.*.product"].name;</code>と書いても、このステップは動きます。行は商品一覧からしか足せないので、商品は必ず見つかるからです。けれども次のステップからは、保存したカートが商品一覧より先に戻ってきます。そのとき、どの行の名前もコンソールに<code>Cannot read properties of undefined (reading 'name')</code>を出して失敗します。getterは、データがまだ無い瞬間のことも考えて書きます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 10</span><span lang="ja">ステップ10</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.product"() {
+        const id = this["cart.*.id"];
+        return this.products.find(product =&gt; product.id === id);
+      },
+      get "cart.*.name"() {
+        return this["cart.*.product"]?.name ?? "…";
+      },
+      get "cart.*.price"() {
+        return this["cart.*.product"]?.price ?? 0;
+      },
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="toolbar"&gt;
+      &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+      &lt;fieldset class="categories"&gt;
+        &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+    &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../09-retry/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">9. When loading fails</span><span lang="ja">9. 読み込みに失敗したら</span></span></a>
+      <a class="next" href="../11-storage/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">11. Keep the cart across reloads</span><span lang="ja">11. 再読み込みしてもカートを残す</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

@@ -149,20 +149,64 @@
       </ol>
     </section>
 
-    <section class="doc" id="later">
-      <h2><span lang="en">Coming next</span><span lang="ja">この先</span></h2>
-      <p lang="en">The same shop keeps growing. These parts are in preparation.</p>
-      <p lang="ja">同じショップを育て続けます。以下は準備中です。</p>
+    <section class="doc" id="part2">
+      <h2><span lang="en">Part 2 — Connect to the outside</span><span lang="ja">Part 2 — 外の世界とつなぐ</span></h2>
+      <p lang="en">Five steps that load the catalog from a JSON file and keep the cart across reloads and tabs. What you add are tags &mdash; <code>&lt;wcs-fetch&gt;</code> and <code>&lt;wcs-storage&gt;</code> &mdash; and a few getters; no <code>fetch()</code>, <code>localStorage</code> or <code>try</code> / <code>catch</code> in your code. Start from your page of step 6.</p>
+      <p lang="ja">商品一覧をJSONファイルから読み、カートを再読み込みやタブをまたいで残す5つのステップです。加えるのはタグ(<code>&lt;wcs-fetch&gt;</code>と<code>&lt;wcs-storage&gt;</code>)といくつかのgetterで、コードに<code>fetch()</code>・<code>localStorage</code>・<code>try</code> / <code>catch</code>は出てきません。ステップ6の自分のページから始めます。</p>
       <ol class="steps">
-        <li class="later"><a href="#later" tabindex="-1" aria-disabled="true">
-          <span class="num">2</span>
+        <li><a href="08-fetch/">
+          <span class="num">8</span>
           <span>
-            <span class="title"><span lang="en">Part 2 — Connect to the outside</span><span lang="ja">Part 2 — 外の世界とつなぐ</span></span>
-            <span class="desc" lang="en">Keep the cart across reloads and load the catalog from a JSON file &mdash; with tags, not new JavaScript.</span>
-            <span class="desc" lang="ja">再読み込みしてもカートを保ち、JSONファイルから商品一覧を読み込む。増えるのはタグで、新しいJavaScriptではない。</span>
-            <span class="chips"><code>&lt;wcs-storage&gt;</code><code>&lt;wcs-fetch&gt;</code></span>
+            <span class="title"><span lang="en">Load the catalog from a file</span><span lang="ja">商品一覧をファイルから読む</span></span>
+            <span class="desc" lang="en">A tag loads the products into state; a getter in front of them keeps the rest of the page unchanged.</span>
+            <span class="desc" lang="ja">タグが商品をstateに読み込み、その前に置いたgetterがページの残りをそのままに保つ。</span>
+            <span class="chips"><code>&lt;wcs-fetch&gt;</code><code>value:</code><code>loading:</code><code>@typedef</code></span>
           </span>
         </a></li>
+        <li><a href="09-retry/">
+          <span class="num">9</span>
+          <span>
+            <span class="title"><span lang="en">When loading fails</span><span lang="ja">読み込みに失敗したら</span></span>
+            <span class="desc" lang="en">Show the error and try again &mdash; by binding an output and writing an input.</span>
+            <span class="desc" lang="ja">エラーを表示し、もう一度試す。出力をバインドし、入力に書くだけで。</span>
+            <span class="chips"><code>error:</code><code>trigger:</code></span>
+          </span>
+        </a></li>
+        <li><a href="10-lookup/">
+          <span class="num">10</span>
+          <span>
+            <span class="title"><span lang="en">Keep only ids in the cart</span><span lang="ja">カートにはIDと数量だけ</span></span>
+            <span class="desc" lang="en">A line remembers what the customer chose; row getters look up the rest in the catalog.</span>
+            <span class="desc" lang="ja">行はお客さんが選んだものだけを覚え、残りは行getterで商品一覧から引く。</span>
+            <span class="chips"><code>get "cart.*.product"()</code><code>?.</code></span>
+          </span>
+        </a></li>
+        <li><a href="11-storage/">
+          <span class="num">11</span>
+          <span>
+            <span class="title"><span lang="en">Keep the cart across reloads</span><span lang="ja">再読み込みしてもカートを残す</span></span>
+            <span class="desc" lang="en">Bind a getter that reads every line, and let the stored cart win at load.</span>
+            <span class="desc" lang="ja">すべての行を読むgetterをバインドし、読み込み時には保存済みのカートを勝たせる。</span>
+            <span class="chips"><code>&lt;wcs-storage&gt;</code><code>#init=element</code><code>get / set</code></span>
+          </span>
+        </a></li>
+        <li><a href="12-lint/">
+          <span class="num">12</span>
+          <span>
+            <span class="title"><span lang="en">Check the page again</span><span lang="ja">もう一度ページを検査する</span></span>
+            <span class="desc" lang="en">The mistakes of Part 2 lose data after a reload; the checker reports them before.</span>
+            <span class="desc" lang="ja">Part 2の間違いは再読み込みの後でデータを失う。検査器はその前に報告する。</span>
+            <span class="chips"><code>wcs/input-nested-write</code><code>wcs/storage-init-seed</code></span>
+          </span>
+        </a></li>
+      </ol>
+    </section>
+
+    <section class="doc" id="later">
+      <h2><span lang="en">Coming next</span><span lang="ja">この先</span></h2>
+      <p lang="en">The same shop keeps growing. This part is in preparation.</p>
+      <p lang="ja">同じショップを育て続けます。以下は準備中です。</p>
+      <ol class="steps">
         <li class="later"><a href="#later" tabindex="-1" aria-disabled="true">
           <span class="num">3</span>
           <span>

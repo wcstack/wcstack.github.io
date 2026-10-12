@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="11. Keep the cart across reloads — wcstack tutorial" data-title-ja="11. 再読み込みしてもカートを残す — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>11. Keep the cart across reloads — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 11: a <wcs-storage> tag keeps the cart in localStorage — restored on reload and shared between tabs. Bind a getter that reads every line, and let the stored value win at load with #init=element. / <wcs-storage>でカートをlocalStorageに残す。">
+  <meta property="og:title" content="11. Keep the cart across reloads — wcstack tutorial">
+  <meta property="og:description" content="A <wcs-storage> tag keeps the cart in localStorage — restored on reload and shared between tabs.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/11-storage/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/11-storage/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 2 · Step 4 of 5</span><span lang="ja">チュートリアル · Part 2 · ステップ 4/5</span></p>
+      <h1 class="page-title"><span lang="en">Keep the cart across reloads</span><span lang="ja">再読み込みしてもカートを残す</span></h1>
+      <p class="lead" lang="en">A <code>&lt;wcs-storage&gt;</code> tag keeps the cart in the browser's <code>localStorage</code>: it comes back after a reload, and two tabs of the shop share it. The part to get right is what you bind to it.</p>
+      <p class="lead" lang="ja"><code>&lt;wcs-storage&gt;</code>タグで、カートをブラウザの<code>localStorage</code>に残します。再読み込みしても戻ってきて、ショップの2つのタブで共有されます。押さえどころは、そこに何をバインドするかです。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../08-fetch/" class="done">8</a></li>
+        <li><a href="../09-retry/" class="done">9</a></li>
+        <li><a href="../10-lookup/" class="done">10</a></li>
+        <li><a href="../11-storage/" aria-current="page">11</a></li>
+        <li><a href="../12-lint/">12</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">Two copies of this step's page, side by side. Add a product on one side, change a quantity on the other: each follows the other, through the <code>localStorage</code> they share &mdash; as two tabs of the shop would. Then reload this whole page: the cart is still there.</p>
+      <p lang="ja">このステップのページを2枚並べています。片方で商品を入れ、もう片方で数量を変えてみてください。共有する<code>localStorage</code>を通して、互いに追従します(ショップを2つのタブで開いたときと同じです)。それからこのページ全体を再読み込みすると、カートは残っています。</p>
+      <div class="demo-pair">
+        <div class="demo tall">
+          <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+          <iframe src="shop/" title="Little Roastery — step 11, first copy" loading="lazy"></iframe>
+        </div>
+        <div class="demo tall">
+          <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — the same page again</span><span lang="ja">ライブ — 同じページをもう1枚</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+          <iframe src="shop/" title="Little Roastery — step 11, second copy" loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Load the storage package:</p>
+      <p lang="ja">storageのパッケージを読み込みます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">new line</span><span lang="ja">1行追加</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/storage@4/auto"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <p lang="en">Add a row getter and a getter / setter pair before <code>retry</code>:</p>
+      <p lang="ja"><code>retry</code>の前に、行getterを1つと、getterとsetterの組を加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">get "cart.*.saved"() {
+  return { id: this["cart.*.id"], quantity: this["cart.*.quantity"] };
+},
+get savedCart() {
+  return this.$getAll("cart.*.saved", []);
+},
+set savedCart(lines) {
+  if (Array.isArray(lines)) this.cart = lines;
+},</code></pre>
+      </div>
+      <p lang="en">Add the tag after <code>&lt;wcs-fetch&gt;</code>:</p>
+      <p lang="ja"><code>&lt;wcs-fetch&gt;</code>の後にタグを加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;body&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;wcs-storage key="little-roastery-cart"
+  data-wcs="value#init=element: savedCart"&gt;&lt;/wcs-storage&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">An input whose value lives in <code>localStorage</code></span><span lang="ja">値が<code>localStorage</code>にある入力</span></h3>
+      <p lang="en"><code>&lt;wcs-storage&gt;</code> has one property that works both ways, <code>value</code>, like <code>value:</code> on an <code>&lt;input&gt;</code>. When the tag appears, it reads its <code>key</code> and announces what it found; when <code>value</code> is assigned, it saves it (as JSON). When another tab or frame of the same site saves the key, the new value arrives on its own &mdash; that is the browser's <code>storage</code> event, and it is why the two demos above follow each other.</p>
+      <p lang="ja"><code>&lt;wcs-storage&gt;</code>には両方向に働くプロパティ<code>value</code>が1つあり、<code>&lt;input&gt;</code>の<code>value:</code>と同じように振る舞います。タグが現れると<code>key</code>を読んで見つけたものを知らせ、<code>value</code>に代入されると(JSONとして)保存します。同じサイトの別のタブやフレームがそのキーに保存すると、新しい値がひとりでに届きます。ブラウザの<code>storage</code>イベントで、上の2つのデモが互いに追従するのはそのためです。</p>
+
+      <h3><span lang="en">Bind what to save, not the cart</span><span lang="ja">カートではなく、保存するものをバインドする</span></h3>
+      <p lang="en">A binding is re-applied when <em>its own path</em> is assigned. <code>this.cart = this.cart.concat(…)</code> assigns <code>cart</code>, but <code>this[`cart.${index}.quantity`] += 1</code> assigns a path <em>under</em> it, and a binding on <code>cart</code> never hears about that &mdash; bound to <code>cart</code>, the storage would miss every change of quantity. So the tag is bound to <code>savedCart</code>, a getter that reads each line's id and quantity by path, the way <code>itemCount</code> reads every quantity in step 5. Any change to any line re-evaluates it, the new array goes to <code>value</code>, and the tag saves it. The setter is the way back: a stored cart that arrives &mdash; at load, or from another tab &mdash; becomes <code>cart</code>.</p>
+      <p lang="ja">バインディングは、<em>自分のパス</em>に代入されたときに当て直されます。<code>this.cart = this.cart.concat(…)</code>は<code>cart</code>に代入しますが、<code>this[`cart.${index}.quantity`] += 1</code>はその<em>下</em>のパスに代入し、<code>cart</code>へのバインディングはそれを知りません。<code>cart</code>にバインドしたら、storageは数量の変化をすべて取りこぼします。だからタグは<code>savedCart</code>にバインドします。各行のIDと数量をパスで読むgetterで、ステップ5の<code>itemCount</code>がすべての数量を読むのと同じやり方です。どの行が変わっても評価し直され、新しい配列が<code>value</code>に渡り、タグがそれを保存します。setterは帰り道です。届いた保存済みのカート(読み込み時や、別のタブから)が<code>cart</code>になります。</p>
+
+      <h3><span lang="en">Who goes first: <code>#init=element</code></span><span lang="ja">どちらが先か: <code>#init=element</code></span></h3>
+      <p lang="en">At load two values meet: the cart in <code>localStorage</code>, and the one the state starts with &mdash; <code>savedCart</code> of an empty cart, <code>[]</code>. By default the state's value is written to the element first, and the empty cart would be saved over the stored one. <code>#init=element</code> makes the element win that first sync: the stored cart goes into the setter. After that, changes flow both ways as usual. On a first visit the key is empty, the element holds <code>null</code>, and the setter ignores anything that isn't an array.</p>
+      <p lang="ja">読み込み時には2つの値が出会います。<code>localStorage</code>の中のカートと、stateが最初に持つ値(空のカートの<code>savedCart</code>、つまり<code>[]</code>)です。既定ではstateの値が先に要素へ書かれ、空のカートが保存済みのカートの上に保存されてしまいます。<code>#init=element</code>は、最初の同期で要素を勝たせます。保存済みのカートがsetterに入ります。その後は、いつもどおり両方向に流れます。初めての訪問ではキーが空で、要素は<code>null</code>を持ち、setterは配列でないものを無視します。</p>
+      <p lang="en">The stored cart arrives at once; the catalog arrives later. In between, the header's count is already right &mdash; it reads only quantities &mdash; and the lines' names would be “…”, thanks to the <code>?.</code> of step 10.</p>
+      <p lang="ja">保存済みのカートはすぐに届き、商品一覧は後から届きます。その間もヘッダーの個数はもう正しく(数量しか読まないから)、行の名前はステップ10の<code>?.</code>のおかげで「…」になります。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Keep the chosen category for this tab. Add <code>get savedCategory() { return this.category; }</code> and <code>set savedCategory(value) { if (value) this.category = value; }</code> to the state, and <code>&lt;wcs-storage key="little-roastery-category" type="session" data-wcs="value#init=element: savedCategory"&gt;&lt;/wcs-storage&gt;</code> to the body. Pick Tea and reload: Tea is still picked. <code>type="session"</code> uses <code>sessionStorage</code>, which each tab keeps for itself.</p>
+        <p lang="ja">選んだカテゴリをこのタブの間だけ残してみましょう。stateに<code>get savedCategory() { return this.category; }</code>と<code>set savedCategory(value) { if (value) this.category = value; }</code>を、bodyに<code>&lt;wcs-storage key="little-roastery-category" type="session" data-wcs="value#init=element: savedCategory"&gt;&lt;/wcs-storage&gt;</code>を加えます。Teaを選んで再読み込みしても、Teaが選ばれたままです。<code>type="session"</code>は<code>sessionStorage</code>を使い、タブごとに別々に保たれます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Binding the cart itself</span><span lang="ja">カートそのものをバインドする</span></h3>
+        <p lang="en">With <code>data-wcs="value: cart"</code>, add House Blend twice: the page shows 2, and <code>localStorage</code> holds 1, because the second add wrote <code>cart.0.quantity</code>. Reload, and the cart is empty: without <code>#init=element</code>, the state's <code>[]</code> was saved over it. Nothing appears in the console. Step 12 shows the checker catching both.</p>
+        <p lang="ja"><code>data-wcs="value: cart"</code>にしてHouse Blendを2回入れると、ページは2を表示し、<code>localStorage</code>には1が入っています。2回目の追加は<code>cart.0.quantity</code>に書いたからです。再読み込みするとカートは空です。<code>#init=element</code>が無いので、stateの<code>[]</code>がその上に保存されました。コンソールには何も出ません。検査器が両方を見つけるところは、ステップ12で見せます。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Forgetting <code>#init=element</code></span><span lang="ja"><code>#init=element</code>を忘れる</span></h3>
+        <p lang="en">With <code>value: savedCart</code>, everything works until you reload: then the cart is empty, because <code>savedCart</code> of the starting empty cart was saved over the stored one. The checker can't see this one &mdash; it would have to know what a getter returns at startup. Test the way the demo above invites you to: add something, then reload.</p>
+        <p lang="ja"><code>value: savedCart</code>にすると、再読み込みするまでは問題なく動きます。再読み込みするとカートは空です。最初の空のカートの<code>savedCart</code>が、保存済みのカートの上に保存されたからです。これは検査器には見えません(getterが起動時に何を返すかを知る必要があるため)。上のデモが誘うとおりに試しましょう。何かを入れて、再読み込みします。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step &mdash; the finished shop of Part 2. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体で、Part 2のショップの完成形です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 11</span><span lang="ja">ステップ11</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/storage@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.product"() {
+        const id = this["cart.*.id"];
+        return this.products.find(product =&gt; product.id === id);
+      },
+      get "cart.*.name"() {
+        return this["cart.*.product"]?.name ?? "…";
+      },
+      get "cart.*.price"() {
+        return this["cart.*.product"]?.price ?? 0;
+      },
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      get "cart.*.saved"() {
+        return { id: this["cart.*.id"], quantity: this["cart.*.quantity"] };
+      },
+      get savedCart() {
+        return this.$getAll("cart.*.saved", []);
+      },
+      set savedCart(lines) {
+        if (Array.isArray(lines)) this.cart = lines;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+&lt;wcs-storage key="little-roastery-cart"
+  data-wcs="value#init=element: savedCart"&gt;&lt;/wcs-storage&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="toolbar"&gt;
+      &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+      &lt;fieldset class="categories"&gt;
+        &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+    &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../10-lookup/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">10. Keep only ids in the cart</span><span lang="ja">10. カートにはIDと数量だけ</span></span></a>
+      <a class="next" href="../12-lint/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">12. Check the page again</span><span lang="ja">12. もう一度ページを検査する</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

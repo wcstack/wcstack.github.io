@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="9. When loading fails — wcstack tutorial" data-title-ja="9. 読み込みに失敗したら — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>9. When loading fails — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 9: bind the error of <wcs-fetch> to show a message, and its trigger to retry — no try/catch. / <wcs-fetch>のerrorでメッセージを出し、triggerで再試行する。">
+  <meta property="og:title" content="9. When loading fails — wcstack tutorial">
+  <meta property="og:description" content="Bind the error of <wcs-fetch> to show a message, and its trigger to retry.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/09-retry/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/09-retry/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 2 · Step 2 of 5</span><span lang="ja">チュートリアル · Part 2 · ステップ 2/5</span></p>
+      <h1 class="page-title"><span lang="en">When loading fails</span><span lang="ja">読み込みに失敗したら</span></h1>
+      <p class="lead" lang="en">A file can be missing and a network can drop. Bind the error of <code>&lt;wcs-fetch&gt;</code> to say so, and its trigger to try again &mdash; without a <code>try</code> / <code>catch</code> in sight.</p>
+      <p class="lead" lang="ja">ファイルが無いこともあれば、回線が切れることもあります。<code>&lt;wcs-fetch&gt;</code>のerrorをバインドしてそれを伝え、triggerをバインドしてもう一度試します。<code>try</code> / <code>catch</code>はどこにも出てきません。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../08-fetch/" class="done">8</a></li>
+        <li><a href="../09-retry/" aria-current="page">9</a></li>
+        <li><a href="../10-lookup/">10</a></li>
+        <li><a href="../11-storage/">11</a></li>
+        <li><a href="../12-lint/">12</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">This copy of the page asks for a file that doesn't exist, so you can see the failure. Press “Try again”: the request runs again &mdash; “Loading products…” flashes &mdash; and fails again. <a href="shop/" target="_blank" rel="noopener">The page with the right URL ↗</a> looks like step 8.</p>
+      <p lang="ja">このページのコピーは存在しないファイルを読みに行くので、失敗の様子が見えます。「Try again」を押すと、リクエストがもう一度走り(「Loading products…」が一瞬出ます)、また失敗します。<a href="shop/" target="_blank" rel="noopener">正しいURLのページ ↗</a>はステップ8と同じに見えます。</p>
+      <div class="demo short">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page, with a missing file</span><span lang="ja">ライブ — このステップのページ(ファイルが無い場合)</span></span><a href="broken/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="broken/" title="Little Roastery — step 9, with a missing file" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Add two keys after <code>loading</code>:</p>
+      <p lang="ja"><code>loading</code>の後ろにキーを2つ加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">catalog: null,
+loading: false,
+loadError: null,
+reload: false,</code></pre>
+      </div>
+      <p lang="en">Add a method before <code>addToCart</code>:</p>
+      <p lang="ja"><code>addToCart</code>の前にメソッドを1つ加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">retry() {
+  this.reload = true;
+},
+addToCart(event, index) {</code></pre>
+      </div>
+      <p lang="en">Bind two more properties of <code>&lt;wcs-fetch&gt;</code>, and put an error line after the loading line:</p>
+      <p lang="ja"><code>&lt;wcs-fetch&gt;</code>のプロパティをさらに2つバインドし、読み込み中の行の後にエラーの行を置きます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;body&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+&lt;!-- … --&gt;
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">Three outputs, three keys</span><span lang="ja">3つの出力と3つのキー</span></h3>
+      <p lang="en">A request is in one of three conditions &mdash; on its way, failed, arrived &mdash; and <code>&lt;wcs-fetch&gt;</code> reports each as a property: <code>loading</code>, <code>error</code> and <code>value</code>. Each lands in its own key, and each line of the page reads one of them. When the file is missing, <code>error</code> becomes an error object (an HTTP error carries the status code) and <code>value</code> goes back to <code>null</code>, so <code>catalog</code> is <code>null</code>, the shop stays hidden and <code>products</code> is still an empty list. <code>hidden: loadError|not</code> shows the line while there is an error. When a later request succeeds, <code>error</code> is <code>null</code> again and the line goes away by itself.</p>
+      <p lang="ja">リクエストは3つの状態(届く途中・失敗・届いた)のどれかにあり、<code>&lt;wcs-fetch&gt;</code>はそれぞれをプロパティで知らせます。<code>loading</code>・<code>error</code>・<code>value</code>です。それぞれが自分のキーに入り、ページの各行はそのどれかを読みます。ファイルが無いと、<code>error</code>はエラーのオブジェクト(HTTPのエラーならステータスコードを持つ)になり、<code>value</code>は<code>null</code>に戻ります。だから<code>catalog</code>は<code>null</code>で、ショップは隠れたまま、<code>products</code>は空のリストのままです。<code>hidden: loadError|not</code>は、エラーがある間その行を表示します。後のリクエストが成功すると<code>error</code>は<code>null</code>に戻り、行はひとりでに消えます。</p>
+
+      <h3><span lang="en">A command written as a value</span><span lang="ja">値として書いた命令</span></h3>
+      <p lang="en"><code>trigger</code> is an input that means “run now”: writing <code>true</code> to it starts the request again. So <code>retry</code> only assigns <code>this.reload = true</code>, and <code>trigger: reload</code> carries it to the element. When the request is done, the element sets <code>trigger</code> back to <code>false</code> and announces it, which brings <code>reload</code> back to <code>false</code>, ready for the next press. Your code never holds the element or calls a method on it; it changes state, as everywhere else.</p>
+      <p lang="ja"><code>trigger</code>は「今実行して」を意味する入力で、<code>true</code>を書き込むとリクエストがもう一度始まります。だから<code>retry</code>は<code>this.reload = true</code>と代入するだけで、<code>trigger: reload</code>がそれを要素へ運びます。リクエストが終わると、要素は<code>trigger</code>を<code>false</code>に戻してそれを知らせ、<code>reload</code>も<code>false</code>に戻って、次に押されるのを待ちます。コードは要素をつかむことも、そのメソッドを呼ぶこともありません。ほかの場所と同じく、stateを変えるだけです。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Show the HTTP status in the message. Add <code>loadStatus: 0,</code> to the state, <code>status: loadStatus</code> to the bindings of <code>&lt;wcs-fetch&gt;</code>, and <code>(&lt;span data-wcs="textContent: loadStatus"&gt;&lt;/span&gt;)</code> after “Couldn't load the products.”. Change the URL to <code>…/no-such-file.json</code>: the message ends with <code>(404)</code>.</p>
+        <p lang="ja">メッセージにHTTPのステータスを出してみましょう。stateに<code>loadStatus: 0,</code>を、<code>&lt;wcs-fetch&gt;</code>のバインディングに<code>status: loadStatus</code>を、「Couldn't load the products.」の後に<code>(&lt;span data-wcs="textContent: loadStatus"&gt;&lt;/span&gt;)</code>を加えます。URLを<code>…/no-such-file.json</code>に変えると、メッセージの最後に<code>(404)</code>が付きます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Binding only <code>value</code></span><span lang="ja"><code>value</code>だけをバインドする</span></h3>
+        <p lang="en">That was the page of step 8. When the request fails, <code>value</code> goes back to <code>null</code> and the shop simply never appears &mdash; no message, nothing to press, and only the console knows why. Whenever you bind <code>value</code>, bind <code>error</code> too.</p>
+        <p lang="ja">それがステップ8のページでした。リクエストが失敗すると<code>value</code>は<code>null</code>に戻り、ショップは現れないままです。メッセージも押すものも無く、理由を知っているのはコンソールだけです。<code>value</code>をバインドするときは、<code>error</code>も必ずバインドします。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Starting the trigger at <code>true</code></span><span lang="ja">triggerを<code>true</code>で始める</span></h3>
+        <p lang="en"><code>reload: true</code> fires as soon as the binding is made, so the catalog is requested twice at startup. A trigger has no memory of what it was; any <code>true</code> it is given runs the request. The checker knows:</p>
+        <p lang="ja"><code>reload: true</code>はバインドした瞬間に発火するので、起動時に商品一覧を2回取りに行きます。triggerは前の値を覚えておらず、渡された<code>true</code>はどれもリクエストを実行します。検査器はこれを知っています。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">npx @wcstack/lint index.html</span></div>
+          <pre class="terminal">index.html:84:65 <span class="warn">warning</span> wcs/trigger-seeded-truthy The trigger-bound slot "reload" is seeded with true. trigger has no edge detection (any truthy write fires, and it bypasses manual), so it fires immediately at bind. Seed it with false
+
+0 error(s), 1 warning(s), 0 info</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step (with the right URL). <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体(正しいURLのもの)です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 9</span><span lang="ja">ステップ9</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="toolbar"&gt;
+      &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+      &lt;fieldset class="categories"&gt;
+        &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+    &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../08-fetch/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">8. Load the catalog from a file</span><span lang="ja">8. 商品一覧をファイルから読む</span></span></a>
+      <a class="next" href="../10-lookup/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">10. Keep only ids in the cart</span><span lang="ja">10. カートにはIDと数量だけ</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

@@ -12,12 +12,15 @@
  *     file, in order and contiguous, ignoring indentation. A line that is only
  *     "…", "// …" or "<!-- … -->" skips any number of lines of the file.
  *
- * Paths are relative to the page. Run after editing a demo or a page:
+ * Paths are relative to the page. A few demos are copies of another with a
+ * line changed (VARIANTS below); this script writes those too.
+ *
+ * Run after editing a demo or a page:
  *
  *   node scripts/build-tutorial.mjs           # write the includes, check the excerpts
  *   node scripts/build-tutorial.mjs --check   # change nothing; exit 1 if anything is stale
  */
-import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, statSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -59,6 +62,41 @@ function matches(excerpt, source) {
 const BLOCK = /(<code\b[^>]*\bdata-(include|excerpt)="([^"]+)"[^>]*>)([\s\S]*?)(<\/code>)/g;
 let problems = 0;
 let rewritten = 0;
+
+/**
+ * Demos written from another demo, so the two cannot drift: each is `from` with
+ * the `replace` pairs applied (every pair must match). Step 9 shows its error
+ * line live on a copy whose catalog URL does not exist.
+ */
+const VARIANTS = [
+  {
+    from: "09-retry/shop/index.html",
+    to: "09-retry/broken/index.html",
+    replace: [["/tutorial/data/products.json", "/tutorial/data/no-such-file.json"]],
+  },
+];
+
+for (const variant of VARIANTS) {
+  let text = readFileSync(path.join(tutorialRoot, variant.from), "utf8");
+  for (const [find, put] of variant.replace) {
+    if (!text.includes(find)) {
+      problems++;
+      console.error(`tutorial/${variant.to}: "${find}" is not in tutorial/${variant.from}`);
+    }
+    text = text.replaceAll(find, put);
+  }
+  const target = path.join(tutorialRoot, variant.to);
+  if (existsSync(target) && readFileSync(target, "utf8") === text) continue;
+  if (checkOnly) {
+    problems++;
+    console.error(`tutorial/${variant.to}: out of date with tutorial/${variant.from} — run node scripts/build-tutorial.mjs`);
+  } else {
+    mkdirSync(path.dirname(target), { recursive: true });
+    writeFileSync(target, text);
+    rewritten++;
+    console.log(`wrote tutorial/${variant.to}`);
+  }
+}
 
 for (const page of pages()) {
   const rel = path.relative(siteRoot, page).replaceAll("\\", "/");

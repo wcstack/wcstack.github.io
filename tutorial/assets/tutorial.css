@@ -191,6 +191,7 @@ pre.terminal .prompt { color: var(--text-dim); user-select: none; }
 pre.terminal .warn { color: var(--c-gold); }
 pre.terminal .err { color: var(--c-salmon); }
 pre.terminal .ok { color: var(--c-green); }
+pre.terminal .dim { color: var(--text-dim); }
 code[class*="language-"], pre[class*="language-"] { color: var(--text); text-shadow: none; background: none; }
 pre > code[class*="language-"] { padding: 0; }
 .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #5a6d84; font-style: italic; }
@@ -256,6 +257,9 @@ details.source summary:hover { color: var(--accent-hover); }
 .demo iframe { display: block; width: 100%; height: 520px; border: 0; }
 .demo.short iframe { height: 380px; }
 .demo.tall iframe { height: 720px; }
+/* two copies of the same page side by side (step 11: the cart they share) */
+.demo-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .demo-pair { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── Step list (index) ── */
 .steps { list-style: none; margin-top: 22px; display: grid; gap: 12px; }
