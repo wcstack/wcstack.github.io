@@ -208,8 +208,8 @@ addProduct(id) {
 
       <div class="mistake">
         <h3><span lang="en">The outlet away from the router</span><span lang="ja">ルーターから離れたoutlet</span></h3>
-        <p lang="en">The router looks for its outlet in one place: the element right after it. Put the router at the top of <code>&lt;body&gt;</code> and the outlet inside <code>&lt;main&gt;</code>, and the router makes an outlet of its own after itself: the pages appear above the header, and the outlet in <code>&lt;main&gt;</code> stays empty. Nothing in the console says so.</p>
-        <p lang="ja">ルーターがoutletを探すのは1か所、自分のすぐ後の要素だけです。ルーターを<code>&lt;body&gt;</code>の先頭に、outletを<code>&lt;main&gt;</code>の中に置くと、ルーターは自分の後ろに自前のoutletを作ります。ページはヘッダーの上に現れ、<code>&lt;main&gt;</code>の中のoutletは空のままです。コンソールには何も出ません。</p>
+        <p lang="en">The router looks for its outlet in one place: the element right after it. Put the router at the top of <code>&lt;body&gt;</code> and the outlet inside <code>&lt;main&gt;</code>, and the router makes an outlet of its own after itself: the pages appear above the header, and the outlet in <code>&lt;main&gt;</code> stays empty. Since 4.0.4 the router warns in the console (<code>[wcs/router-outlet-misplaced]</code>), and so does the checker.</p>
+        <p lang="ja">ルーターがoutletを探すのは1か所、自分のすぐ後の要素だけです。ルーターを<code>&lt;body&gt;</code>の先頭に、outletを<code>&lt;main&gt;</code>の中に置くと、ルーターは自分の後ろに自前のoutletを作ります。ページはヘッダーの上に現れ、<code>&lt;main&gt;</code>の中のoutletは空のままです。4.0.4からは、ルーターがコンソールで警告し(<code>[wcs/router-outlet-misplaced]</code>)、検査器も報告します。</p>
       </div>
 
       <div class="mistake">
