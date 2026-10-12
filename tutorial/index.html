@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="Build a shop with wcstack — tutorial" data-title-ja="wcstackでショップを作る — チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build a shop with wcstack — tutorial</title>
+  <meta name="description" content="A hands-on wcstack tutorial: build a small online shop — catalog, cart, totals, search — in one HTML file with @wcstack/state. No build tools, no npm install. In English and Japanese. / wcstackのチュートリアル。HTMLファイル1つで小さなショップを作る。">
+  <meta property="og:title" content="Build a shop with wcstack — tutorial">
+  <meta property="og:description" content="Build a small online shop — catalog, cart, totals, search — in one HTML file. No build tools, no npm install.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/tutorial.css">
+  <script src="assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../">Home</a>
+        <a href="./" class="active">Tutorial</a>
+        <a href="../state/">state</a>
+        <a href="../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial</span><span lang="ja">チュートリアル</span></p>
+      <h1 class="page-title"><span lang="en">Build a shop with wcstack</span><span lang="ja">wcstackでショップを作る</span></h1>
+      <p class="lead" lang="en">Build a small online shop &mdash; a product catalog, a cart with totals, search &mdash; in one HTML file, one step at a time. No build tools and no <code>npm install</code>: a text editor and a browser are all you need.</p>
+      <p class="lead" lang="ja">商品一覧、合計の出るカート、検索のある小さなオンラインショップを、HTMLファイル1つで一歩ずつ作ります。ビルドツールも<code>npm install</code>もいりません。必要なのはテキストエディタとブラウザだけです。</p>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">What you'll build</span><span lang="ja">作るもの</span></h2>
+      <p lang="en">This is the shop at the end of Part 1, running. Search, filter by category, add to the cart, change quantities &mdash; it is a single <code>index.html</code>.</p>
+      <p lang="ja">Part 1の終わりにできあがるショップが動いているところです。検索、カテゴリでの絞り込み、カートへの追加、数量の変更。これがすべて<code>index.html</code>1枚です。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — the finished shop of Part 1</span><span lang="ja">ライブ — Part 1の完成形</span></span><a href="06-search/shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="06-search/shop/" title="Little Roastery — the finished shop of Part 1" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="before">
+      <h2><span lang="en">Before you start</span><span lang="ja">始める前に</span></h2>
+      <ul class="list" lang="en">
+        <li><strong>A text editor and a modern browser.</strong> Each step is a single <code>index.html</code>. Save it and open it &mdash; double-clicking the file works, and so does any local server.</li>
+        <li><strong>HTML and a little JavaScript</strong>: objects, arrays, functions. No framework experience is needed, and none of it carries over by accident &mdash; wcstack has no virtual DOM, no hooks and no components to learn first.</li>
+        <li><strong>Node.js is optional.</strong> You need it only for the checker, <code>npx @wcstack/lint</code>, which step 7 introduces.</li>
+      </ul>
+      <ul class="list" lang="ja">
+        <li><strong>テキストエディタと最近のブラウザ。</strong>各ステップは<code>index.html</code>1枚です。保存して開くだけで、ファイルのダブルクリックでも、ローカルサーバーでも動きます。</li>
+        <li><strong>HTMLと少しのJavaScript</strong>(オブジェクト、配列、関数)。フレームワークの経験はいりません。仮想DOMもフックも、先に覚えるコンポーネントもありません。</li>
+        <li><strong>Node.jsは任意です。</strong>必要なのは、ステップ7で紹介する検査器<code>npx @wcstack/lint</code>を使うときだけです。</li>
+      </ul>
+    </section>
+
+    <section class="doc" id="how-to-read">
+      <h2><span lang="en">How each step works</span><span lang="ja">各ステップの読み方</span></h2>
+      <p lang="en">Every step starts with its page running live, so you see the goal before the code. Then come the code changes &mdash; only what changed, starting from your page of the previous step &mdash; and <em>How it works</em>, which explains the new ideas in a few paragraphs. <em>Try it</em> suggests one change to make yourself, and <em>Common mistakes</em> shows what goes wrong and how it looks. If you lose track, the complete file of each step is at the bottom of its page.</p>
+      <p lang="ja">どのステップも、そのページが動いている様子から始まるので、コードより先にゴールが見えます。続いてコードの変更(前のステップの自分のページからの差分だけ)と、新しい考え方を数段落で説明する「しくみ」があります。「やってみよう」は自分で試す変更を1つ挙げ、「よくある間違い」は何がどう壊れるかを見せます。迷ったら、各ページの最後にそのステップのファイル全体があります。</p>
+      <p lang="en">The text is in English and Japanese. Switch with <strong>EN / 日本語</strong> in the header; the code is the same in both.</p>
+      <p lang="ja">本文は英語と日本語で書かれています。ヘッダーの<strong>EN / 日本語</strong>で切り替えられます。コードはどちらも同じです。</p>
+    </section>
+
+    <section class="doc" id="part1">
+      <h2><span lang="en">Part 1 — The basics</span><span lang="ja">Part 1 — 基本</span></h2>
+      <p lang="en">Seven steps, with nothing but <code>@wcstack/state</code>. Each takes ten to fifteen minutes.</p>
+      <p lang="ja"><code>@wcstack/state</code>だけを使う7つのステップです。1つにつき10〜15分ほどです。</p>
+      <ol class="steps">
+        <li><a href="01-product/">
+          <span class="num">1</span>
+          <span>
+            <span class="title"><span lang="en">Show a product</span><span lang="ja">商品を1つ表示する</span></span>
+            <span class="desc" lang="en">One file, one script tag. Show a product from state and count clicks.</span>
+            <span class="desc" lang="ja">ファイル1つ、scriptタグ1つ。stateの商品を表示し、クリックを数える。</span>
+            <span class="chips"><code>&lt;wcs-state&gt;</code><code>data-wcs</code><code>textContent:</code><code>|toFixed</code><code>onclick:</code></span>
+          </span>
+        </a></li>
+        <li><a href="02-catalog/">
+          <span class="num">2</span>
+          <span>
+            <span class="title"><span lang="en">List the catalog</span><span lang="ja">商品一覧を並べる</span></span>
+            <span class="desc" lang="en">Repeat a card for every product and mark the one that is sold out.</span>
+            <span class="desc" lang="ja">商品ごとにカードを繰り返し、売り切れの商品に印を付ける。</span>
+            <span class="chips"><code>for:</code><code>.name</code><code>{{ }}</code><code>class.NAME:</code><code>hidden:</code><code>disabled:</code></span>
+          </span>
+        </a></li>
+        <li><a href="03-cart/">
+          <span class="num">3</span>
+          <span>
+            <span class="title"><span lang="en">Put products in the cart</span><span lang="ja">カートに商品を入れる</span></span>
+            <span class="desc" lang="en">Handlers learn which row was clicked; a list changes when you assign a new array.</span>
+            <span class="desc" lang="ja">ハンドラがどの行が押されたかを知る。リストは新しい配列を代入して変える。</span>
+            <span class="chips"><code>(event, index)</code><code>concat</code><code>cart.length</code></span>
+          </span>
+        </a></li>
+        <li><a href="04-quantity/">
+          <span class="num">4</span>
+          <span>
+            <span class="title"><span lang="en">Change quantities</span><span lang="ja">数量を変える</span></span>
+            <span class="desc" lang="en">Write to one cell with a path, and learn the one rule: assign to the path.</span>
+            <span class="desc" lang="ja">パスで1つのセルに書き込み、ただ1つの規則「パスに代入する」を学ぶ。</span>
+            <span class="chips"><code>cart.0.quantity</code><code>toSpliced</code><code>|le</code></span>
+          </span>
+        </a></li>
+        <li><a href="05-totals/">
+          <span class="num">5</span>
+          <span>
+            <span class="title"><span lang="en">Add up the cart</span><span lang="ja">カートを集計する</span></span>
+            <span class="desc" lang="en">Line totals, item count, shipping and total as getters; a message for the empty cart.</span>
+            <span class="desc" lang="ja">小計・品数・送料・合計をgetterで。空のカートにはメッセージを。</span>
+            <span class="chips"><code>get "cart.*.lineTotal"()</code><code>$getAll</code><code>if:</code><code>else:</code></span>
+          </span>
+        </a></li>
+        <li><a href="06-search/">
+          <span class="num">6</span>
+          <span>
+            <span class="title"><span lang="en">Search and filter</span><span lang="ja">検索と絞り込み</span></span>
+            <span class="desc" lang="en">Two-way bindings carry input into state; a getter on every product decides what shows.</span>
+            <span class="desc" lang="ja">双方向バインディングが入力をstateへ運び、各商品のgetterが表示を決める。</span>
+            <span class="chips"><code>value:</code><code>radio:</code><code>|not</code></span>
+          </span>
+        </a></li>
+        <li><a href="07-lint/">
+          <span class="num">7</span>
+          <span>
+            <span class="title"><span lang="en">Check your page</span><span lang="ja">ページを検査する</span></span>
+            <span class="desc" lang="en">Catch mistyped paths, unknown filters and array mutations before you reload.</span>
+            <span class="desc" lang="ja">パスの打ち間違い、存在しないフィルタ、配列の破壊的変更を、再読み込みの前に見つける。</span>
+            <span class="chips"><code>npx @wcstack/lint</code><code>wcstack-intellisense</code></span>
+          </span>
+        </a></li>
+      </ol>
+    </section>
+
+    <section class="doc" id="later">
+      <h2><span lang="en">Coming next</span><span lang="ja">この先</span></h2>
+      <p lang="en">The same shop keeps growing. These parts are in preparation.</p>
+      <p lang="ja">同じショップを育て続けます。以下は準備中です。</p>
+      <ol class="steps">
+        <li class="later"><a href="#later" tabindex="-1" aria-disabled="true">
+          <span class="num">2</span>
+          <span>
+            <span class="title"><span lang="en">Part 2 — Connect to the outside</span><span lang="ja">Part 2 — 外の世界とつなぐ</span></span>
+            <span class="desc" lang="en">Keep the cart across reloads and load the catalog from a JSON file &mdash; with tags, not new JavaScript.</span>
+            <span class="desc" lang="ja">再読み込みしてもカートを保ち、JSONファイルから商品一覧を読み込む。増えるのはタグで、新しいJavaScriptではない。</span>
+            <span class="chips"><code>&lt;wcs-storage&gt;</code><code>&lt;wcs-fetch&gt;</code></span>
+          </span>
+        </a></li>
+        <li class="later"><a href="#later" tabindex="-1" aria-disabled="true">
+          <span class="num">3</span>
+          <span>
+            <span class="title"><span lang="en">Part 3 — Grow into an app</span><span lang="ja">Part 3 — アプリに育てる</span></span>
+            <span class="desc" lang="en">Product pages with a router, components, tests, and publishing with pinned versions.</span>
+            <span class="desc" lang="ja">ルーターで商品ページを作り、部品に分け、テストし、バージョンを固定して公開する。</span>
+            <span class="chips"><code>&lt;wcs-router&gt;</code><code>@wcstack/testing</code><code>SRI</code></span>
+          </span>
+        </a></li>
+      </ol>
+      <p lang="en">Looking for every option rather than a path through them? The <a href="../state/">state page</a> is the complete reference.</p>
+      <p lang="ja">道筋よりも、すべての機能の一覧が欲しいときは、<a href="../state/">stateのページ</a>が完全なリファレンスです。</p>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../">Home</a>
+        <a href="../state/">state docs</a>
+        <a href="../signals/">signals docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

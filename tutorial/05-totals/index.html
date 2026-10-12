@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="5. Add up the cart — wcstack tutorial" data-title-ja="5. カートを集計する — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5. Add up the cart — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 5: derived values as getters — a path getter on every cart line, $getAll to sum a column, shipping and total — plus if: / else: for the empty cart. / getterで合計を出し、if:/else:で空のカートを表示する。">
+  <meta property="og:title" content="5. Add up the cart — wcstack tutorial">
+  <meta property="og:description" content="Line totals, item count, shipping and total as getters, and if: / else: for the empty cart.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/05-totals/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/05-totals/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 1 · Step 5 of 7</span><span lang="ja">チュートリアル · Part 1 · ステップ 5/7</span></p>
+      <h1 class="page-title"><span lang="en">Add up the cart</span><span lang="ja">カートを集計する</span></h1>
+      <p class="lead" lang="en">Line totals, the item count, shipping and the total are all derived from the cart. You write each one once, as a getter, and wcstack keeps them current. The cart also learns to say when it is empty.</p>
+      <p class="lead" lang="ja">行ごとの小計、品数、送料、合計は、どれもカートから導かれる値です。それぞれをgetterとして1度書けば、wcstackが最新に保ちます。カートが空のときの表示も加えます。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../01-product/" class="done">1</a></li>
+        <li><a href="../02-catalog/" class="done">2</a></li>
+        <li><a href="../03-cart/" class="done">3</a></li>
+        <li><a href="../04-quantity/" class="done">4</a></li>
+        <li><a href="../05-totals/" aria-current="page">5</a></li>
+        <li><a href="../06-search/">6</a></li>
+        <li><a href="../07-lint/">7</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">The badge now counts items, not lines. Shipping is $5 until the subtotal reaches $50; then it's free and the hint disappears.</p>
+      <p lang="ja">バッジは行数ではなく品数を数えるようになります。送料は小計が$50に届くまで$5で、届くと無料になり、案内の行が消えます。</p>
+      <div class="demo">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 5" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Add five getters to the state, after <code>cart: []</code>. The handlers stay as they were.</p>
+      <p lang="ja">stateの<code>cart: []</code>の後ろにgetterを5つ加えます。ハンドラはそのままです。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">get "cart.*.lineTotal"() {
+  return this["cart.*.price"] * this["cart.*.quantity"];
+},
+get itemCount() {
+  return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+},
+get subtotal() {
+  return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+},
+get shipping() {
+  return this.subtotal &gt;= 50 ? 0 : 5;
+},
+get total() {
+  return this.subtotal + this.shipping;
+},</code></pre>
+      </div>
+      <p lang="en">The badge reads <code>itemCount</code>:</p>
+      <p lang="ja">バッジは<code>itemCount</code>を読みます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;header&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;</code></pre>
+      </div>
+      <p lang="en">In the cart panel, the list goes into an <code>if:</code> / <code>else:</code> pair, each line shows <code>.lineTotal</code>, and the totals follow the list:</p>
+      <p lang="ja">カートの欄では、一覧を<code>if:</code> / <code>else:</code>の組に入れ、各行に<code>.lineTotal</code>を表示し、一覧の後ろに合計を置きます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;aside class="cart"&gt;</span><span class="tag"><span lang="en">replaces the panel</span><span lang="ja">欄を置き換え</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;aside class="cart"&gt;
+  &lt;h2&gt;Cart&lt;/h2&gt;
+  &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+    &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+  &lt;/template&gt;
+  &lt;template data-wcs="else:"&gt;
+    &lt;ul class="cart-lines"&gt;
+      &lt;template data-wcs="for: cart"&gt;
+        &lt;li&gt;
+          &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+          &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+          &lt;!-- … --&gt;
+        &lt;/li&gt;
+      &lt;/template&gt;
+    &lt;/ul&gt;
+    &lt;dl class="totals"&gt;
+      &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+      &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+      &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+  &lt;/template&gt;
+&lt;/aside&gt;</code></pre>
+      </div>
+      <p lang="en"><code>&lt;!-- … --&gt;</code> stands for the stepper and the Remove button of step 4, unchanged.</p>
+      <p lang="ja"><code>&lt;!-- … --&gt;</code>の部分は、ステップ4の増減ボタンとRemoveボタンのまま変わりません。</p>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">A path getter adds a property to every line</span><span lang="ja">パスgetterはすべての行にプロパティを足す</span></h3>
+      <p lang="en"><code>get "cart.*.lineTotal"()</code> is a getter whose name is a path with <code>*</code>. It defines <code>lineTotal</code> on every element of <code>cart</code>. Inside it, <code>this["cart.*.price"]</code> and <code>this["cart.*.quantity"]</code> are the price and quantity of the line being computed. The markup reads the result like stored data, <code>{{ .lineTotal }}</code>, and never knows it is computed.</p>
+      <p lang="ja"><code>get "cart.*.lineTotal"()</code>は、名前が<code>*</code>を含むパスになっているgetterです。<code>cart</code>のすべての要素に<code>lineTotal</code>を定義します。中の<code>this["cart.*.price"]</code>と<code>this["cart.*.quantity"]</code>は、計算している行の価格と数量です。マークアップは結果を保存されたデータと同じように<code>{{ .lineTotal }}</code>で読み、それが計算値だとは知りません。</p>
+
+      <h3><span lang="en"><code>$getAll</code> collects a column</span><span lang="ja"><code>$getAll</code>は列を集める</span></h3>
+      <p lang="en"><code>this.$getAll("cart.*.quantity", [])</code> returns the quantity of every line as an array; the <code>[]</code> means “all lines”. <code>reduce</code> adds them up. <code>subtotal</code> does the same over <code>lineTotal</code> &mdash; a getter can read other getters.</p>
+      <p lang="ja"><code>this.$getAll("cart.*.quantity", [])</code>は、すべての行の数量を配列で返します。<code>[]</code>は「すべての行」という意味です。それを<code>reduce</code>で足し合わせます。<code>subtotal</code>は同じことを<code>lineTotal</code>に対して行います。getterはほかのgetterを読めます。</p>
+
+      <h3><span lang="en">Only what changed is recomputed</span><span lang="ja">変わったところだけ計算し直す</span></h3>
+      <p lang="en">wcstack records which paths each getter read. Press + on one line, and that line's <code>lineTotal</code> is recomputed, then <code>itemCount</code>, <code>subtotal</code>, <code>shipping</code> and <code>total</code>; the other lines' totals come from the cache. You never list dependencies yourself.</p>
+      <p lang="ja">wcstackは、各getterがどのパスを読んだかを記録しています。ある行で+を押すと、その行の<code>lineTotal</code>が計算し直され、続いて<code>itemCount</code>・<code>subtotal</code>・<code>shipping</code>・<code>total</code>が計算し直されます。ほかの行の小計はキャッシュから使われます。依存関係を自分で書き並べることはありません。</p>
+
+      <h3><span lang="en">Filters or getters?</span><span lang="ja">フィルタかgetterか</span></h3>
+      <p lang="en">A filter takes one value and formats or tests it: <code>toFixed(2)</code>, <code>eq(0)</code>. Anything that combines values &mdash; price × quantity, a sum, a threshold &mdash; goes into a getter. Logic then lives in JavaScript, where you can read and test it, and <code>data-wcs</code> stays what it is: wiring between a path and an element.</p>
+      <p lang="ja">フィルタは1つの値を受け取って、整形したり判定したりします(<code>toFixed(2)</code>、<code>eq(0)</code>)。価格×数量、合計、しきい値のように値を組み合わせるものはgetterに書きます。そうするとロジックは読めてテストもできるJavaScriptの中に置かれ、<code>data-wcs</code>はパスと要素をつなぐ配線のままでいられます。</p>
+
+      <h3><span lang="en"><code>if:</code> and <code>else:</code></span><span lang="ja"><code>if:</code>と<code>else:</code></span></h3>
+      <p lang="en">A <code>&lt;template&gt;</code> with <code>if:</code> renders its content while the value is true; the <code>else:</code> template right after it renders the rest of the time. Here the empty message and the lines-with-totals take turns. Templates nest: the <code>for: cart</code> loop sits inside the <code>else:</code> branch.</p>
+      <p lang="ja"><code>if:</code>の付いた<code>&lt;template&gt;</code>は値が真の間だけ中身を描画し、直後の<code>else:</code>のテンプレートはそれ以外のときに描画されます。ここでは空のメッセージと、一覧と合計が入れ替わります。テンプレートは入れ子にでき、<code>for: cart</code>のループは<code>else:</code>の枝の中にあります。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Lower the free-shipping line: change <code>this.subtotal &gt;= 50</code> to <code>this.subtotal &gt;= 30</code>, and the hint text to match. Two House Blend and a Measuring Spoon ($34) now ship free. Only <code>shipping</code> changed; <code>total</code> followed on its own.</p>
+        <p lang="ja">送料無料の線を下げてみましょう。<code>this.subtotal &gt;= 50</code>を<code>this.subtotal &gt;= 30</code>にし、案内の文もそれに合わせます。House Blend 2つとMeasuring Spoon($34)が送料無料になります。変えたのは<code>shipping</code>だけで、<code>total</code>はひとりでについてきます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Expressions in bindings</span><span lang="ja">バインディングの中の式</span></h3>
+        <p lang="en"><code>{{ subtotal + shipping }}</code> is not an expression: a binding takes a path and filters, nothing else, so this is read as a path named <code>subtotal + shipping</code>, which does not exist. The checker reports it; the fix is a getter, like <code>total</code>.</p>
+        <p lang="ja"><code>{{ subtotal + shipping }}</code>は式ではありません。バインディングが受け取るのはパスとフィルタだけなので、これは<code>subtotal + shipping</code>という名前の(存在しない)パスとして読まれます。検査器が指摘します。直し方は<code>total</code>のようなgetterを書くことです。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">npx @wcstack/lint index.html</span></div>
+          <pre class="terminal"><span class="warn">warning</span> wcs/binding-path-missing Path "subtotal + shipping" does not exist in the state definition</pre>
+        </div>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Writing state in a getter</span><span lang="ja">getterの中でstateに書く</span></h3>
+        <p lang="en">A getter answers a question; it should not change the state. Keep assignments in methods like <code>addToCart</code>, and keep getters to reading and returning a value. Then a getter can run as often &mdash; or as rarely &mdash; as wcstack needs, without side effects.</p>
+        <p lang="ja">getterは問いに答えるもので、stateを変えるべきではありません。代入は<code>addToCart</code>のようなメソッドに置き、getterは読んで値を返すだけにします。そうしておけば、wcstackが必要なだけ(あるいは必要なときだけ)getterを実行しても、副作用は起きません。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 5</span><span lang="ja">ステップ5</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      products: [
+        { id: 1, name: "House Blend", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+        { id: 2, name: "Ethiopia Yirgacheffe", description: "Bright and floral, with jasmine and lemon.", price: 18, stock: 5, icon: "☕" },
+        { id: 3, name: "Colombia Supremo", description: "Nutty and smooth, with a cocoa finish.", price: 16, stock: 8, icon: "☕" },
+        { id: 4, name: "Sencha", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+        { id: 5, name: "Matcha", description: "Stone-ground, ceremonial grade.", price: 24, stock: 0, icon: "🍵" },
+        { id: 6, name: "Measuring Spoon", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+        { id: 7, name: "Milk Pitcher", description: "Stainless steel, 350 ml.", price: 15, stock: 4, icon: "🥛" }
+      ],
+      cart: [],
+
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;main class="shop"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../04-quantity/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">4. Change quantities</span><span lang="ja">4. 数量を変える</span></span></a>
+      <a class="next" href="../06-search/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">6. Search and filter</span><span lang="ja">6. 検索と絞り込み</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

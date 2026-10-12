@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="4. Change quantities — wcstack tutorial" data-title-ja="4. 数量を変える — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4. Change quantities — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 4: give each cart line a quantity, write to one cell with a path like cart.0.quantity, and learn the one rule of wcstack — assign to the path. / パスへの代入で数量を変える。">
+  <meta property="og:title" content="4. Change quantities — wcstack tutorial">
+  <meta property="og:description" content="Write to one cell with a path like cart.0.quantity — and see why assigning to the path is the rule.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/04-quantity/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/04-quantity/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 1 · Step 4 of 7</span><span lang="ja">チュートリアル · Part 1 · ステップ 4/7</span></p>
+      <h1 class="page-title"><span lang="en">Change quantities</span><span lang="ja">数量を変える</span></h1>
+      <p class="lead" lang="en">One line per product, with − and + buttons and a Remove link. On the way you'll meet the one rule of wcstack: <strong>assign to the path</strong>.</p>
+      <p class="lead" lang="ja">商品ごとに1行、−と+のボタンと削除リンクを付けます。その途中で、wcstackのただ1つの規則に出会います。<strong>パスに代入する</strong>ことです。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../01-product/" class="done">1</a></li>
+        <li><a href="../02-catalog/" class="done">2</a></li>
+        <li><a href="../03-cart/" class="done">3</a></li>
+        <li><a href="../04-quantity/" aria-current="page">4</a></li>
+        <li><a href="../05-totals/">5</a></li>
+        <li><a href="../06-search/">6</a></li>
+        <li><a href="../07-lint/">7</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">Add the same product twice: its line now shows 2. Use − and + to change the quantity, and Remove to take the line out.</p>
+      <p lang="ja">同じ商品を2回入れると、その行は2になります。−と+で数量を変え、Removeで行を取り除けます。</p>
+      <div class="demo">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 4" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Replace <code>addToCart</code> with the version below, and add three handlers for the cart lines. A new line now starts with <code>quantity: 1</code>.</p>
+      <p lang="ja"><code>addToCart</code>を下のものに置き換え、カートの行のためのハンドラを3つ加えます。新しい行は<code>quantity: 1</code>で始まります。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">replaces addToCart</span><span lang="ja">addToCartを置き換え</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">addToCart(event, index) {
+  const product = this.products[index];
+  const line = this.cart.findIndex(item =&gt; item.id === product.id);
+  if (line &gt;= 0) {
+    this[`cart.${line}.quantity`] += 1;
+  } else {
+    this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+  }
+},
+increase(event, index) {
+  this[`cart.${index}.quantity`] += 1;
+},
+decrease(event, index) {
+  this[`cart.${index}.quantity`] -= 1;
+},
+remove(event, index) {
+  this.cart = this.cart.toSpliced(index, 1);
+}</code></pre>
+      </div>
+      <p lang="en">Each cart line gets a stepper and a Remove button:</p>
+      <p lang="ja">カートの各行に、増減ボタンとRemoveボタンを付けます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;aside class="cart"&gt;</span><span class="tag"><span lang="en">replaces the &lt;li&gt;</span><span lang="ja">&lt;li&gt;を置き換え</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;li&gt;
+  &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+  &lt;span class="line-total"&gt;${{ .price|toFixed(2) }}&lt;/span&gt;
+  &lt;span class="stepper"&gt;
+    &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+    &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+    &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+  &lt;/span&gt;
+  &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+&lt;/li&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">A path can name one cell</span><span lang="ja">パスは1つのセルを名指せる</span></h3>
+      <p lang="en"><code>cart.0.quantity</code> is the quantity of the first cart line. The handlers build that path with a template literal &mdash; <code>`cart.${index}.quantity`</code> &mdash; and assign to it with <code>this[…] += 1</code>. Only the bindings that read that cell update: that line's number and its − button. The other lines are not touched.</p>
+      <p lang="ja"><code>cart.0.quantity</code>はカートの1行目の数量です。ハンドラはテンプレートリテラル(<code>`cart.${index}.quantity`</code>)でこのパスを組み立て、<code>this[…] += 1</code>で代入します。更新されるのはそのセルを読むバインディング、つまりその行の数字と−ボタンだけで、ほかの行には触れません。</p>
+
+      <h3><span lang="en">The rule: assign to the path</span><span lang="ja">規則:パスに代入する</span></h3>
+      <p lang="en"><code>this.cart[index].quantity += 1</code> looks like the same thing, but it is not. <code>this.cart</code> reads the path <code>cart</code> and hands you the plain array; <code>.quantity</code> is then changed directly on the object. No path was assigned, so nothing on the page updates.</p>
+      <p lang="ja"><code>this.cart[index].quantity += 1</code>は同じことに見えますが、違います。<code>this.cart</code>はパス<code>cart</code>を読んでふつうの配列を返し、<code>.quantity</code>はそのオブジェクトの上で直接書き換えられます。どのパスにも代入していないので、ページは何も更新されません。</p>
+      <div class="note warn">
+        <span class="callout-label"><span lang="en">Why it matters</span><span lang="ja">なぜ大事か</span></span>
+        <p lang="en">The object <em>did</em> change. The screen and the state now disagree, silently, until the next assignment that touches that line shows the hidden change all at once. Making <code>this.cart[index].quantity += 1</code> work too would look convenient, but then any line of code could change the screen, and you could no longer tell from the code where an update happens. In wcstack, an update is always an assignment to a path &mdash; <code>this.x = …</code> or <code>this["a.b"] = …</code> &mdash; so you can find every one of them.</p>
+        <p lang="ja">オブジェクトは<em>実際に</em>変わっています。画面とstateは黙ってずれたままになり、次にその行に触れる代入が来たとき、隠れていた変化が一度に現れます。<code>this.cart[index].quantity += 1</code>でも動くようにすれば便利に見えますが、そうするとどのコードでも画面を変えられることになり、どこで更新が起きるのかをコードから読み取れなくなります。wcstackでは更新は必ずパスへの代入(<code>this.x = …</code>または<code>this["a.b"] = …</code>)なので、すべての更新を見つけられます。</p>
+      </div>
+
+      <h3><span lang="en">Which index is which</span><span lang="ja">どのインデックスか</span></h3>
+      <p lang="en">The <code>index</code> a handler receives is the index in the loop the click came from. <code>addToCart</code> is clicked in the products loop, so its <code>index</code> is a product index; the cart line is looked up with <code>findIndex</code> and named explicitly, <code>`cart.${line}.quantity`</code>. <code>increase</code>, <code>decrease</code> and <code>remove</code> are clicked in the cart loop, so their <code>index</code> is the cart line.</p>
+      <p lang="ja">ハンドラが受け取る<code>index</code>は、クリックが起きたループでのインデックスです。<code>addToCart</code>は商品のループで押されるので、その<code>index</code>は商品のインデックスです。カートの行は<code>findIndex</code>で探し、<code>`cart.${line}.quantity`</code>と明示して名指します。<code>increase</code>・<code>decrease</code>・<code>remove</code>はカートのループで押されるので、その<code>index</code>がカートの行です。</p>
+
+      <h3><span lang="en">Removing a line</span><span lang="ja">行を取り除く</span></h3>
+      <p lang="en"><code>this.cart.toSpliced(index, 1)</code> returns a copy of the cart without that line, and assigning it removes the row. <code>disabled: .quantity|le(1)</code> stops − at 1, so a line never reaches 0; Remove is how it leaves.</p>
+      <p lang="ja"><code>this.cart.toSpliced(index, 1)</code>はその行を除いたカートのコピーを返し、それを代入すると行が消えます。<code>disabled: .quantity|le(1)</code>は−を1で止めるので、行の数量が0になることはありません。行を消すのはRemoveです。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">In <code>increase</code>, replace the path assignment with <code>this.cart[index].quantity += 1</code>. Reload, add Sencha, and press + twice: the number stays at 1. Now press Sencha's “Add to cart” &mdash; a real path assignment &mdash; and the line jumps to 4. Put the path assignment back.</p>
+        <p lang="ja"><code>increase</code>のパスへの代入を<code>this.cart[index].quantity += 1</code>に置き換えてみましょう。再読み込みしてSenchaを入れ、+を2回押しても、数字は1のままです。そこでSenchaの「Add to cart」(本物のパスへの代入)を押すと、行は一気に4になります。確かめたら、パスへの代入に戻してください。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Changing the object instead of the path</span><span lang="ja">パスではなくオブジェクトを変える</span></h3>
+        <p lang="en"><code>this.cart[index].quantity += 1</code>, <code>this.product.price = 9</code>, <code>Object.assign(this.cart[0], …)</code>: all of these change an object you read from the state, none of them assigns to a path. Write <code>this[`cart.${index}.quantity`] += 1</code>, <code>this["product.price"] = 9</code>, or assign a new array or object to the path above.</p>
+        <p lang="ja"><code>this.cart[index].quantity += 1</code>、<code>this.product.price = 9</code>、<code>Object.assign(this.cart[0], …)</code>。どれもstateから読んだオブジェクトを変えているだけで、パスには代入していません。<code>this[`cart.${index}.quantity`] += 1</code>や<code>this["product.price"] = 9</code>と書くか、上の階層のパスに新しい配列やオブジェクトを代入します。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Using the wrong loop's index</span><span lang="ja">別のループのインデックスを使う</span></h3>
+        <p lang="en"><code>this[`cart.${index}.quantity`] += 1</code> inside <code>addToCart</code> would add to the cart line at the <em>product's</em> position &mdash; a different line, or none. When a handler in one list changes another list, find the target by something it shares, like <code>id</code>.</p>
+        <p lang="ja"><code>addToCart</code>の中で<code>this[`cart.${index}.quantity`] += 1</code>と書くと、<em>商品の</em>位置にあるカートの行(別の行か、存在しない行)に足してしまいます。あるリストのハンドラが別のリストを変えるときは、<code>id</code>のように両方が持つもので相手を探します。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 4</span><span lang="ja">ステップ4</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      products: [
+        { id: 1, name: "House Blend", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+        { id: 2, name: "Ethiopia Yirgacheffe", description: "Bright and floral, with jasmine and lemon.", price: 18, stock: 5, icon: "☕" },
+        { id: 3, name: "Colombia Supremo", description: "Nutty and smooth, with a cocoa finish.", price: 16, stock: 8, icon: "☕" },
+        { id: 4, name: "Sencha", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+        { id: 5, name: "Matcha", description: "Stone-ground, ceremonial grade.", price: 24, stock: 0, icon: "🍵" },
+        { id: 6, name: "Measuring Spoon", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+        { id: 7, name: "Milk Pitcher", description: "Stainless steel, 350 ml.", price: 15, stock: 4, icon: "🥛" }
+      ],
+      cart: [],
+
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: cart.length"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;main class="shop"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;ul class="cart-lines"&gt;
+      &lt;template data-wcs="for: cart"&gt;
+        &lt;li&gt;
+          &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+          &lt;span class="line-total"&gt;${{ .price|toFixed(2) }}&lt;/span&gt;
+          &lt;span class="stepper"&gt;
+            &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+            &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+            &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+          &lt;/span&gt;
+          &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+        &lt;/li&gt;
+      &lt;/template&gt;
+    &lt;/ul&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../03-cart/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">3. Put products in the cart</span><span lang="ja">3. カートに商品を入れる</span></span></a>
+      <a class="next" href="../05-totals/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">5. Add up the cart</span><span lang="ja">5. カートを集計する</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

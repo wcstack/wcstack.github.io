@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="6. Search and filter — wcstack tutorial" data-title-ja="6. 検索と絞り込み — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6. Search and filter — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 6: two-way bindings (value:, radio:) carry input into state, and a path getter on every product decides whether it matches. / 双方向バインディングと行getterで商品を絞り込む。">
+  <meta property="og:title" content="6. Search and filter — wcstack tutorial">
+  <meta property="og:description" content="Two-way bindings carry the search box and category into state; a getter on every product decides whether it matches.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/06-search/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/06-search/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 1 · Step 6 of 7</span><span lang="ja">チュートリアル · Part 1 · ステップ 6/7</span></p>
+      <h1 class="page-title"><span lang="en">Search and filter</span><span lang="ja">検索と絞り込み</span></h1>
+      <p class="lead" lang="en">A search box and category buttons narrow the catalog as you type. Two-way bindings carry the input into state, and a getter on every product decides whether it matches.</p>
+      <p class="lead" lang="ja">検索欄とカテゴリのボタンで、入力に合わせて商品一覧を絞り込みます。双方向バインディングが入力をstateに運び、各商品のgetterが条件に合うかを決めます。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../01-product/" class="done">1</a></li>
+        <li><a href="../02-catalog/" class="done">2</a></li>
+        <li><a href="../03-cart/" class="done">3</a></li>
+        <li><a href="../04-quantity/" class="done">4</a></li>
+        <li><a href="../05-totals/" class="done">5</a></li>
+        <li><a href="../06-search/" aria-current="page">6</a></li>
+        <li><a href="../07-lint/">7</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">Type “sen” or pick Tea. Cards that don't match disappear, and “No products match.” appears when nothing is left. The cart works as before &mdash; add from a filtered list, too.</p>
+      <p lang="ja">「sen」と打つか、Teaを選んでみてください。合わないカードが消え、何も残らないと「No products match.」が出ます。カートはこれまでどおり動き、絞り込んだ一覧からも入れられます。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 6" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Give every product a <code>category</code> &mdash; <code>"coffee"</code>, <code>"tea"</code> or <code>"tools"</code>:</p>
+      <p lang="ja">各商品に<code>category</code>(<code>"coffee"</code>・<code>"tea"</code>・<code>"tools"</code>のどれか)を加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">products: [
+  { id: 1, name: "House Blend", category: "coffee", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+  // …
+  { id: 4, name: "Sencha", category: "tea", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+  // …
+  { id: 6, name: "Measuring Spoon", category: "tools", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+  // …
+],</code></pre>
+      </div>
+      <p lang="en">Then add the two inputs and two getters, after <code>cart: []</code>:</p>
+      <p lang="ja">続けて、<code>cart: []</code>の後ろに入力用のキー2つとgetter 2つを加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">new</span><span lang="ja">追加</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">query: "",
+category: "all",
+
+get "products.*.matches"() {
+  const query = this.query.trim().toLowerCase();
+  return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+    this["products.*.name"].toLowerCase().includes(query);
+},
+get matchCount() {
+  return this.$getAll("products.*.matches", []).filter(Boolean).length;
+},</code></pre>
+      </div>
+      <p lang="en">In the catalog section, put a toolbar above the grid, hide the cards that don't match, and add a message after the grid:</p>
+      <p lang="ja">商品一覧のセクションでは、グリッドの上にツールバーを置き、合わないカードを隠し、グリッドの後ろにメッセージを加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;section class="catalog"&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;h2&gt;Products&lt;/h2&gt;
+&lt;div class="toolbar"&gt;
+  &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+  &lt;fieldset class="categories"&gt;
+    &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+    &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+    &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+    &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+    &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+  &lt;/fieldset&gt;
+&lt;/div&gt;
+&lt;div class="grid"&gt;
+  &lt;template data-wcs="for: products"&gt;
+    &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+      &lt;!-- … --&gt;
+    &lt;/article&gt;
+  &lt;/template&gt;
+&lt;/div&gt;
+&lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">Two-way bindings</span><span lang="ja">双方向バインディング</span></h3>
+      <p lang="en">On an <code>&lt;input&gt;</code>, <code>value: query</code> works in both directions: every keystroke (the <code>input</code> event) writes the text to <code>query</code>, and assigning <code>query</code> in code writes it back into the box. <code>radio: category</code> binds a group of radio buttons to one value &mdash; the checked button's <code>value</code> &mdash; and checks the button whose <code>value</code> equals the state, which is why “All” starts checked. A <code>&lt;select&gt;</code> with <code>value:</code> and a checkbox with <code>checked:</code> work the same way.</p>
+      <p lang="ja"><code>&lt;input&gt;</code>の<code>value: query</code>は両方向に働きます。打鍵のたび(<code>input</code>イベント)に文字列を<code>query</code>へ書き込み、コードで<code>query</code>に代入すると入力欄に書き戻します。<code>radio: category</code>はラジオボタンの組を1つの値(チェックされたボタンの<code>value</code>)にバインドし、stateと<code>value</code>が等しいボタンにチェックを付けます。「All」が最初からチェックされているのはそのためです。<code>&lt;select&gt;</code>の<code>value:</code>やチェックボックスの<code>checked:</code>も同じように働きます。</p>
+
+      <h3><span lang="en">A row getter can read anything</span><span lang="ja">行getterは何でも読める</span></h3>
+      <p lang="en"><code>get "products.*.matches"()</code> combines the row's own <code>category</code> and <code>name</code> with the top-level <code>query</code> and <code>category</code>. wcstack records all of them as dependencies of every row, so a keystroke re-evaluates <code>matches</code> on each product, and only the <code>hidden</code> flags whose value changed are written to the page.</p>
+      <p lang="ja"><code>get "products.*.matches"()</code>は、行自身の<code>category</code>と<code>name</code>に、トップレベルの<code>query</code>と<code>category</code>を組み合わせます。wcstackはそのすべてを各行の依存として記録するので、1打鍵ごとに各商品の<code>matches</code>が評価し直され、値が変わった<code>hidden</code>だけがページに書き込まれます。</p>
+
+      <h3><span lang="en">Hide, don't rebuild</span><span lang="ja">作り直さずに隠す</span></h3>
+      <p lang="en"><code>hidden: .matches|not</code> hides the card when it doesn't match &mdash; <code>not</code> turns <code>true</code> into <code>false</code> and back. The cards stay in the page, so the <code>index</code> that <code>addToCart</code> receives still points into <code>products</code>, and the handler did not have to change. <code>matchCount</code> counts the matches with <code>$getAll</code>, and the message shows when it is 0.</p>
+      <p lang="ja"><code>hidden: .matches|not</code>は、条件に合わないカードを隠します(<code>not</code>は<code>true</code>と<code>false</code>を反転します)。カードはページに残っているので、<code>addToCart</code>が受け取る<code>index</code>は今も<code>products</code>のインデックスのままで、ハンドラを変える必要はありませんでした。<code>matchCount</code>は<code>$getAll</code>で一致した数を数え、それが0のときにメッセージを出します。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Search the descriptions too. Change the last line of <code>matches</code> to <code>(this["products.*.name"] + " " + this["products.*.description"]).toLowerCase().includes(query);</code> and type “lemon”: Ethiopia Yirgacheffe is found by its tasting notes.</p>
+        <p lang="ja">説明文も検索の対象にしてみましょう。<code>matches</code>の最後の行を<code>(this["products.*.name"] + " " + this["products.*.description"]).toLowerCase().includes(query);</code>に変えて「lemon」と打つと、Ethiopia Yirgacheffeが味の説明から見つかります。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">A filter on <code>for:</code></span><span lang="ja"><code>for:</code>にフィルタ</span></h3>
+        <p lang="en"><code>for:</code> takes no filters. A row is named by its position in the list it loops over, so the rows of a filtered copy would name other elements, and a write through a row would land on the wrong product. The page refuses to start, and the checker says why:</p>
+        <p lang="ja"><code>for:</code>はフィルタを取りません。行は回しているリストの中の位置で名指されるので、絞り込んだコピーの行は別の要素を指してしまい、行を通した書き込みが違う商品に届いてしまいます。ページは起動せず、検査器がその理由を示します。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">npx @wcstack/lint index.html</span></div>
+          <pre class="terminal"><span class="err">error</span> wcs/binding-syntax Binding syntax error (the runtime throws at load time): "for: products|not": "for:" takes no filters — a row is "&lt;path&gt;.&lt;index&gt;", so the rows of a filtered list would name other elements. Declare a getter that returns the filtered list and loop over it ("for: &lt;getter&gt;").</pre>
+        </div>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Numbers from inputs are strings</span><span lang="ja">入力から来る数値は文字列</span></h3>
+        <p lang="en"><code>value:</code> always writes a string. Bind a quantity box with <code>value: qty</code> and you get <code>"2"</code> &mdash; and <code>"2" + 1</code> is <code>"21"</code>. For numbers, bind <code>valueAsNumber: qty</code>, or convert on the way in with an input filter on the left side: <code>value|number: qty</code>.</p>
+        <p lang="ja"><code>value:</code>が書き込むのは常に文字列です。数量の欄を<code>value: qty</code>でバインドすると<code>"2"</code>が入り、<code>"2" + 1</code>は<code>"21"</code>になります。数値は<code>valueAsNumber: qty</code>でバインドするか、左辺に入力フィルタを付けて入口で変換します(<code>value|number: qty</code>)。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step &mdash; the finished shop of Part 1. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体で、Part 1のショップの完成形です。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 6</span><span lang="ja">ステップ6</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      products: [
+        { id: 1, name: "House Blend", category: "coffee", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+        { id: 2, name: "Ethiopia Yirgacheffe", category: "coffee", description: "Bright and floral, with jasmine and lemon.", price: 18, stock: 5, icon: "☕" },
+        { id: 3, name: "Colombia Supremo", category: "coffee", description: "Nutty and smooth, with a cocoa finish.", price: 16, stock: 8, icon: "☕" },
+        { id: 4, name: "Sencha", category: "tea", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+        { id: 5, name: "Matcha", category: "tea", description: "Stone-ground, ceremonial grade.", price: 24, stock: 0, icon: "🍵" },
+        { id: 6, name: "Measuring Spoon", category: "tools", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+        { id: 7, name: "Milk Pitcher", category: "tools", description: "Stainless steel, 350 ml.", price: 15, stock: 4, icon: "🥛" }
+      ],
+      cart: [],
+      query: "",
+      category: "all",
+
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      addToCart(event, index) {
+        const product = this.products[index];
+        const line = this.cart.findIndex(item =&gt; item.id === product.id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id: product.id, name: product.name, price: product.price, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;main class="shop"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="toolbar"&gt;
+      &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+      &lt;fieldset class="categories"&gt;
+        &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="hidden: .matches|not; class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+    &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../05-totals/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">5. Add up the cart</span><span lang="ja">5. カートを集計する</span></span></a>
+      <a class="next" href="../07-lint/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">7. Check your page</span><span lang="ja">7. ページを検査する</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

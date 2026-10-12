@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Little Roastery</title>
+  <link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css">
+  <script type="module" src="https://esm.run/@wcstack/state@4/auto"></script>
+</head>
+<body>
+
+<wcs-state>
+  <script type="module">
+    export default {
+      product: {
+        name: "House Blend",
+        description: "Chocolate, caramel, a hint of citrus.",
+        price: 14,
+        icon: "☕"
+      },
+      cartCount: 0,
+
+      addToCart() {
+        this.cartCount += 1;
+      }
+    };
+  </script>
+</wcs-state>
+
+<header class="shop-header">
+  <h1>Little Roastery</h1>
+  <p class="cart-badge">Cart: <span data-wcs="textContent: cartCount"></span></p>
+</header>
+
+<main class="shop">
+  <article class="card">
+    <div class="card-icon" data-wcs="textContent: product.icon"></div>
+    <h2 data-wcs="textContent: product.name"></h2>
+    <p data-wcs="textContent: product.description"></p>
+    <p class="price">$<span data-wcs="textContent: product.price|toFixed(2)"></span></p>
+    <button type="button" data-wcs="onclick: addToCart">Add to cart</button>
+  </article>
+</main>
+
+</body>
+</html>

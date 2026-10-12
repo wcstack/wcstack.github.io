@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="2. List the catalog — wcstack tutorial" data-title-ja="2. 商品一覧を並べる — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2. List the catalog — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 2: render a list with for: on a <template>, read row values with relative paths, and bind class, hidden and disabled with filters. / for:で商品一覧を描画する。">
+  <meta property="og:title" content="2. List the catalog — wcstack tutorial">
+  <meta property="og:description" content="Render a list with for: on a template and mark the sold-out product with class, hidden and disabled bindings.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/02-catalog/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/02-catalog/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 1 · Step 2 of 7</span><span lang="ja">チュートリアル · Part 1 · ステップ 2/7</span></p>
+      <h1 class="page-title"><span lang="en">List the catalog</span><span lang="ja">商品一覧を並べる</span></h1>
+      <p class="lead" lang="en">One product becomes seven. A <code>&lt;template&gt;</code> repeats the card for every product, and three bindings mark the one that is sold out.</p>
+      <p class="lead" lang="ja">商品が1つから7つになります。<code>&lt;template&gt;</code>が商品ごとにカードを繰り返し、3つのバインディングが売り切れの商品に印を付けます。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../01-product/" class="done">1</a></li>
+        <li><a href="../02-catalog/" aria-current="page">2</a></li>
+        <li><a href="../03-cart/">3</a></li>
+        <li><a href="../04-quantity/">4</a></li>
+        <li><a href="../05-totals/">5</a></li>
+        <li><a href="../06-search/">6</a></li>
+        <li><a href="../07-lint/">7</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">Seven cards from one template. Matcha is out of stock: its card is greyed out, carries a “Sold out” badge, and its button is disabled.</p>
+      <p lang="ja">1つのテンプレートから7枚のカードができます。Matchaは在庫切れなので、カードが灰色になり、「Sold out」のバッジが付き、ボタンが押せなくなっています。</p>
+      <div class="demo">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 2" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Start from your page of step 1. In the state, replace <code>product</code> with a list of <code>products</code>. Each product also gets an <code>id</code> and a <code>stock</code>.</p>
+      <p lang="ja">ステップ1のページから始めます。stateの<code>product</code>を、<code>products</code>のリストに置き換えます。各商品には<code>id</code>と<code>stock</code>(在庫数)も加えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;wcs-state&gt;</span><span class="tag"><span lang="en">replaces product</span><span lang="ja">productを置き換え</span></span></div>
+        <pre><code class="language-javascript" data-excerpt="shop/index.html">products: [
+  { id: 1, name: "House Blend", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+  { id: 2, name: "Ethiopia Yirgacheffe", description: "Bright and floral, with jasmine and lemon.", price: 18, stock: 5, icon: "☕" },
+  { id: 3, name: "Colombia Supremo", description: "Nutty and smooth, with a cocoa finish.", price: 16, stock: 8, icon: "☕" },
+  { id: 4, name: "Sencha", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+  { id: 5, name: "Matcha", description: "Stone-ground, ceremonial grade.", price: 24, stock: 0, icon: "🍵" },
+  { id: 6, name: "Measuring Spoon", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+  { id: 7, name: "Milk Pitcher", description: "Stainless steel, 350 ml.", price: 15, stock: 4, icon: "🥛" }
+],
+cartCount: 0,</code></pre>
+      </div>
+      <p lang="en">In the markup, replace the single card inside <code>&lt;main&gt;</code> with a section that loops over the list:</p>
+      <p lang="ja">マークアップでは、<code>&lt;main&gt;</code>の中の1枚のカードを、リストを回すセクションに置き換えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;main&gt;</span><span class="tag"><span lang="en">replaces the card</span><span lang="ja">カードを置き換え</span></span></div>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;main class="shop"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/main&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en"><code>for:</code> repeats a template</span><span lang="ja"><code>for:</code>はテンプレートを繰り返す</span></h3>
+      <p lang="en">The standard <code>&lt;template&gt;</code> element is inert: the browser parses it but shows nothing. <code>data-wcs="for: products"</code> turns it into a loop. Its content is copied once for every element of <code>products</code> and placed right after the template. When the array changes later, only the cards that changed are added or removed.</p>
+      <p lang="ja">標準の<code>&lt;template&gt;</code>要素は不活性で、ブラウザはパースするだけで何も表示しません。<code>data-wcs="for: products"</code>がこれをループにします。中身が<code>products</code>の要素ごとに1回ずつ複製され、テンプレートのすぐ後ろに置かれます。あとで配列が変わったときは、変わったカードだけが足されたり取り除かれたりします。</p>
+
+      <h3><span lang="en"><code>.name</code> means “this row's name”</span><span lang="ja"><code>.name</code>は「この行のname」</span></h3>
+      <p lang="en">Inside the loop, <code>.name</code> is short for <code>products.*.name</code>. The <code>*</code> stands for “the row this element belongs to”. A row never stores its index or a reference to its object; it holds only the wildcard path, and wcstack supplies the index. It is the same contract as in step 1 &mdash; a path &mdash; with one segment left open.</p>
+      <p lang="ja">ループの中の<code>.name</code>は<code>products.*.name</code>の省略形です。<code>*</code>は「この要素が属する行」を表します。行は自分のインデックスもオブジェクトへの参照も持たず、ワイルドカードのパスだけを持っていて、インデックスはwcstackが補います。ステップ1と同じ「パス」という契約で、1つの区間だけが空いている形です。</p>
+
+      <h3><span lang="en"><code>{{ }}</code> inside templates</span><span lang="ja">テンプレートの中の<code>{{ }}</code></span></h3>
+      <p lang="en"><code>{{ .name }}</code> is a text binding, the same as <code>textContent: .name</code> on a wrapper element. Inside a template nothing is visible until the row is rendered, so the braces never flash on screen. A <code>{{ }}</code> takes filters too: <code>{{ .price|toFixed(2) }}</code>.</p>
+      <p lang="ja"><code>{{ .name }}</code>はテキストのバインディングで、包む要素に<code>textContent: .name</code>と書くのと同じです。テンプレートの中は行が描画されるまで何も見えないので、波括弧が画面にちらつくことはありません。<code>{{ }}</code>にもフィルタが使えます(<code>{{ .price|toFixed(2) }}</code>)。</p>
+
+      <h3><span lang="en">Any property, through a filter</span><span lang="ja">どのプロパティにも、フィルタを通して</span></h3>
+      <p lang="en"><code>class.sold-out: .stock|eq(0)</code> adds the class <code>sold-out</code> while the row's <code>stock</code> equals 0 and removes it otherwise. <code>hidden:</code> and <code>disabled:</code> are not special words: they are ordinary DOM properties, and <code>data-wcs</code> can set any property an element has. The comparison filters <code>eq(0)</code> and <code>ne(0)</code> turn the number into the <code>true</code> / <code>false</code> those properties expect. Several bindings on one element are separated with <code>;</code>.</p>
+      <p lang="ja"><code>class.sold-out: .stock|eq(0)</code>は、行の<code>stock</code>が0の間はクラス<code>sold-out</code>を付け、それ以外では外します。<code>hidden:</code>と<code>disabled:</code>は特別な語ではなく、ふつうのDOMプロパティです。<code>data-wcs</code>は要素が持つどのプロパティにも値を入れられます。比較フィルタ<code>eq(0)</code>・<code>ne(0)</code>が、数値をそれらのプロパティが期待する<code>true</code> / <code>false</code>に変えます。1つの要素の複数のバインディングは<code>;</code>で区切ります。</p>
+
+      <h3><span lang="en">One handler for every card</span><span lang="ja">どのカードも同じハンドラ</span></h3>
+      <p lang="en">Every card's button calls the same <code>addToCart</code>, which still only counts clicks. In the next step the handler learns which product was clicked.</p>
+      <p lang="ja">どのカードのボタンも同じ<code>addToCart</code>を呼び、それはまだクリックを数えるだけです。次のステップで、ハンドラはどの商品が押されたかを知るようになります。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Set Sencha's <code>stock</code> to <code>0</code> and reload. Its card greys out, shows the badge and disables its button &mdash; data changed, markup didn't.</p>
+        <p lang="ja">Senchaの<code>stock</code>を<code>0</code>にして再読み込みしてみましょう。カードが灰色になり、バッジが出て、ボタンが押せなくなります。変えたのはデータだけで、マークアップには触れていません。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en"><code>class:</code> without a class name</span><span lang="ja">クラス名のない<code>class:</code></span></h3>
+        <p lang="en"><code>class: .stock|eq(0)</code> is not an error, which is what makes it dangerous: it sets a property named <code>class</code> that the browser ignores, and neither the browser nor the checker says anything. Always name the class after the dot: <code>class.sold-out:</code>.</p>
+        <p lang="ja"><code>class: .stock|eq(0)</code>はエラーになりません。それが厄介なところです。ブラウザが無視する<code>class</code>という名前のプロパティに値を入れるだけで、ブラウザも検査器も何も言いません。クラス名は必ずドットの後ろに書きます(<code>class.sold-out:</code>)。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en"><code>*</code> outside a loop</span><span lang="ja">ループの外の<code>*</code></span></h3>
+        <p lang="en"><code>products.*.name</code> only means something inside <code>for: products</code>, where there is a row for the <code>*</code>. Written on the page itself, it stops the state from starting, and the console says <code>[wcs/wildcard-rank] "products.*.name" needs 1 enclosing loop level(s); the scope provides 0.</code></p>
+        <p lang="ja"><code>products.*.name</code>が意味を持つのは、<code>*</code>に当てはまる行がある<code>for: products</code>の中だけです。ページに直接書くとstateが起動せず、コンソールに<code>[wcs/wildcard-rank] "products.*.name" needs 1 enclosing loop level(s); the scope provides 0.</code>が出ます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">Lost track of an edit? Here is the complete <code>index.html</code> of this step. <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">どこを直したか分からなくなったら、このステップの<code>index.html</code>全体と見比べてください。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 2</span><span lang="ja">ステップ2</span></span></div>
+          <pre><code class="language-html" data-include="shop/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    export default {
+      products: [
+        { id: 1, name: "House Blend", description: "Chocolate, caramel, a hint of citrus.", price: 14, stock: 12, icon: "☕" },
+        { id: 2, name: "Ethiopia Yirgacheffe", description: "Bright and floral, with jasmine and lemon.", price: 18, stock: 5, icon: "☕" },
+        { id: 3, name: "Colombia Supremo", description: "Nutty and smooth, with a cocoa finish.", price: 16, stock: 8, icon: "☕" },
+        { id: 4, name: "Sencha", description: "Fresh, grassy Japanese green tea.", price: 12, stock: 20, icon: "🍵" },
+        { id: 5, name: "Matcha", description: "Stone-ground, ceremonial grade.", price: 24, stock: 0, icon: "🍵" },
+        { id: 6, name: "Measuring Spoon", description: "One scoop, one cup.", price: 6, stock: 30, icon: "🥄" },
+        { id: 7, name: "Milk Pitcher", description: "Stainless steel, 350 ml.", price: 15, stock: 4, icon: "🥛" }
+      ],
+      cartCount: 0,
+
+      addToCart() {
+        this.cartCount += 1;
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: cartCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;main class="shop"&gt;
+  &lt;section class="catalog"&gt;
+    &lt;h2&gt;Products&lt;/h2&gt;
+    &lt;div class="grid"&gt;
+      &lt;template data-wcs="for: products"&gt;
+        &lt;article class="card" data-wcs="class.sold-out: .stock|eq(0)"&gt;
+          &lt;div class="card-icon"&gt;{{ .icon }}&lt;/div&gt;
+          &lt;h3&gt;{{ .name }}&lt;/h3&gt;
+          &lt;p&gt;{{ .description }}&lt;/p&gt;
+          &lt;p class="price"&gt;${{ .price|toFixed(2) }}&lt;/p&gt;
+          &lt;p class="badge" data-wcs="hidden: .stock|ne(0)"&gt;Sold out&lt;/p&gt;
+          &lt;button type="button" data-wcs="onclick: addToCart; disabled: .stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+        &lt;/article&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../01-product/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">1. Show a product</span><span lang="ja">1. 商品を1つ表示する</span></span></a>
+      <a class="next" href="../03-cart/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">3. Put products in the cart</span><span lang="ja">3. カートに商品を入れる</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>
