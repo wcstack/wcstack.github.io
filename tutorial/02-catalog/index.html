@@ -141,8 +141,8 @@ cartCount: 0,</code></pre>
 
       <div class="mistake">
         <h3><span lang="en"><code>class:</code> without a class name</span><span lang="ja">クラス名のない<code>class:</code></span></h3>
-        <p lang="en"><code>class: .stock|eq(0)</code> is not an error, which is what makes it dangerous: it sets a property named <code>class</code> that the browser ignores, and neither the browser nor the checker says anything. Always name the class after the dot: <code>class.sold-out:</code>.</p>
-        <p lang="ja"><code>class: .stock|eq(0)</code>はエラーになりません。それが厄介なところです。ブラウザが無視する<code>class</code>という名前のプロパティに値を入れるだけで、ブラウザも検査器も何も言いません。クラス名は必ずドットの後ろに書きます(<code>class.sold-out:</code>)。</p>
+        <p lang="en"><code>class: .stock|eq(0)</code> names no class. Up to 4.0.0 it did nothing at all &mdash; it set a property named <code>class</code> that the browser ignores, and nothing reported it. Since 4.0.1 the state refuses it when the page loads, with <code>[wcs/binding-syntax] &hellip; "class:" needs a class name</code> in the console, and the checker reports it as an error. Name the class after the dot: <code>class.sold-out:</code>.</p>
+        <p lang="ja"><code>class: .stock|eq(0)</code>はクラスを名指していません。4.0.0までは何も起きませんでした。ブラウザが無視する<code>class</code>という名前のプロパティに値を入れるだけで、何も報告されなかったのです。4.0.1からは、ページの読み込み時にstateがこれを拒み、コンソールに<code>[wcs/binding-syntax] &hellip; "class:" needs a class name</code>が出て、検査器もerrorとして報告します。クラス名はドットの後ろに書きます(<code>class.sold-out:</code>)。</p>
       </div>
 
       <div class="mistake">
