@@ -202,18 +202,45 @@
       </ol>
     </section>
 
-    <section class="doc" id="later">
-      <h2><span lang="en">Coming next</span><span lang="ja">この先</span></h2>
-      <p lang="en">The same shop keeps growing. This part is in preparation.</p>
-      <p lang="ja">同じショップを育て続けます。以下は準備中です。</p>
+    <section class="doc" id="part3">
+      <h2><span lang="en">Part 3 — Grow into an app</span><span lang="ja">Part 3 — アプリに育てる</span></h2>
+      <p lang="en">Four steps that turn the page into an app: pages for every product, a component, tests, and a published site. From here on you need Node.js and a local server (<code>npx serve -s .</code>). Start from your page of step 11.</p>
+      <p lang="ja">ページをアプリにする4つのステップです。商品ごとのページ、部品、テスト、公開したサイト。ここから先はNode.jsとローカルサーバー(<code>npx serve -s .</code>)が必要です。ステップ11の自分のページから始めます。</p>
       <ol class="steps">
-        <li class="later"><a href="#later" tabindex="-1" aria-disabled="true">
-          <span class="num">3</span>
+        <li><a href="13-router/">
+          <span class="num">13</span>
           <span>
-            <span class="title"><span lang="en">Part 3 — Grow into an app</span><span lang="ja">Part 3 — アプリに育てる</span></span>
-            <span class="desc" lang="en">Product pages with a router, components, tests, and publishing with pinned versions.</span>
-            <span class="desc" lang="ja">ルーターで商品ページを作り、部品に分け、テストし、バージョンを固定して公開する。</span>
-            <span class="chips"><code>&lt;wcs-router&gt;</code><code>@wcstack/testing</code><code>SRI</code></span>
+            <span class="title"><span lang="en">Product pages with a router</span><span lang="ja">ルーターで商品ページを作る</span></span>
+            <span class="desc" lang="en">The URL picks the page and becomes state; links stay plain links, and Back and Forward work.</span>
+            <span class="desc" lang="ja">URLがページを選んでstateになる。リンクは素のリンクのまま、「戻る」と「進む」も働く。</span>
+            <span class="chips"><code>&lt;wcs-router&gt;</code><code>:id(int)</code><code>typedParams:</code><code>&lt;base href&gt;</code></span>
+          </span>
+        </a></li>
+        <li><a href="14-component/">
+          <span class="num">14</span>
+          <span>
+            <span class="title"><span lang="en">Split out a component</span><span lang="ja">部品に分ける</span></span>
+            <span class="desc" lang="en">The card becomes a custom element: the page mounts a row on it and hears its event.</span>
+            <span class="desc" lang="ja">カードをカスタム要素にする。ページは行をマウントし、そのイベントを聞く。</span>
+            <span class="chips"><code>bind-component</code><code>state: .</code><code>onadd-to-cart:</code></span>
+          </span>
+        </a></li>
+        <li><a href="15-test/">
+          <span class="num">15</span>
+          <span>
+            <span class="title"><span lang="en">Test it</span><span lang="ja">テストする</span></span>
+            <span class="desc" lang="en">Mount the real page in Node, click, and check the cart &mdash; in about a second.</span>
+            <span class="desc" lang="ja">本物のページをNodeでマウントし、クリックし、カートを確かめる。1秒ほどで。</span>
+            <span class="chips"><code>@wcstack/testing</code><code>vitest</code><code>happy-dom</code></span>
+          </span>
+        </a></li>
+        <li><a href="16-publish/">
+          <span class="num">16</span>
+          <span>
+            <span class="title"><span lang="en">Publish it</span><span lang="ja">公開する</span></span>
+            <span class="desc" lang="en">Pin the version, let the browser verify it, and put the shop on GitHub Pages with its deep links working.</span>
+            <span class="desc" lang="ja">バージョンを固定し、ブラウザに検証させ、深いリンクの動くショップをGitHub Pagesに置く。</span>
+            <span class="chips"><code>wcstack/auto</code><code>integrity</code><code>404.html</code></span>
           </span>
         </a></li>
       </ol>

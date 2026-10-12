@@ -136,8 +136,14 @@ set savedCart(lines) {
 
       <div class="mistake">
         <h3><span lang="en">Forgetting <code>#init=element</code></span><span lang="ja"><code>#init=element</code>を忘れる</span></h3>
-        <p lang="en">With <code>value: savedCart</code>, everything works until you reload: then the cart is empty, because <code>savedCart</code> of the starting empty cart was saved over the stored one. The checker can't see this one &mdash; it would have to know what a getter returns at startup. Test the way the demo above invites you to: add something, then reload.</p>
-        <p lang="ja"><code>value: savedCart</code>にすると、再読み込みするまでは問題なく動きます。再読み込みするとカートは空です。最初の空のカートの<code>savedCart</code>が、保存済みのカートの上に保存されたからです。これは検査器には見えません(getterが起動時に何を返すかを知る必要があるため)。上のデモが誘うとおりに試しましょう。何かを入れて、再読み込みします。</p>
+        <p lang="en">With <code>value: savedCart</code>, everything works until you reload: then the cart is empty, because <code>savedCart</code> of the starting empty cart was saved over the stored one. The checker reports it (<code>@wcstack/lint</code> 4.0.3 or later):</p>
+        <p lang="ja"><code>value: savedCart</code>にすると、再読み込みするまでは問題なく動きます。再読み込みするとカートは空です。最初の空のカートの<code>savedCart</code>が、保存済みのカートの上に保存されたからです。検査器はこれを報告します(<code>@wcstack/lint</code> 4.0.3以降)。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">npx @wcstack/lint index.html</span></div>
+          <pre class="terminal">index.html:107:13 <span class="warn">warning</span> wcs/storage-seed-clobber The &lt;wcs-storage&gt; value is bound to the accessor pair "savedCart" without #init=element. The state's side goes first, so on every load the getter's starting value is saved over the stored one, and the setter never receives it — add #init=element (`value#init=element: savedCart`)
+
+0 error(s), 1 warning(s), 0 info</pre>
+        </div>
       </div>
     </section>
 

@@ -64,16 +64,27 @@ let problems = 0;
 let rewritten = 0;
 
 /**
- * Demos written from another demo, so the two cannot drift: each is `from` with
- * the `replace` pairs applied (every pair must match). Step 9 shows its error
- * line live on a copy whose catalog URL does not exist.
+ * Demos written from another file, so the two cannot drift: each is `from` with
+ * the `replace` pairs applied (every pair must match; none copies the file).
+ * Step 9 shows its error line live on a copy whose catalog URL does not exist.
+ * From Part 3 on, the page the reader writes (`app/`) is served from the root of
+ * its own server (`<base href="/">`), while the demo lives in a folder of this
+ * site: the demo (`shop/`) is the reader's page with its base pointed there.
  */
+const demoOf = (step, files = ["index.html"]) => files.map((file) => ({
+  from: `${step}/app/${file}`,
+  to: `${step}/shop/${file}`,
+  replace: file === "index.html" ? [['<base href="/">', `<base href="/tutorial/${step}/shop/">`]] : [],
+}));
 const VARIANTS = [
   {
     from: "09-retry/shop/index.html",
     to: "09-retry/broken/index.html",
     replace: [["/tutorial/data/products.json", "/tutorial/data/no-such-file.json"]],
   },
+  ...demoOf("13-router"),
+  ...demoOf("14-component", ["index.html", "product-card.js"]),
+  ...demoOf("16-publish", ["index.html", "product-card.js"]),
 ];
 
 for (const variant of VARIANTS) {

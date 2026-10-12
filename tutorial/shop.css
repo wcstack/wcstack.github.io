@@ -86,6 +86,33 @@ button, input, select { font: inherit; color: inherit; }
 }
 .card.sold-out .card-icon { filter: grayscale(1); opacity: .45; }
 .card.sold-out h3, .card.sold-out .price { color: var(--muted); }
+.card h3 a { color: inherit; text-decoration: none; }
+.card h3 a:hover { text-decoration: underline; }
+
+/* ── Product page and the <product-card> component (Part 3) ── */
+/* The component's own element adds no box: its .card is the grid item. */
+product-card { display: contents; }
+/* The router only holds its routes; its outlet, right after it, is the grid item. */
+wcs-router { display: contents; }
+.product-page {
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: 520px; padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: 12px;
+}
+.product-page .back { font-size: .88rem; }
+.product-page .back a { color: var(--brand); }
+.product-page .card-icon { height: 140px; font-size: 3.4rem; }
+.shop .product-page h2 { font-size: 1.3rem; margin: 4px 0 0; }
+.product-page p { color: var(--ink-soft); }
+.product-page .price { font-size: 1.15rem; font-weight: 700; color: var(--ink); }
+.product-page .badge {
+  align-self: flex-start;
+  font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+  padding: 2px 8px; border-radius: 999px;
+  background: var(--line); color: var(--ink-soft);
+}
+.product-page button { align-self: flex-start; }
 
 /* ── Buttons ── */
 button {

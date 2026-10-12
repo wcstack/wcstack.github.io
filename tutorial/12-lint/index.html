@@ -117,8 +117,8 @@ index.html:137:18 <span class="warn">warning</span> wcs/binding-path-missing Pat
 
       <div class="note">
         <span class="callout-label"><span lang="en">What the checker can't see</span><span lang="ja">検査器に見えないもの</span></span>
-        <p lang="en">Forgetting <code>#init=element</code> on <code>savedCart</code> (step 11) passes the checker: it would have to know what a getter returns at startup. Neither can it see the file a page fetches, beyond the type you declare. Keep the habit the demos teach: add something, reload, and look.</p>
-        <p lang="ja"><code>savedCart</code>の<code>#init=element</code>を忘れても(ステップ11)、検査器は通ります。getterが起動時に何を返すかを知る必要があるからです。ページが読み込むファイルも、宣言した型より先は見えません。デモが教える習慣を続けましょう。何かを入れて、再読み込みして、見ることです。</p>
+        <p lang="en">The checker can't see the file a page fetches, beyond the type you declare, and it can't run the page: a cart that empties on reload for a reason it doesn't know shows up only in the browser. Keep the habit the demos teach: add something, reload, and look. (Forgetting <code>#init=element</code> on <code>savedCart</code>, from step 11, it does report since 4.0.3.)</p>
+        <p lang="ja">検査器には、ページが読み込むファイルは宣言した型より先は見えず、ページを動かすこともできません。検査器の知らない理由で再読み込みのたびにカートが空になるなら、それはブラウザでしか分かりません。デモが教える習慣を続けましょう。何かを入れて、再読み込みして、見ることです。(ステップ11の、<code>savedCart</code>の<code>#init=element</code>の付け忘れは、4.0.3から報告します。)</p>
       </div>
     </section>
 
@@ -142,13 +142,13 @@ index.html:137:18 <span class="warn">warning</span> wcs/binding-path-missing Pat
       </ul>
 
       <h3><span lang="en">Coming next</span><span lang="ja">この先</span></h3>
-      <p lang="en"><strong>Part 3 &mdash; Grow into an app</strong> adds product pages with <code>&lt;wcs-router&gt;</code>, splits the page into components, tests it with <code>@wcstack/testing</code>, and publishes it with pinned versions. It is in preparation; until then, the <a href="../../state/">state page</a> is the complete reference.</p>
-      <p lang="ja"><strong>Part 3 アプリに育てる</strong>では、<code>&lt;wcs-router&gt;</code>で商品ページを加え、ページを部品に分け、<code>@wcstack/testing</code>でテストし、バージョンを固定して公開します。準備中です。それまでは<a href="../../state/">stateのページ</a>が完全なリファレンスです。</p>
+      <p lang="en"><a href="../13-router/"><strong>Part 3 &mdash; Grow into an app</strong></a> adds product pages with <code>&lt;wcs-router&gt;</code>, splits out a component, tests the page with <code>@wcstack/testing</code>, and publishes it with a pinned, verified version. From there on you need Node.js and a local server.</p>
+      <p lang="ja"><a href="../13-router/"><strong>Part 3 アプリに育てる</strong></a>では、<code>&lt;wcs-router&gt;</code>で商品ページを加え、部品に分け、<code>@wcstack/testing</code>でテストし、固定して検証できるバージョンで公開します。ここから先はNode.jsとローカルサーバーが必要です。</p>
     </section>
 
     <nav class="step-nav" aria-label="Steps">
       <a class="prev" href="../11-storage/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">11. Keep the cart across reloads</span><span lang="ja">11. 再読み込みしてもカートを残す</span></span></a>
-      <a class="next" href="../"><span class="dir"><span lang="en">Back to →</span><span lang="ja">戻る →</span></span><span class="name"><span lang="en">Tutorial overview</span><span lang="ja">チュートリアルの概要</span></span></a>
+      <a class="next" href="../13-router/"><span class="dir"><span lang="en">Next: Part 3 →</span><span lang="ja">次へ: Part 3 →</span></span><span class="name"><span lang="en">13. Product pages with a router</span><span lang="ja">13. ルーターで商品ページを作る</span></span></a>
     </nav>
 
   </main>

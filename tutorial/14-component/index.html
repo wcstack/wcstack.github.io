@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="14. Split out a component — wcstack tutorial" data-title-ja="14. 部品に分ける — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>14. Split out a component — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 14: the product card becomes <product-card>, a custom element with its own <wcs-state>. The page mounts each row on it (state: .) and hears its add-to-cart event. / 商品カードを<product-card>という部品に分ける。">
+  <meta property="og:title" content="14. Split out a component — wcstack tutorial">
+  <meta property="og:description" content="The product card becomes <product-card>: the page mounts each row on it and hears its add-to-cart event.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/14-component/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/14-component/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 3 · Step 2 of 4</span><span lang="ja">チュートリアル · Part 3 · ステップ 2/4</span></p>
+      <h1 class="page-title"><span lang="en">Split out a component</span><span lang="ja">部品に分ける</span></h1>
+      <p class="lead" lang="en">The product card becomes <code>&lt;product-card&gt;</code>: a custom element in its own file, with its own <code>&lt;wcs-state&gt;</code>. The page mounts each row of the catalog on it and hears when its button is pressed &mdash; data in, events out.</p>
+      <p class="lead" lang="ja">商品カードを<code>&lt;product-card&gt;</code>にします。独立したファイルに置くカスタム要素で、自分の<code>&lt;wcs-state&gt;</code>を持ちます。ページは商品一覧の各行をそこにマウントし、ボタンが押されたことを聞きます。データは中へ、イベントは外へ。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../13-router/" class="done">13</a></li>
+        <li><a href="../14-component/" aria-current="page">14</a></li>
+        <li><a href="../15-test/">15</a></li>
+        <li><a href="../16-publish/">16</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">It looks and works like step 13. Each card is now one <code>&lt;product-card&gt;</code> element: the page's catalog template shrinks to a single line, and the card's markup lives in <code>product-card.js</code>.</p>
+      <p lang="ja">見た目も動きもステップ13と同じです。各カードは<code>&lt;product-card&gt;</code>要素1つになりました。ページの商品一覧のテンプレートは1行に縮み、カードのマークアップは<code>product-card.js</code>にあります。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 14" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
+      <p lang="en">Create <code>product-card.js</code> next to <code>index.html</code>:</p>
+      <p lang="ja"><code>index.html</code>の隣に<code>product-card.js</code>を作ります。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">product-card.js</span><span class="tag"><span lang="en">new file</span><span lang="ja">新しいファイル</span></span></div>
+        <pre><code class="language-javascript" data-include="app/product-card.js">// &lt;product-card&gt; draws one product: the row the page mounts on it (data-wcs="state: .").
+// "Add to cart" is the page's business, so the card only says it was pressed.
+class ProductCard extends HTMLElement {
+  state = {
+    add: () =&gt; {
+      this.dispatchEvent(new CustomEvent("add-to-cart", { bubbles: true }));
+    },
+  };
+
+  connectedCallback() {
+    // The router takes the catalog out and puts the same cards back: keep what is there.
+    if (this.hasChildNodes()) return;
+    this.innerHTML = `
+      &lt;wcs-state bind-component="state"&gt;&lt;/wcs-state&gt;
+      &lt;article class="card" data-wcs="class.sold-out: stock|eq(0)"&gt;
+        &lt;div class="card-icon" data-wcs="textContent: icon"&gt;&lt;/div&gt;
+        &lt;h3&gt;&lt;a data-wcs="attr.href: href; textContent: name"&gt;&lt;/a&gt;&lt;/h3&gt;
+        &lt;p data-wcs="textContent: description"&gt;&lt;/p&gt;
+        &lt;p class="price"&gt;$&lt;span data-wcs="textContent: price|toFixed(2)"&gt;&lt;/span&gt;&lt;/p&gt;
+        &lt;p class="badge" data-wcs="hidden: stock|ne(0)"&gt;Sold out&lt;/p&gt;
+        &lt;button type="button" data-wcs="onclick: add; disabled: stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+      &lt;/article&gt;
+    `;
+  }
+}
+customElements.define("product-card", ProductCard);</code></pre>
+      </div>
+      <p lang="en">Load it in <code>&lt;head&gt;</code>, after the router:</p>
+      <p lang="ja"><code>&lt;head&gt;</code>で、ルーターの後に読み込みます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">new line</span><span lang="ja">1行追加</span></span></div>
+        <pre><code class="language-html" data-excerpt="app/index.html">&lt;script type="module" src="https://esm.run/@wcstack/router@4/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <p lang="en">In the catalog, replace the whole <code>&lt;article class="card"&gt;</code> of the row with one element:</p>
+      <p lang="ja">商品一覧では、行の<code>&lt;article class="card"&gt;</code>を丸ごと、要素1つに置き換えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — the catalog</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="app/index.html">&lt;template data-wcs="for: products"&gt;
+  &lt;product-card data-wcs="state: .; hidden: .matches|not; onadd-to-cart: addToCart"&gt;&lt;/product-card&gt;
+&lt;/template&gt;</code></pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">A custom element with its own state</span><span lang="ja">自分のstateを持つカスタム要素</span></h3>
+      <p lang="en"><code>ProductCard</code> is a plain custom element: a class that extends <code>HTMLElement</code>, registered under a name with a hyphen. When it is connected, it writes its markup into itself, starting with <code>&lt;wcs-state bind-component="state"&gt;</code>: that makes the element's <code>state</code> property the state of the bindings inside it. The markup goes into the element itself (no shadow root), so <code>shop.css</code> styles it like the rest of the page; <code>shop.css</code> also has <code>product-card { display: contents; }</code>, so the element adds no box and its <code>.card</code> sits in the grid as before.</p>
+      <p lang="ja"><code>ProductCard</code>は普通のカスタム要素です。<code>HTMLElement</code>を継承したクラスを、ハイフンを含む名前で登録します。接続されると、自分の中にマークアップを書き込みます。その先頭の<code>&lt;wcs-state bind-component="state"&gt;</code>が、要素の<code>state</code>プロパティを、中のバインディングのstateにします。マークアップは要素そのものの中に入る(shadow rootを使わない)ので、<code>shop.css</code>がページのほかの部分と同じようにスタイルを当てます。<code>shop.css</code>には<code>product-card { display: contents; }</code>もあり、要素自身は箱を作らず、中の<code>.card</code>がこれまでどおりグリッドに並びます。</p>
+
+      <h3><span lang="en">Data in: <code>state: .</code></span><span lang="ja">データは中へ: <code>state: .</code></span></h3>
+      <p lang="en"><code>state: .</code> mounts the row on the component. Inside it, <code>name</code> <em>is</em> the row's name, <code>stock</code> its stock, and <code>href</code> the page's row getter <code>"products.*.href"</code> &mdash; the component reads the page's tree at the row, with nothing copied. Search still filters the cards: <code>hidden: .matches|not</code> sits on the element in the page, where it always was.</p>
+      <p lang="ja"><code>state: .</code>は、行を部品にマウントします。部品の中では、<code>name</code>は行のnameそのもの、<code>stock</code>は行のstock、<code>href</code>はページの行getter<code>"products.*.href"</code>です。部品はページの木をその行で読み、何も写しません。検索もこれまでどおりカードを絞り込みます。<code>hidden: .matches|not</code>は、ページの側の要素に、元からあった場所にあります。</p>
+
+      <h3><span lang="en">Events out</span><span lang="ja">イベントは外へ</span></h3>
+      <p lang="en">The card doesn't know about carts. Its button calls the component's own method <code>add</code>, which dispatches an <code>add-to-cart</code> event from the element. The page binds <code>onadd-to-cart: addToCart</code> on it, exactly as it binds <code>onclick</code>: the handler receives <code>(event, index)</code> with the row's index, and adds the product as before. The same card could sit in a wish list whose page does something else with the event.</p>
+      <p lang="ja">カードはカートのことを知りません。ボタンは部品自身のメソッド<code>add</code>を呼び、それが要素から<code>add-to-cart</code>イベントを送ります。ページはその要素に<code>onadd-to-cart: addToCart</code>をバインドします。<code>onclick</code>をバインドするのとまったく同じで、ハンドラは行のindex付きで<code>(event, index)</code>を受け取り、これまでどおり商品を加えます。同じカードを欲しいものリストに置けば、そのページはイベントで別のことをできます。</p>
+
+      <h3><span lang="en">Built once</span><span lang="ja">作るのは1度</span></h3>
+      <p lang="en">When you leave the catalog and come back, the router puts the same cards back in the page, and each card's <code>connectedCallback</code> runs again. <code>if (this.hasChildNodes()) return;</code> keeps the card it already built instead of building it twice.</p>
+      <p lang="ja">商品一覧を離れて戻ると、ルーターは同じカードをページに戻し、各カードの<code>connectedCallback</code>がもう一度走ります。<code>if (this.hasChildNodes()) return;</code>は、作り直さずに、もう作ったカードをそのまま使います。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Show the category on every card with one edit. In <code>product-card.js</code>, add <code>&lt;p data-wcs="textContent: category"&gt;&lt;/p&gt;</code> after the description: every card in the catalog gets it.</p>
+        <p lang="ja">1か所の変更で、すべてのカードにカテゴリを出してみましょう。<code>product-card.js</code>の説明文の後に<code>&lt;p data-wcs="textContent: category"&gt;&lt;/p&gt;</code>を加えると、商品一覧のどのカードにも出ます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">Forgetting <code>state: .</code></span><span lang="ja"><code>state: .</code>を忘れる</span></h3>
+        <p lang="en">Without a mount, a component whose markup is in the element itself has no state to bind to: the cards appear empty, and the console says what to do:</p>
+        <p lang="ja">マウントが無いと、マークアップを要素そのものに置いた部品には、バインドするstateがありません。カードは空のまま現れ、コンソールがすべきことを言います。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">console</span></div>
+          <pre class="terminal"><span class="err">[@wcstack/state] A plain (unwired) Light DOM "bind-component" is not supported. Attach a shadow root to &lt;product-card&gt;, or mount it from the host (data-wcs="state: path").</span></pre>
+        </div>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">A typo inside the component</span><span lang="ja">部品の中の打ち間違い</span></h3>
+        <p lang="en">The checker reads your HTML, not the strings in your JavaScript: write <code>textContent: nmae</code> in <code>product-card.js</code> and <code>npx @wcstack/lint index.html</code> still reports nothing, while every card loses its name. The next step writes tests, which do see it.</p>
+        <p lang="ja">検査器が読むのはHTMLで、JavaScriptの中の文字列ではありません。<code>product-card.js</code>に<code>textContent: nmae</code>と書いても、<code>npx @wcstack/lint index.html</code>は何も報告せず、どのカードからも名前が消えます。次のステップで書くテストなら、これを見つけます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step (<code>product-card.js</code> is shown in full above). <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体です(<code>product-card.js</code>は上に全文があります)。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 14</span><span lang="ja">ステップ14</span></span></div>
+          <pre><code class="language-html" data-include="app/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;base href="/"&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/storage@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/router@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      routeParams: {},
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.href"() {
+        return "products/" + this["products.*.id"];
+      },
+      get product() {
+        const id = this["routeParams.id"];
+        return this.products.find(product =&gt; product.id === id) ?? null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.product"() {
+        const id = this["cart.*.id"];
+        return this.products.find(product =&gt; product.id === id);
+      },
+      get "cart.*.name"() {
+        return this["cart.*.product"]?.name ?? "…";
+      },
+      get "cart.*.price"() {
+        return this["cart.*.product"]?.price ?? 0;
+      },
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      get "cart.*.saved"() {
+        return { id: this["cart.*.id"], quantity: this["cart.*.quantity"] };
+      },
+      get savedCart() {
+        return this.$getAll("cart.*.saved", []);
+      },
+      set savedCart(lines) {
+        if (Array.isArray(lines)) this.cart = lines;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        this.addProduct(this.products[index].id);
+      },
+      addCurrent() {
+        this.addProduct(this.product.id);
+      },
+      addProduct(id) {
+        const line = this.cart.findIndex(item =&gt; item.id === id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+&lt;wcs-storage key="little-roastery-cart"
+  data-wcs="value#init=element: savedCart"&gt;&lt;/wcs-storage&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;wcs-router data-wcs="typedParams: routeParams"&gt;
+    &lt;template&gt;
+      &lt;wcs-route path="/"&gt;
+        &lt;section class="catalog"&gt;
+          &lt;h2&gt;Products&lt;/h2&gt;
+          &lt;div class="toolbar"&gt;
+            &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+            &lt;fieldset class="categories"&gt;
+              &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+            &lt;/fieldset&gt;
+          &lt;/div&gt;
+          &lt;div class="grid"&gt;
+            &lt;template data-wcs="for: products"&gt;
+              &lt;product-card data-wcs="state: .; hidden: .matches|not; onadd-to-cart: addToCart"&gt;&lt;/product-card&gt;
+            &lt;/template&gt;
+          &lt;/div&gt;
+          &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+        &lt;/section&gt;
+      &lt;/wcs-route&gt;
+      &lt;wcs-route path="/products/:id(int)"&gt;
+        &lt;article class="product-page"&gt;
+          &lt;p class="back"&gt;&lt;a href="./"&gt;← All products&lt;/a&gt;&lt;/p&gt;
+          &lt;template data-wcs="if: product"&gt;
+            &lt;div class="card-icon"&gt;{{ product.icon }}&lt;/div&gt;
+            &lt;h2&gt;{{ product.name }}&lt;/h2&gt;
+            &lt;p&gt;{{ product.description }}&lt;/p&gt;
+            &lt;p class="price"&gt;${{ product.price|toFixed(2) }}&lt;/p&gt;
+            &lt;p class="badge" data-wcs="hidden: product.stock|ne(0)"&gt;Sold out&lt;/p&gt;
+            &lt;button type="button" data-wcs="onclick: addCurrent; disabled: product.stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+          &lt;/template&gt;
+          &lt;template data-wcs="else:"&gt;
+            &lt;p class="no-results"&gt;No such product.&lt;/p&gt;
+          &lt;/template&gt;
+        &lt;/article&gt;
+      &lt;/wcs-route&gt;
+      &lt;wcs-route fallback&gt;
+        &lt;p class="no-results"&gt;Page not found. &lt;a href="./"&gt;Back to the shop&lt;/a&gt;&lt;/p&gt;
+      &lt;/wcs-route&gt;
+    &lt;/template&gt;
+  &lt;/wcs-router&gt;
+  &lt;wcs-outlet&gt;&lt;/wcs-outlet&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../13-router/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">13. Product pages with a router</span><span lang="ja">13. ルーターで商品ページを作る</span></span></a>
+      <a class="next" href="../15-test/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">15. Test it</span><span lang="ja">15. テストする</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

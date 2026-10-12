@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="15. Test it — wcstack tutorial" data-title-ja="15. テストする — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15. Test it — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 15: test the shop headlessly with Vitest, happy-dom and @wcstack/testing — mount the page's body, stub the catalog, click, and check the cart, in about a second. / Vitestと@wcstack/testingでショップをテストする。">
+  <meta property="og:title" content="15. Test it — wcstack tutorial">
+  <meta property="og:description" content="Test the shop headlessly with Vitest, happy-dom and @wcstack/testing.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/15-test/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/15-test/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 3 · Step 3 of 4</span><span lang="ja">チュートリアル · Part 3 · ステップ 3/4</span></p>
+      <h1 class="page-title"><span lang="en">Test it</span><span lang="ja">テストする</span></h1>
+      <p class="lead" lang="en">Clicking through the shop after every change stops scaling, and the checker can't see inside <code>product-card.js</code>. Tests can: Vitest runs your real page in Node with happy-dom, and <code>@wcstack/testing</code> mounts it, clicks, and waits for the page to update &mdash; in about a second.</p>
+      <p class="lead" lang="ja">変更のたびにショップをクリックして確かめるのは、すぐに追いつかなくなります。検査器は<code>product-card.js</code>の中を見ません。テストなら見られます。Vitestがhappy-domの上で本物のページをNodeで動かし、<code>@wcstack/testing</code>がそれをマウントし、クリックし、ページの更新を待ちます。かかるのは1秒ほどです。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../13-router/" class="done">13</a></li>
+        <li><a href="../14-component/" class="done">14</a></li>
+        <li><a href="../15-test/" aria-current="page">15</a></li>
+        <li><a href="../16-publish/">16</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="setup">
+      <h2><span lang="en">Set up</span><span lang="ja">準備する</span></h2>
+      <p lang="en">In the folder of your <code>index.html</code>, create <code>package.json</code>:</p>
+      <p lang="ja"><code>index.html</code>のあるフォルダに、<code>package.json</code>を作ります。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">package.json</span><span class="tag"><span lang="en">new file</span><span lang="ja">新しいファイル</span></span></div>
+        <pre><code class="language-json">{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  }
+}</code></pre>
+      </div>
+      <p lang="en">Install the test runner, a DOM for Node, and the wcstack packages the page uses:</p>
+      <p lang="ja">テストランナー、Node用のDOM、ページが使うwcstackのパッケージを入れます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npm install -D vitest happy-dom @wcstack/testing @wcstack/server @wcstack/state @wcstack/fetch @wcstack/storage @wcstack/router</pre>
+      </div>
+      <p lang="en">Tell Vitest to give the tests a DOM:</p>
+      <p lang="ja">Vitestに、テストへDOMを用意するよう伝えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">vitest.config.js</span><span class="tag"><span lang="en">new file</span><span lang="ja">新しいファイル</span></span></div>
+        <pre><code class="language-javascript" data-include="app/vitest.config.js">import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: { environment: "happy-dom" },
+});</code></pre>
+      </div>
+      <p lang="en">The page itself doesn't change: it still loads the packages from the CDN. The installed copies are for the tests.</p>
+      <p lang="ja">ページ自体は変わりません。パッケージはこれまでどおりCDNから読み込みます。インストールしたものはテスト用です。</p>
+    </section>
+
+    <section class="doc" id="code">
+      <h2><span lang="en">Write the tests</span><span lang="ja">テストを書く</span></h2>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">tests/shop.test.js</span><span class="tag"><span lang="en">new file</span><span lang="ja">新しいファイル</span></span></div>
+        <pre><code class="language-javascript" data-include="app/tests/shop.test.js">import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { mount, settle, fire } from "@wcstack/testing";
+import { bootstrapState } from "@wcstack/state";
+import { bootstrapFetch } from "@wcstack/fetch";
+import { bootstrapStorage } from "@wcstack/storage";
+import { bootstrapRouter } from "@wcstack/router";
+import "../product-card.js";
+
+// The page's &lt;body&gt;. Its &lt;head&gt; loads the packages from the CDN, which a test
+// does not need: mount() registers the elements imported above.
+const body = /&lt;body&gt;([\s\S]*)&lt;\/body&gt;/.exec(readFileSync("index.html", "utf8"))[1];
+
+// Three products are enough to test with, and they never change.
+const catalog = [
+  { id: 1, name: "House Blend", category: "coffee", description: "Chocolate, caramel.", price: 14, stock: 12, icon: "☕" },
+  { id: 4, name: "Sencha", category: "tea", description: "Fresh, grassy.", price: 12, stock: 20, icon: "🍵" },
+  { id: 5, name: "Matcha", category: "tea", description: "Stone-ground.", price: 24, stock: 0, icon: "🍵" },
+];
+
+const names = () =&gt; [...app.root.querySelectorAll("product-card:not([hidden]) h3")].map((h) =&gt; h.textContent);
+const card = (name) =&gt; [...app.root.querySelectorAll("product-card")].find((c) =&gt; c.textContent.includes(name));
+
+let app;
+beforeEach(async () =&gt; {
+  localStorage.clear();
+  vi.stubGlobal("fetch", async () =&gt; Response.json(catalog));
+  app = await mount(body, { bootstrap: [bootstrapState, bootstrapFetch, bootstrapStorage, bootstrapRouter] });
+  await vi.waitFor(() =&gt; expect(names()).toHaveLength(3));
+});
+afterEach(() =&gt; {
+  app.unmount();
+  vi.unstubAllGlobals();
+});
+
+describe("the shop", () =&gt; {
+  it("shows the catalog", () =&gt; {
+    expect(names()).toEqual(["House Blend", "Sencha", "Matcha"]);
+  });
+
+  it("adds to the cart, totals it and keeps it", async () =&gt; {
+    fire(card("Sencha").querySelector("button"), "click");
+    fire(card("Sencha").querySelector("button"), "click");
+    await settle();
+    expect(app.root.querySelector("dd.grand").textContent).toBe("$29.00");
+    expect(JSON.parse(localStorage.getItem("little-roastery-cart"))).toEqual([{ id: 4, quantity: 2 }]);
+  });
+
+  it("does not sell what is sold out", () =&gt; {
+    expect(card("Matcha").querySelector("button").disabled).toBe(true);
+  });
+
+  it("filters by search", async () =&gt; {
+    const search = app.root.querySelector('input[type="search"]');
+    search.value = "sen";
+    fire(search, "input");
+    await settle();
+    expect(names()).toEqual(["Sencha"]);
+  });
+
+  it("opens a product page", async () =&gt; {
+    await app.root.querySelector("wcs-router").navigate("/products/4");
+    await vi.waitFor(() =&gt; expect(app.root.querySelector(".product-page h2")?.textContent).toBe("Sencha"));
+  });
+});</code></pre>
+      </div>
+      <p lang="en">Run them with <code>npm test</code>. Add <code>-- --reporter=verbose</code> to see every test by name:</p>
+      <p lang="ja"><code>npm test</code>で実行します。<code>-- --reporter=verbose</code>を付けると、テストが1つずつ名前付きで出ます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>npm test -- --reporter=verbose
+
+ RUN  v5.0.4 …/little-roastery
+
+ <span class="ok">✓</span> tests/shop.test.js &gt; the shop &gt; shows the catalog
+ <span class="ok">✓</span> tests/shop.test.js &gt; the shop &gt; adds to the cart, totals it and keeps it
+ <span class="ok">✓</span> tests/shop.test.js &gt; the shop &gt; does not sell what is sold out
+ <span class="ok">✓</span> tests/shop.test.js &gt; the shop &gt; filters by search
+ <span class="ok">✓</span> tests/shop.test.js &gt; the shop &gt; opens a product page
+
+ Test Files  <span class="ok">1 passed</span> (1)
+      Tests  <span class="ok">5 passed</span> (5)
+   Duration  1.04s</pre>
+      </div>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">The real page, without its head</span><span lang="ja">本物のページを、headを除いて</span></h3>
+      <p lang="en">The test reads <code>index.html</code> and mounts its <code>&lt;body&gt;</code>: the state script, the tags and the templates are the ones the browser runs. The <code>&lt;head&gt;</code> is left out, because it loads the packages from the CDN; instead, the <code>bootstrap</code> list registers the installed ones, and the test imports <code>product-card.js</code> itself. <code>mount()</code> resolves once the state is built and the router has shown its first route.</p>
+      <p lang="ja">テストは<code>index.html</code>を読み、その<code>&lt;body&gt;</code>をマウントします。stateのスクリプトも、タグも、テンプレートも、ブラウザが動かすものと同じです。<code>&lt;head&gt;</code>はCDNからパッケージを読み込むので外し、代わりに<code>bootstrap</code>の一覧がインストールしたものを登録し、テストが<code>product-card.js</code>を自分でimportします。<code>mount()</code>は、stateができあがり、ルーターが最初のルートを表示した時点で終わります。</p>
+
+      <h3><span lang="en">A catalog that never changes</span><span lang="ja">変わらない商品一覧</span></h3>
+      <p lang="en"><code>&lt;wcs-fetch&gt;</code> calls the global <code>fetch</code>, and <code>vi.stubGlobal</code> replaces it with one that returns three products. The tests no longer need the network, and they don't break when the real catalog gets a new product. The catalog still arrives a moment after <code>mount()</code>, as in the browser, so <code>vi.waitFor</code> waits until three cards are there.</p>
+      <p lang="ja"><code>&lt;wcs-fetch&gt;</code>はグローバルの<code>fetch</code>を呼び、<code>vi.stubGlobal</code>がそれを3つの商品を返すものに置き換えます。テストはネットワークを必要とせず、本物の商品一覧に商品が増えても壊れません。商品一覧はブラウザと同じく<code>mount()</code>の少し後に届くので、<code>vi.waitFor</code>でカードが3枚になるまで待ちます。</p>
+
+      <h3><span lang="en">Act, then settle</span><span lang="ja">操作して、落ち着くのを待つ</span></h3>
+      <p lang="en"><code>fire()</code> dispatches what a user would cause &mdash; a <code>click</code>, an <code>input</code> &mdash; and <code>settle()</code> waits until the page has caught up. Then you check the DOM (the total reads <code>$29.00</code>) and anything else the page touched (the cart in <code>localStorage</code>). A product page is one <code>navigate()</code> away.</p>
+      <p lang="ja"><code>fire()</code>は、ユーザーが起こすもの(<code>click</code>や<code>input</code>)を送り、<code>settle()</code>はページが追いつくまで待ちます。それからDOM(合計が<code>$29.00</code>になる)や、ページが触ったほかのもの(<code>localStorage</code>のカート)を確かめます。商品ページは<code>navigate()</code>1つで開けます。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Break the component on purpose: in <code>product-card.js</code>, change <code>textContent: name</code> to <code>textContent: nmae</code>. The checker still says nothing; <code>npm test</code> doesn't:</p>
+        <p lang="ja">わざと部品を壊してみましょう。<code>product-card.js</code>の<code>textContent: name</code>を<code>textContent: nmae</code>に変えます。検査器は何も言いませんが、<code>npm test</code>は違います。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">terminal</span></div>
+          <pre class="terminal"><span class="prompt">$ </span>npm test
+
+ <span class="err">×</span> shows the catalog
+ <span class="err">×</span> adds to the cart, totals it and keeps it
+ <span class="err">×</span> does not sell what is sold out
+ <span class="err">×</span> filters by search
+
+ <span class="err">FAIL</span>  tests/shop.test.js &gt; the shop &gt; shows the catalog
+AssertionError: expected [ '', '', '' ] to deeply equal [ 'House Blend', 'Sencha', 'Matcha' ]
+<span class="dim">…</span>
+      Tests  <span class="err">4 failed</span> | <span class="ok">1 passed</span> (5)</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc" id="limits">
+      <h2><span lang="en">What these tests don't see</span><span lang="ja">このテストに見えないもの</span></h2>
+      <p lang="en">happy-dom is not a browser. The tests don't click a real link (the router's in-place navigation needs the browser's Navigation API, so the test calls <code>navigate()</code>), and they don't see when a custom element is upgraded or how a real browser orders its events. Keep opening the shop in a browser after a change that touches those; a browser test runner such as Playwright can automate it.</p>
+      <p lang="ja">happy-domはブラウザではありません。テストは本物のリンクをクリックしません(ルーターのその場での遷移にはブラウザのNavigation APIが要るので、テストは<code>navigate()</code>を呼びます)。カスタム要素がいつアップグレードされるかや、本物のブラウザのイベントの順番も見えません。そこに触れる変更の後は、引き続きブラウザでショップを開いて確かめましょう。Playwrightのようなブラウザのテストランナーで自動化することもできます。</p>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole files</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en"><code>package.json</code> after the install (your version numbers may be newer). <code>index.html</code> and <code>product-card.js</code> are those of step 14.</p>
+      <p lang="ja">インストール後の<code>package.json</code>です(バージョンはこれより新しいかもしれません)。<code>index.html</code>と<code>product-card.js</code>はステップ14のものです。</p>
+      <details class="source">
+        <summary><span lang="en">Show package.json</span><span lang="ja">package.jsonを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">package.json</span><span class="tag"><span lang="en">step 15</span><span lang="ja">ステップ15</span></span></div>
+          <pre><code class="language-json" data-include="app/package.json">{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@wcstack/fetch": "^4.0.3",
+    "@wcstack/router": "^4.0.3",
+    "@wcstack/server": "^4.0.3",
+    "@wcstack/state": "^4.0.3",
+    "@wcstack/storage": "^4.0.3",
+    "@wcstack/testing": "^4.0.3",
+    "happy-dom": "^21.0.1",
+    "vitest": "^5.0.4"
+  }
+}</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../14-component/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">14. Split out a component</span><span lang="ja">14. 部品に分ける</span></span></a>
+      <a class="next" href="../16-publish/"><span class="dir"><span lang="en">Next →</span><span lang="ja">次へ →</span></span><span class="name"><span lang="en">16. Publish it</span><span lang="ja">16. 公開する</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>

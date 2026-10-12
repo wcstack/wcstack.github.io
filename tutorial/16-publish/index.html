@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" data-title-en="16. Publish it — wcstack tutorial" data-title-ja="16. 公開する — wcstack チュートリアル">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>16. Publish it — wcstack tutorial</title>
+  <meta name="description" content="wcstack tutorial, step 16: load one pinned file that the browser verifies (integrity), and publish the shop on GitHub Pages with its product pages reachable directly. / 固定したバージョンをブラウザに検証させ、GitHub Pagesに公開する。">
+  <meta property="og:title" content="16. Publish it — wcstack tutorial">
+  <meta property="og:description" content="Load one pinned file the browser verifies, and publish the shop on GitHub Pages.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://wcstack.github.io/tutorial/16-publish/">
+  <link rel="canonical" href="https://wcstack.github.io/tutorial/16-publish/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/tutorial.css">
+  <script src="../assets/tutorial.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="../../">&lt;<span>wc</span>stack /&gt;</a>
+      <nav>
+        <a href="../../">Home</a>
+        <a href="../" class="active">Tutorial</a>
+        <a href="../../state/">state</a>
+        <a href="../../signals/" class="wide-only">signals</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener" class="wide-only">GitHub</a>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en">EN</button>
+        <button type="button" data-set-lang="ja">日本語</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-hero">
+    <div class="container">
+      <p class="section-label"><span lang="en">Tutorial · Part 3 · Step 4 of 4</span><span lang="ja">チュートリアル · Part 3 · ステップ 4/4</span></p>
+      <h1 class="page-title"><span lang="en">Publish it</span><span lang="ja">公開する</span></h1>
+      <p class="lead" lang="en"><code>@4</code> means “the newest 4.x”, built for you on request. A published site should run the version you tested: pin it, load it as one file, and let the browser check that the file is the one released. Then put the shop on GitHub Pages, with its product pages reachable directly.</p>
+      <p class="lead" lang="ja"><code>@4</code>は「最新の4.x」で、要求のたびにCDNが組み立てます。公開するサイトは、テストしたバージョンで動くべきです。バージョンを固定し、1つのファイルで読み込み、それがリリースされたファイルそのものかをブラウザに確かめさせます。それから、商品ページへ直接たどり着けるショップをGitHub Pagesに置きます。</p>
+      <ol class="progress" aria-label="Steps">
+        <li><a href="../13-router/" class="done">13</a></li>
+        <li><a href="../14-component/" class="done">14</a></li>
+        <li><a href="../15-test/" class="done">15</a></li>
+        <li><a href="../16-publish/" aria-current="page">16</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <section class="doc" id="result">
+      <h2><span lang="en">The result</span><span lang="ja">できあがり</span></h2>
+      <p lang="en">The same shop, now loaded from one pinned file that the browser has verified. It works as in step 14.</p>
+      <p lang="ja">同じショップを、ブラウザが検証した、固定した1つのファイルから読み込んでいます。動きはステップ14と同じです。</p>
+      <div class="demo tall">
+        <div class="demo-bar"><span><span class="dot"></span><span lang="en">Live — this step's page</span><span lang="ja">ライブ — このステップのページ</span></span><a href="shop/" target="_blank" rel="noopener"><span lang="en">Open in a new tab ↗</span><span lang="ja">新しいタブで開く ↗</span></a></div>
+        <iframe src="shop/" title="Little Roastery — step 16" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section class="doc" id="pin">
+      <h2><span lang="en">Pin one file</span><span lang="ja">1つのファイルに固定する</span></h2>
+      <p lang="en">In <code>&lt;head&gt;</code>, replace the four <code>esm.run</code> scripts with one:</p>
+      <p lang="ja"><code>&lt;head&gt;</code>で、<code>esm.run</code>の4つのscriptを1つに置き換えます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
+        <pre><code class="language-html" data-excerpt="app/index.html">&lt;base href="/"&gt;
+&lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.0.3/dist/auto.min.js"
+  integrity="sha384-Rg/zmSZFr/dAhrIMxTmw7qwPhnVTif3eD6l6ijprkUfMU0Rfcp1rrnBi9AR8xQMV"&gt;&lt;/script&gt;
+&lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+      <p lang="en"><code>wcstack/auto</code> is one file with state, the router, fetch, storage and the autoloader &mdash; everything the shop uses, about 70 KB compressed. The <code>integrity</code> value is the file's SHA-384 hash, from <a href="https://github.com/wcstack/wcstack/releases/tag/v4.0.3" target="_blank" rel="noopener"><code>sri.json</code> on the v4.0.3 release page</a>, where every release lists the hash of each package's file.</p>
+      <p lang="ja"><code>wcstack/auto</code>は、state・ルーター・fetch・storage・autoloaderを1つにしたファイルで、ショップが使うものがすべて入っています。圧縮して約70KBです。<code>integrity</code>の値はファイルのSHA-384ハッシュで、<a href="https://github.com/wcstack/wcstack/releases/tag/v4.0.3" target="_blank" rel="noopener">v4.0.3のリリースページの<code>sri.json</code></a>にあります。どのリリースも、各パッケージのファイルのハッシュをそこに載せています。</p>
+    </section>
+
+    <section class="doc" id="pages">
+      <h2><span lang="en">Put it on GitHub Pages</span><span lang="ja">GitHub Pagesに置く</span></h2>
+      <p lang="en">Push the shop's folder to a repository &mdash; say <code>little-roastery</code> (leave <code>node_modules</code> out with a <code>.gitignore</code>). GitHub Pages will serve it at <code>https://&lt;you&gt;.github.io/little-roastery/</code>: under <code>/little-roastery/</code>, not at <code>/</code>, where <code>npx serve</code> serves it on your machine. Rather than editing <code>&lt;base href&gt;</code> back and forth, write the published copy with a small script, next to <code>index.html</code>:</p>
+      <p lang="ja">ショップのフォルダをリポジトリ(たとえば<code>little-roastery</code>)にpushします(<code>node_modules</code>は<code>.gitignore</code>で外します)。GitHub Pagesはそれを<code>https://&lt;you&gt;.github.io/little-roastery/</code>で配信します。手元の<code>npx serve</code>が配信する<code>/</code>ではなく、<code>/little-roastery/</code>の下です。<code>&lt;base href&gt;</code>を行ったり来たり書き換える代わりに、公開用のコピーを小さなスクリプトで書き出します。<code>index.html</code>の隣に置きます。</p>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">publish.mjs</span><span class="tag"><span lang="en">new file</span><span lang="ja">新しいファイル</span></span></div>
+        <pre><code class="language-javascript" data-include="app/publish.mjs">// Writes the copy of the shop that GitHub Pages serves, into docs/.
+// On a project site the shop lives at /&lt;repository&gt;/, not at /, so the copy gets that base.
+import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
+
+const base = "/little-roastery/"; // "/" + your repository's name + "/"
+
+const html = readFileSync("index.html", "utf8").replace('&lt;base href="/"&gt;', `&lt;base href="${base}"&gt;`);
+mkdirSync("docs", { recursive: true });
+writeFileSync("docs/index.html", html);
+// GitHub Pages answers a path it has no file for (/little-roastery/products/2) with 404.html:
+// the same page, so the router reads the URL and shows the product.
+writeFileSync("docs/404.html", html);
+copyFileSync("product-card.js", "docs/product-card.js");
+console.log(`docs/ written for ${base}`);</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="filename">terminal</span></div>
+        <pre class="terminal"><span class="prompt">$ </span>node publish.mjs
+docs/ written for /little-roastery/</pre>
+      </div>
+      <p lang="en">Commit <code>docs/</code> and push. In the repository's <strong>Settings → Pages</strong>, choose <strong>Deploy from a branch</strong>, your main branch and the <code>/docs</code> folder. Run <code>node publish.mjs</code> again after every change, before you push.</p>
+      <p lang="ja"><code>docs/</code>をコミットしてpushします。リポジトリの<strong>Settings → Pages</strong>で<strong>Deploy from a branch</strong>を選び、mainのブランチと<code>/docs</code>フォルダを指定します。変更のたびに、pushの前に<code>node publish.mjs</code>をもう一度実行します。</p>
+    </section>
+
+    <section class="doc" id="how">
+      <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
+
+      <h3><span lang="en">The browser checks the file</span><span lang="ja">ブラウザがファイルを確かめる</span></h3>
+      <p lang="en">With <code>integrity</code>, the browser hashes the file it downloaded and runs it only if the hash matches. A file changed on the CDN &mdash; by accident or by an attacker &mdash; does not run on your site. That works only for a file that never changes: <code>esm.run</code> builds its files on request, so it can't be checked, while jsDelivr's <code>/npm/wcstack@4.0.3/dist/auto.min.js</code> is the file as published. <code>integrity</code> covers that one file; <code>product-card.js</code> and the page itself come from your own site.</p>
+      <p lang="ja"><code>integrity</code>があると、ブラウザはダウンロードしたファイルのハッシュを計算し、一致したときだけ実行します。CDN上で変わったファイルは(事故でも攻撃でも)、サイトでは動きません。これは変わらないファイルでしか成り立ちません。<code>esm.run</code>は要求のたびにファイルを組み立てるので確かめられず、jsDelivrの<code>/npm/wcstack@4.0.3/dist/auto.min.js</code>は公開されたファイルそのものです。<code>integrity</code>が守るのはその1つのファイルです。<code>product-card.js</code>とページ自体は、自分のサイトから届きます。</p>
+
+      <h3><span lang="en">404.html is the fallback</span><span lang="ja">404.htmlがfallback</span></h3>
+      <p lang="en">GitHub Pages has no single-page fallback, but for a path it has no file for &mdash; <code>/little-roastery/products/2</code> &mdash; it serves your <code>404.html</code>. <code>publish.mjs</code> makes that file the shop itself, so the router reads the URL and shows the product. The response still carries status 404, which a visitor never sees, though a search engine does.</p>
+      <p lang="ja">GitHub Pagesには単一ページアプリ向けのfallbackがありませんが、ファイルの無いパス(<code>/little-roastery/products/2</code>)には<code>404.html</code>を返します。<code>publish.mjs</code>がそのファイルをショップそのものにするので、ルーターがURLを読み、商品を表示します。応答のステータスは404のままで、訪問者には見えませんが、検索エンジンには見えます。</p>
+
+      <div class="try">
+        <span class="callout-label"><span lang="en">Try it</span><span lang="ja">やってみよう</span></span>
+        <p lang="en">Have GitHub check every push. Commit <code>package-lock.json</code>, and add <code>.github/workflows/check.yml</code> that runs <code>npm ci</code>, <code>npx @wcstack/lint --strict index.html</code> and <code>npm test</code> on <code>ubuntu-latest</code> with Node 22: a push that breaks a path or a test gets a red mark.</p>
+        <p lang="ja">pushのたびにGitHubに確かめさせてみましょう。<code>package-lock.json</code>をコミットし、<code>ubuntu-latest</code>とNode 22で<code>npm ci</code>・<code>npx @wcstack/lint --strict index.html</code>・<code>npm test</code>を実行する<code>.github/workflows/check.yml</code>を加えます。パスやテストを壊したpushには赤い印が付きます。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="mistakes">
+      <h2><span lang="en">Common mistakes</span><span lang="ja">よくある間違い</span></h2>
+
+      <div class="mistake">
+        <h3><span lang="en">An <code>integrity</code> that doesn't match</span><span lang="ja">一致しない<code>integrity</code></span></h3>
+        <p lang="en">A typo in the hash, or a hash from another version, and the browser refuses the file: nothing on the page works, and the console says why:</p>
+        <p lang="ja">ハッシュの打ち間違いや、別のバージョンのハッシュだと、ブラウザはファイルを拒みます。ページの何も動かず、コンソールが理由を言います。</p>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">console</span></div>
+          <pre class="terminal"><span class="err">Failed to find a valid digest in the 'integrity' attribute for resource 'https://cdn.jsdelivr.net/npm/wcstack@4.0.3/dist/auto.min.js' with computed SHA-384 integrity '…'. The resource has been blocked.</span></pre>
+        </div>
+        <p lang="en">Don't fix it by hashing what the CDN sends you: that checks the file against itself. Take the value from the release's <code>sri.json</code>.</p>
+        <p lang="ja">CDNが送ってきたもののハッシュを計算して直してはいけません。それはファイルをそれ自身と比べるだけです。値はリリースの<code>sri.json</code>から取ります。</p>
+      </div>
+
+      <div class="mistake">
+        <h3><span lang="en">Publishing <code>index.html</code> as it is</span><span lang="ja"><code>index.html</code>をそのまま公開する</span></h3>
+        <p lang="en">With <code>&lt;base href="/"&gt;</code> at <code>/little-roastery/</code>, the router counts its paths from the site's root: the shop's own address is a page it doesn't have, so it says “Page not found.”, and any link the page writes (<code>products/2</code>) would point outside the repository. Publish the copy that <code>publish.mjs</code> writes.</p>
+        <p lang="ja"><code>/little-roastery/</code>で<code>&lt;base href="/"&gt;</code>のままだと、ルーターはサイトの根からパスを数えます。ショップ自身のアドレスが知らないページになって「Page not found.」と出ます。ページが書くリンク(<code>products/2</code>)も、リポジトリの外を指すことになります。<code>publish.mjs</code>が書き出したコピーを公開します。</p>
+      </div>
+    </section>
+
+    <section class="doc" id="done">
+      <h2><span lang="en">Part 3 complete</span><span lang="ja">Part 3 完了</span></h2>
+      <p lang="en">The shop is an app now: product pages with their own URLs, a component, tests that run in a second, and a published site that runs the version you tested. Along the way:</p>
+      <p lang="ja">ショップはアプリになりました。自分のURLを持つ商品ページ、部品、1秒で終わるテスト、そしてテストしたバージョンで動く公開サイト。その途中で学んだこと:</p>
+      <ul class="list" lang="en">
+        <li><code>&lt;wcs-router&gt;</code> picks a route from the URL; <code>typedParams</code> makes the URL's parts state, links stay links, and <code>&lt;base href&gt;</code> says where the app starts. A server needs a single-page fallback for deep links.</li>
+        <li>A component is a custom element with <code>&lt;wcs-state bind-component&gt;</code>: the page mounts data on it (<code>state: .</code>) and hears its events (<code>onadd-to-cart:</code>).</li>
+        <li><code>@wcstack/testing</code> mounts the real page in Node; <code>fire()</code> and <code>settle()</code> act like a user, and a stubbed <code>fetch</code> keeps the tests from the network.</li>
+        <li>Publish a pinned file with <code>integrity</code> from the release's <code>sri.json</code>; on GitHub Pages, a copy of the page as <code>404.html</code> is the fallback.</li>
+      </ul>
+      <ul class="list" lang="ja">
+        <li><code>&lt;wcs-router&gt;</code>はURLからルートを選ぶ。<code>typedParams</code>がURLの部分をstateにし、リンクはリンクのまま、<code>&lt;base href&gt;</code>がアプリの始まりを示す。深いリンクには、サーバーの単一ページアプリ向けのfallbackが要る。</li>
+        <li>部品は<code>&lt;wcs-state bind-component&gt;</code>を持つカスタム要素。ページはデータをマウントし(<code>state: .</code>)、そのイベントを聞く(<code>onadd-to-cart:</code>)。</li>
+        <li><code>@wcstack/testing</code>は本物のページをNodeでマウントする。<code>fire()</code>と<code>settle()</code>がユーザーのように操作し、差し替えた<code>fetch</code>がテストをネットワークから切り離す。</li>
+        <li>公開には、固定したファイルとリリースの<code>sri.json</code>の<code>integrity</code>を使う。GitHub Pagesでは、ページのコピーの<code>404.html</code>がfallbackになる。</li>
+      </ul>
+      <p lang="en">That is the end of the tutorial. The <a href="../../state/">state page</a> is the complete reference for everything it didn't cover.</p>
+      <p lang="ja">チュートリアルはここまでです。扱わなかったすべてについては、<a href="../../state/">stateのページ</a>が完全なリファレンスです。</p>
+    </section>
+
+    <section class="doc" id="source">
+      <h2><span lang="en">The whole file</span><span lang="ja">ファイル全体</span></h2>
+      <p lang="en">The complete <code>index.html</code> of this step, as you keep it for <code>npx serve</code> (<code>publish.mjs</code> changes only its <code>&lt;base href&gt;</code>). <code>npx @wcstack/lint index.html</code> reports <code>0 error(s), 0 warning(s), 0 info</code> for it.</p>
+      <p lang="ja">このステップの<code>index.html</code>全体で、<code>npx serve</code>用に手元に置く形です(<code>publish.mjs</code>が変えるのは<code>&lt;base href&gt;</code>だけ)。<code>npx @wcstack/lint index.html</code>の結果は<code>0 error(s), 0 warning(s), 0 info</code>です。</p>
+      <details class="source">
+        <summary><span lang="en">Show index.html</span><span lang="ja">index.htmlを表示</span></summary>
+        <div class="code-block">
+          <div class="code-header"><span class="filename">index.html</span><span class="tag"><span lang="en">step 16</span><span lang="ja">ステップ16</span></span></div>
+          <pre><code class="language-html" data-include="app/index.html">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Little Roastery&lt;/title&gt;
+  &lt;base href="/"&gt;
+  &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
+  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.0.3/dist/auto.min.js"
+    integrity="sha384-Rg/zmSZFr/dAhrIMxTmw7qwPhnVTif3eD6l6ijprkUfMU0Rfcp1rrnBi9AR8xQMV"&gt;&lt;/script&gt;
+  &lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;wcs-state&gt;
+  &lt;script type="module"&gt;
+    /** @typedef {{ id: number, name: string, category: string, description: string, price: number, stock: number, icon: string }} Product */
+
+    export default {
+      /** @type {Product[] | null} */
+      catalog: null,
+      loading: false,
+      loadError: null,
+      reload: false,
+      cart: [],
+      routeParams: {},
+      query: "",
+      category: "all",
+
+      get products() {
+        return this.catalog ?? [];
+      },
+      get catalogReady() {
+        return this.catalog !== null;
+      },
+      get "products.*.href"() {
+        return "products/" + this["products.*.id"];
+      },
+      get product() {
+        const id = this["routeParams.id"];
+        return this.products.find(product =&gt; product.id === id) ?? null;
+      },
+      get "products.*.matches"() {
+        const query = this.query.trim().toLowerCase();
+        return (this.category === "all" || this["products.*.category"] === this.category) &amp;&amp;
+          this["products.*.name"].toLowerCase().includes(query);
+      },
+      get matchCount() {
+        return this.$getAll("products.*.matches", []).filter(Boolean).length;
+      },
+
+      get "cart.*.product"() {
+        const id = this["cart.*.id"];
+        return this.products.find(product =&gt; product.id === id);
+      },
+      get "cart.*.name"() {
+        return this["cart.*.product"]?.name ?? "…";
+      },
+      get "cart.*.price"() {
+        return this["cart.*.product"]?.price ?? 0;
+      },
+      get "cart.*.lineTotal"() {
+        return this["cart.*.price"] * this["cart.*.quantity"];
+      },
+      get itemCount() {
+        return this.$getAll("cart.*.quantity", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get subtotal() {
+        return this.$getAll("cart.*.lineTotal", []).reduce((sum, n) =&gt; sum + n, 0);
+      },
+      get shipping() {
+        return this.subtotal &gt;= 50 ? 0 : 5;
+      },
+      get total() {
+        return this.subtotal + this.shipping;
+      },
+
+      get "cart.*.saved"() {
+        return { id: this["cart.*.id"], quantity: this["cart.*.quantity"] };
+      },
+      get savedCart() {
+        return this.$getAll("cart.*.saved", []);
+      },
+      set savedCart(lines) {
+        if (Array.isArray(lines)) this.cart = lines;
+      },
+
+      retry() {
+        this.reload = true;
+      },
+      addToCart(event, index) {
+        this.addProduct(this.products[index].id);
+      },
+      addCurrent() {
+        this.addProduct(this.product.id);
+      },
+      addProduct(id) {
+        const line = this.cart.findIndex(item =&gt; item.id === id);
+        if (line &gt;= 0) {
+          this[`cart.${line}.quantity`] += 1;
+        } else {
+          this.cart = this.cart.concat({ id, quantity: 1 });
+        }
+      },
+      increase(event, index) {
+        this[`cart.${index}.quantity`] += 1;
+      },
+      decrease(event, index) {
+        this[`cart.${index}.quantity`] -= 1;
+      },
+      remove(event, index) {
+        this.cart = this.cart.toSpliced(index, 1);
+      }
+    };
+  &lt;/script&gt;
+&lt;/wcs-state&gt;
+
+&lt;wcs-fetch url="https://wcstack.github.io/tutorial/data/products.json"
+  data-wcs="value: catalog; loading: loading; error: loadError; trigger: reload"&gt;&lt;/wcs-fetch&gt;
+&lt;wcs-storage key="little-roastery-cart"
+  data-wcs="value#init=element: savedCart"&gt;&lt;/wcs-storage&gt;
+
+&lt;header class="shop-header"&gt;
+  &lt;h1&gt;Little Roastery&lt;/h1&gt;
+  &lt;p class="cart-badge"&gt;Cart: &lt;span data-wcs="textContent: itemCount"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;p class="status" data-wcs="hidden: loading|not"&gt;Loading products…&lt;/p&gt;
+&lt;p class="status error" data-wcs="hidden: loadError|not"&gt;
+  Couldn't load the products.
+  &lt;button type="button" data-wcs="onclick: retry"&gt;Try again&lt;/button&gt;
+&lt;/p&gt;
+
+&lt;main class="shop" data-wcs="hidden: catalogReady|not"&gt;
+  &lt;wcs-router data-wcs="typedParams: routeParams"&gt;
+    &lt;template&gt;
+      &lt;wcs-route path="/"&gt;
+        &lt;section class="catalog"&gt;
+          &lt;h2&gt;Products&lt;/h2&gt;
+          &lt;div class="toolbar"&gt;
+            &lt;input type="search" placeholder="Search products" aria-label="Search products" data-wcs="value: query"&gt;
+            &lt;fieldset class="categories"&gt;
+              &lt;legend class="visually-hidden"&gt;Category&lt;/legend&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="all" data-wcs="radio: category"&gt; All&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="coffee" data-wcs="radio: category"&gt; Coffee&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="tea" data-wcs="radio: category"&gt; Tea&lt;/label&gt;
+              &lt;label&gt;&lt;input type="radio" name="category" value="tools" data-wcs="radio: category"&gt; Tools&lt;/label&gt;
+            &lt;/fieldset&gt;
+          &lt;/div&gt;
+          &lt;div class="grid"&gt;
+            &lt;template data-wcs="for: products"&gt;
+              &lt;product-card data-wcs="state: .; hidden: .matches|not; onadd-to-cart: addToCart"&gt;&lt;/product-card&gt;
+            &lt;/template&gt;
+          &lt;/div&gt;
+          &lt;p class="no-results" data-wcs="hidden: matchCount|ne(0)"&gt;No products match.&lt;/p&gt;
+        &lt;/section&gt;
+      &lt;/wcs-route&gt;
+      &lt;wcs-route path="/products/:id(int)"&gt;
+        &lt;article class="product-page"&gt;
+          &lt;p class="back"&gt;&lt;a href="./"&gt;← All products&lt;/a&gt;&lt;/p&gt;
+          &lt;template data-wcs="if: product"&gt;
+            &lt;div class="card-icon"&gt;{{ product.icon }}&lt;/div&gt;
+            &lt;h2&gt;{{ product.name }}&lt;/h2&gt;
+            &lt;p&gt;{{ product.description }}&lt;/p&gt;
+            &lt;p class="price"&gt;${{ product.price|toFixed(2) }}&lt;/p&gt;
+            &lt;p class="badge" data-wcs="hidden: product.stock|ne(0)"&gt;Sold out&lt;/p&gt;
+            &lt;button type="button" data-wcs="onclick: addCurrent; disabled: product.stock|eq(0)"&gt;Add to cart&lt;/button&gt;
+          &lt;/template&gt;
+          &lt;template data-wcs="else:"&gt;
+            &lt;p class="no-results"&gt;No such product.&lt;/p&gt;
+          &lt;/template&gt;
+        &lt;/article&gt;
+      &lt;/wcs-route&gt;
+      &lt;wcs-route fallback&gt;
+        &lt;p class="no-results"&gt;Page not found. &lt;a href="./"&gt;Back to the shop&lt;/a&gt;&lt;/p&gt;
+      &lt;/wcs-route&gt;
+    &lt;/template&gt;
+  &lt;/wcs-router&gt;
+  &lt;wcs-outlet&gt;&lt;/wcs-outlet&gt;
+
+  &lt;aside class="cart"&gt;
+    &lt;h2&gt;Cart&lt;/h2&gt;
+    &lt;template data-wcs="if: cart.length|eq(0)"&gt;
+      &lt;p class="empty"&gt;Your cart is empty.&lt;/p&gt;
+    &lt;/template&gt;
+    &lt;template data-wcs="else:"&gt;
+      &lt;ul class="cart-lines"&gt;
+        &lt;template data-wcs="for: cart"&gt;
+          &lt;li&gt;
+            &lt;span class="line-name"&gt;{{ .name }}&lt;/span&gt;
+            &lt;span class="line-total"&gt;${{ .lineTotal|toFixed(2) }}&lt;/span&gt;
+            &lt;span class="stepper"&gt;
+              &lt;button type="button" aria-label="Decrease" data-wcs="onclick: decrease; disabled: .quantity|le(1)"&gt;−&lt;/button&gt;
+              &lt;span&gt;{{ .quantity }}&lt;/span&gt;
+              &lt;button type="button" aria-label="Increase" data-wcs="onclick: increase"&gt;+&lt;/button&gt;
+            &lt;/span&gt;
+            &lt;button type="button" class="remove" data-wcs="onclick: remove"&gt;Remove&lt;/button&gt;
+          &lt;/li&gt;
+        &lt;/template&gt;
+      &lt;/ul&gt;
+      &lt;dl class="totals"&gt;
+        &lt;dt&gt;Subtotal&lt;/dt&gt;&lt;dd&gt;${{ subtotal|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt&gt;Shipping&lt;/dt&gt;&lt;dd&gt;${{ shipping|toFixed(2) }}&lt;/dd&gt;
+        &lt;dt class="grand"&gt;Total&lt;/dt&gt;&lt;dd class="grand"&gt;${{ total|toFixed(2) }}&lt;/dd&gt;
+      &lt;/dl&gt;
+      &lt;p class="hint" data-wcs="hidden: shipping|eq(0)"&gt;Free shipping on orders of $50 or more.&lt;/p&gt;
+    &lt;/template&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <nav class="step-nav" aria-label="Steps">
+      <a class="prev" href="../15-test/"><span class="dir"><span lang="en">← Previous</span><span lang="ja">← 前へ</span></span><span class="name"><span lang="en">15. Test it</span><span lang="ja">15. テストする</span></span></a>
+      <a class="next" href="../"><span class="dir"><span lang="en">Back to →</span><span lang="ja">戻る →</span></span><span class="name"><span lang="en">Tutorial overview</span><span lang="ja">チュートリアルの概要</span></span></a>
+    </nav>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Tutorial</a>
+        <a href="../../state/">state docs</a>
+        <a href="https://github.com/wcstack/wcstack" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/wcstack/wcstack/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p>&copy; 2026 wcstack contributors. Released under the MIT License.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+</body>
+</html>
