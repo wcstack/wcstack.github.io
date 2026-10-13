@@ -71,8 +71,8 @@
 
     <section class="doc" id="code">
       <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
-      <p lang="en">Load the storage package:</p>
-      <p lang="ja">storageのパッケージを読み込みます。</p>
+      <p lang="en">Load the storage package, before state:</p>
+      <p lang="ja">storageのパッケージを、stateの前に読み込みます。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">new line</span><span lang="ja">1行追加</span></span></div>
         <pre><code class="language-html" data-excerpt="shop/index.html">&lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
@@ -162,9 +162,9 @@ set savedCart(lines) {
   &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
   &lt;title&gt;Little Roastery&lt;/title&gt;
   &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
-  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
   &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
   &lt;script type="module" src="https://esm.run/@wcstack/storage@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
 

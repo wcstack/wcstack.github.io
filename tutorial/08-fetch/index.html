@@ -80,12 +80,12 @@
 
     <section class="doc" id="code">
       <h2><span lang="en">Change the code</span><span lang="ja">コードを変える</span></h2>
-      <p lang="en">Start from your page of step 6. In <code>&lt;head&gt;</code>, load the fetch package after the state package:</p>
-      <p lang="ja">ステップ6のページから始めます。<code>&lt;head&gt;</code>で、stateのパッケージの後にfetchのパッケージを読み込みます。</p>
+      <p lang="en">Start from your page of step 6. In <code>&lt;head&gt;</code>, load the fetch package before the state package. State goes last, so every element is defined before state connects its bindings:</p>
+      <p lang="ja">ステップ6のページから始めます。<code>&lt;head&gt;</code>で、stateのパッケージの前にfetchのパッケージを読み込みます。stateは最後です — stateがバインディングをつなぐ前に、要素がすべて定義されるように。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">new line</span><span lang="ja">1行追加</span></span></div>
-        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
-&lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;</code></pre>
+        <pre><code class="language-html" data-excerpt="shop/index.html">&lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;</code></pre>
       </div>
       <p lang="en">In the state, the <code>products</code> array goes away. Put a type comment above <code>export default</code>, and replace the array with <code>catalog</code>, <code>loading</code> and two getters:</p>
       <p lang="ja">stateからは<code>products</code>の配列がなくなります。<code>export default</code>の上に型のコメントを置き、配列を<code>catalog</code>・<code>loading</code>とgetter 2つに置き換えます。</p>
@@ -194,8 +194,8 @@ index.html:104:18 <span class="warn">warning</span> wcs/binding-path-missing Pat
   &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
   &lt;title&gt;Little Roastery&lt;/title&gt;
   &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
-  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
   &lt;script type="module" src="https://esm.run/@wcstack/fetch@4/auto"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://esm.run/@wcstack/state@4/auto"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
 
