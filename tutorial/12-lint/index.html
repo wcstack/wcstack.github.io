@@ -108,12 +108,13 @@ index.html:107:33 <span class="err">error</span> wcs/input-nested-write "cart" i
       <div class="code-block">
         <div class="code-header"><span class="filename">terminal</span></div>
         <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
+index.html:37:11 <span class="warn">warning</span> wcs/read-path-missing Path "products.*.name" does not exist in the state definition. The read gives undefined, and what is computed from it is wrong without a word. Did you mean "nmae"?
 index.html:137:18 <span class="warn">warning</span> wcs/binding-path-missing Path ".name" does not exist in the state definition (expanded: products.*.name)
 
-0 error(s), 1 warning(s), 0 info</pre>
+0 error(s), 2 warning(s), 0 info</pre>
       </div>
-      <p lang="en">The warning points at the product card, and the mistake is in the comment. The type is a promise about the file; when the two disagree, check the file first.</p>
-      <p lang="ja">警告は商品カードを指していますが、間違いはコメントの中にあります。型はファイルについての約束です。食い違ったら、まずファイルを確かめましょう。</p>
+      <p lang="en">The warnings point at the search getter, which reads <code>this["products.*.name"]</code>, and at the product card; the mistake is in the comment &mdash; the checker even suggests the misspelled name. The type is a promise about the file; when the two disagree, check the file first.</p>
+      <p lang="ja">警告は<code>this["products.*.name"]</code>を読む検索のgetterと、商品カードを指していますが、間違いはコメントの中にあります(検査器は打ち間違えた名前のほうを勧めさえします)。型はファイルについての約束です。食い違ったら、まずファイルを確かめましょう。</p>
 
       <div class="note">
         <span class="callout-label"><span lang="en">What the checker can't see</span><span lang="ja">検査器に見えないもの</span></span>

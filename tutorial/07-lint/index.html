@@ -104,17 +104,17 @@ index.html:97:18 <span class="warn">warning</span> wcs/binding-path-missing Path
       </div>
 
       <h3><span lang="en">2. A filter that doesn't exist</span><span lang="ja">2. 存在しないフィルタ</span></h3>
-      <p lang="en">Change <code>{{ .price|toFixed(2) }}</code> in the card to <code>{{ .price|currency }}</code>. This time nothing on the page binds: the state stops at startup with <code>[wcs/filter-unknown] filter not found: currency</code> in the console. The checker:</p>
-      <p lang="ja">カードの<code>{{ .price|toFixed(2) }}</code>を<code>{{ .price|currency }}</code>に変えます。今度はページの何もバインドされません。stateは起動の時点で止まり、コンソールに<code>[wcs/filter-unknown] filter not found: currency</code>が出ます。検査器の結果は次のとおりです。</p>
+      <p lang="en">Change <code>{{ .price|toFixed(2) }}</code> in the card to <code>{{ .price|money }}</code>. This time nothing on the page binds: the state stops at startup with <code>[wcs/filter-unknown] filter not found: money</code> in the console. The checker:</p>
+      <p lang="ja">カードの<code>{{ .price|toFixed(2) }}</code>を<code>{{ .price|money }}</code>に変えます。今度はページの何もバインドされません。stateは起動の時点で止まり、コンソールに<code>[wcs/filter-unknown] filter not found: money</code>が出ます。検査器の結果は次のとおりです。</p>
       <div class="code-block">
         <div class="code-header"><span class="filename">terminal</span></div>
         <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
-index.html:99:39 <span class="err">error</span> wcs/filter-unknown Filter "currency" is not a built-in filter
+index.html:99:39 <span class="err">error</span> wcs/filter-unknown Filter "money" is not a built-in filter
 
 1 error(s), 0 warning(s), 0 info</pre>
       </div>
-      <p lang="en">The 47 built-in filters are listed on the <a href="../../state/#filters">state page</a>.</p>
-      <p lang="ja">47個の組み込みフィルタは<a href="../../state/#filters">stateのページ</a>に一覧があります。</p>
+      <p lang="en">The 48 built-in filters are listed on the <a href="../../state/#filters">state page</a>.</p>
+      <p lang="ja">48個の組み込みフィルタは<a href="../../state/#filters">stateのページ</a>に一覧があります。</p>
 
       <h3><span lang="en">3. <code>push</code> instead of a new array</span><span lang="ja">3. 新しい配列の代わりに<code>push</code></span></h3>
       <p lang="en">In <code>addToCart</code>, change <code>this.cart = this.cart.concat(</code> to <code>this.cart.push(</code>. In the browser, “Add to cart” now does nothing the first time you add a product. The checker reports an error, and three warnings after it:</p>
