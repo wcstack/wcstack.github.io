@@ -80,10 +80,10 @@
       <div class="code-block">
         <div class="code-header"><span class="filename">terminal</span></div>
         <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
-index.html:107:13 <span class="warn">warning</span> wcs/storage-seed-clobber The &lt;wcs-storage&gt; value-bound slot "cart" is seeded with []. The initial write-back overwrites the persisted value on every load — add #init=element to the binding (`value#init=element: cart`) so the stored value wins, and seed the slot with null (what an empty key loads as)
-index.html:107:20 <span class="warn">warning</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
+index.html:107:13 <span class="err">error</span> wcs/storage-seed-clobber The &lt;wcs-storage&gt; value-bound slot "cart" is seeded with []. The initial write-back overwrites the persisted value on every load — add #init=element to the binding (`value#init=element: cart`) so the stored value wins, and seed the slot with null (what an empty key loads as)
+index.html:107:20 <span class="err">error</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
 
-0 error(s), 2 warning(s), 0 info</pre>
+2 error(s), 0 warning(s), 0 info</pre>
       </div>
       <p lang="en">The first is the reload: the starting <code>[]</code> is saved over the stored cart. The second is the quantity: <code>addToCart</code> and the stepper write <code>cart.*.quantity</code>, below the bound path. Step 11's <code>savedCart</code> answers both.</p>
       <p lang="ja">1つ目は再読み込みの件です。最初の<code>[]</code>が保存済みのカートの上に保存されます。2つ目は数量の件です。<code>addToCart</code>と数量のボタンは、バインドしたパスの下の<code>cart.*.quantity</code>に書きます。ステップ11の<code>savedCart</code>が、どちらにも答えています。</p>
@@ -95,9 +95,9 @@ index.html:107:20 <span class="warn">warning</span> wcs/input-nested-write "cart
         <div class="code-header"><span class="filename">terminal</span></div>
         <pre class="terminal"><span class="prompt">$ </span>npx @wcstack/lint index.html
 index.html:107:13 <span class="warn">warning</span> wcs/storage-init-seed The &lt;wcs-storage&gt; value-bound slot "cart" is seeded with [], but #init=element pulls the element's value into it. On a first visit (an empty key) that is null, so the seed is replaced by null — seed it with null and supply the default where you read it (`this.cart ?? …`), or bind an accessor pair whose setter ignores null
-index.html:107:33 <span class="warn">warning</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
+index.html:107:33 <span class="err">error</span> wcs/input-nested-write "cart" is bound to the input "value" of &lt;wcs-storage&gt;, but the page writes below it ("cart.*.quantity"). A binding is re-applied only when "cart" itself is assigned, so those writes never reach &lt;wcs-storage&gt; — bind a getter that reads the fields by path (`this["cart.*.quantity"]`, `$getAll`) and returns a new value, or replace "cart" instead of writing below it
 
-0 error(s), 2 warning(s), 0 info</pre>
+1 error(s), 1 warning(s), 0 info</pre>
       </div>
       <p lang="en">“An accessor pair whose setter ignores null” is <code>savedCart</code>.</p>
       <p lang="ja">「nullを無視するsetterを持つアクセサペア」とは、<code>savedCart</code>のことです。</p>
