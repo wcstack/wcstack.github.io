@@ -70,12 +70,12 @@
         <div class="code-header"><span class="filename">index.html — &lt;head&gt;</span><span class="tag"><span lang="en">changed</span><span lang="ja">変更</span></span></div>
         <pre><code class="language-html" data-excerpt="app/index.html">&lt;base href="/"&gt;
 &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
-&lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.7.0/dist/auto.min.js"
-  integrity="sha384-xJE52u8ewAT7VeLCXj5a4Yg9dhGMDaH7i+zpsJR+D8b0TJeNzJBPPh9AqzlNxDU3"&gt;&lt;/script&gt;
+&lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.9.0/dist/auto.min.js"
+  integrity="sha384-q7fx7b9auW5J7LFOlIsNQQJ2P17cHSzRtHV533DtJ28EQTyEFp7kZJZwPPmDv6Js"&gt;&lt;/script&gt;
 &lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;</code></pre>
       </div>
-      <p lang="en"><code>wcstack/auto</code> is one file with state, the router, fetch, storage and the autoloader &mdash; everything the shop uses, about 70 KB compressed. The <code>integrity</code> value is the file's SHA-384 hash, from <a href="https://github.com/wcstack/wcstack/releases/tag/v4.7.0" target="_blank" rel="noopener"><code>sri.json</code> on the v4.7.0 release page</a>, where every release lists the hash of each package's file.</p>
-      <p lang="ja"><code>wcstack/auto</code>は、state・ルーター・fetch・storage・autoloaderを1つにしたファイルで、ショップが使うものがすべて入っています。圧縮して約70KBです。<code>integrity</code>の値はファイルのSHA-384ハッシュで、<a href="https://github.com/wcstack/wcstack/releases/tag/v4.7.0" target="_blank" rel="noopener">v4.7.0のリリースページの<code>sri.json</code></a>にあります。どのリリースも、各パッケージのファイルのハッシュをそこに載せています。</p>
+      <p lang="en"><code>wcstack/auto</code> is one file with state, the router, fetch, storage and the autoloader &mdash; everything the shop uses, about 75 KB compressed. The <code>integrity</code> value is the file's SHA-384 hash, from <a href="https://github.com/wcstack/wcstack/releases/tag/v4.9.0" target="_blank" rel="noopener"><code>sri.json</code> on the v4.9.0 release page</a>, where every release lists the hash of each package's file.</p>
+      <p lang="ja"><code>wcstack/auto</code>は、state・ルーター・fetch・storage・autoloaderを1つにしたファイルで、ショップが使うものがすべて入っています。圧縮して約75KBです。<code>integrity</code>の値はファイルのSHA-384ハッシュで、<a href="https://github.com/wcstack/wcstack/releases/tag/v4.9.0" target="_blank" rel="noopener">v4.9.0のリリースページの<code>sri.json</code></a>にあります。どのリリースも、各パッケージのファイルのハッシュをそこに載せています。</p>
     </section>
 
     <section class="doc" id="pages">
@@ -112,8 +112,8 @@ docs/ written for /little-roastery/</pre>
       <h2><span lang="en">How it works</span><span lang="ja">しくみ</span></h2>
 
       <h3><span lang="en">The browser checks the file</span><span lang="ja">ブラウザがファイルを確かめる</span></h3>
-      <p lang="en">With <code>integrity</code>, the browser hashes the file it downloaded and runs it only if the hash matches. A file changed on the CDN &mdash; by accident or by an attacker &mdash; does not run on your site. That works only for a file that never changes: <code>esm.run</code> builds its files on request, so it can't be checked, while jsDelivr's <code>/npm/wcstack@4.7.0/dist/auto.min.js</code> is the file as published. <code>integrity</code> covers that one file; <code>product-card.js</code> and the page itself come from your own site.</p>
-      <p lang="ja"><code>integrity</code>があると、ブラウザはダウンロードしたファイルのハッシュを計算し、一致したときだけ実行します。CDN上で変わったファイルは(事故でも攻撃でも)、サイトでは動きません。これは変わらないファイルでしか成り立ちません。<code>esm.run</code>は要求のたびにファイルを組み立てるので確かめられず、jsDelivrの<code>/npm/wcstack@4.7.0/dist/auto.min.js</code>は公開されたファイルそのものです。<code>integrity</code>が守るのはその1つのファイルです。<code>product-card.js</code>とページ自体は、自分のサイトから届きます。</p>
+      <p lang="en">With <code>integrity</code>, the browser hashes the file it downloaded and runs it only if the hash matches. A file changed on the CDN &mdash; by accident or by an attacker &mdash; does not run on your site. That works only for a file that never changes: <code>esm.run</code> builds its files on request, so it can't be checked, while jsDelivr's <code>/npm/wcstack@4.9.0/dist/auto.min.js</code> is the file as published. <code>integrity</code> covers that one file; <code>product-card.js</code> and the page itself come from your own site.</p>
+      <p lang="ja"><code>integrity</code>があると、ブラウザはダウンロードしたファイルのハッシュを計算し、一致したときだけ実行します。CDN上で変わったファイルは(事故でも攻撃でも)、サイトでは動きません。これは変わらないファイルでしか成り立ちません。<code>esm.run</code>は要求のたびにファイルを組み立てるので確かめられず、jsDelivrの<code>/npm/wcstack@4.9.0/dist/auto.min.js</code>は公開されたファイルそのものです。<code>integrity</code>が守るのはその1つのファイルです。<code>product-card.js</code>とページ自体は、自分のサイトから届きます。</p>
 
       <h3><span lang="en">404.html is the fallback</span><span lang="ja">404.htmlがfallback</span></h3>
       <p lang="en">GitHub Pages has no single-page fallback, but for a path it has no file for &mdash; <code>/little-roastery/products/2</code> &mdash; it serves your <code>404.html</code>. <code>publish.mjs</code> makes that file the shop itself, so the router reads the URL and shows the product. The response still carries status 404, which a visitor never sees, though a search engine does.</p>
@@ -135,7 +135,7 @@ docs/ written for /little-roastery/</pre>
         <p lang="ja">ハッシュの打ち間違いや、別のバージョンのハッシュだと、ブラウザはファイルを拒みます。ページの何も動かず、コンソールが理由を言います。</p>
         <div class="code-block">
           <div class="code-header"><span class="filename">console</span></div>
-          <pre class="terminal"><span class="err">Failed to find a valid digest in the 'integrity' attribute for resource 'https://cdn.jsdelivr.net/npm/wcstack@4.7.0/dist/auto.min.js' with computed SHA-384 integrity '…'. The resource has been blocked.</span></pre>
+          <pre class="terminal"><span class="err">Failed to find a valid digest in the 'integrity' attribute for resource 'https://cdn.jsdelivr.net/npm/wcstack@4.9.0/dist/auto.min.js' with computed SHA-384 integrity '…'. The resource has been blocked.</span></pre>
         </div>
         <p lang="en">Don't fix it by hashing what the CDN sends you: that checks the file against itself. Take the value from the release's <code>sri.json</code>.</p>
         <p lang="ja">CDNが送ってきたもののハッシュを計算して直してはいけません。それはファイルをそれ自身と比べるだけです。値はリリースの<code>sri.json</code>から取ります。</p>
@@ -184,8 +184,8 @@ docs/ written for /little-roastery/</pre>
   &lt;title&gt;Little Roastery&lt;/title&gt;
   &lt;base href="/"&gt;
   &lt;link rel="stylesheet" href="https://wcstack.github.io/tutorial/shop.css"&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.7.0/dist/auto.min.js"
-    integrity="sha384-xJE52u8ewAT7VeLCXj5a4Yg9dhGMDaH7i+zpsJR+D8b0TJeNzJBPPh9AqzlNxDU3"&gt;&lt;/script&gt;
+  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/wcstack@4.9.0/dist/auto.min.js"
+    integrity="sha384-q7fx7b9auW5J7LFOlIsNQQJ2P17cHSzRtHV533DtJ28EQTyEFp7kZJZwPPmDv6Js"&gt;&lt;/script&gt;
   &lt;script type="module" src="product-card.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;

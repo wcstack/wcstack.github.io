@@ -5,12 +5,12 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@wcstack/fetch": "^4.7.0",
-    "@wcstack/router": "^4.7.0",
-    "@wcstack/server": "^4.7.0",
-    "@wcstack/state": "^4.7.0",
-    "@wcstack/storage": "^4.7.0",
-    "@wcstack/testing": "^4.7.0",
+    "@wcstack/fetch": "^4.9.0",
+    "@wcstack/router": "^4.9.0",
+    "@wcstack/server": "^4.9.0",
+    "@wcstack/state": "^4.9.0",
+    "@wcstack/storage": "^4.9.0",
+    "@wcstack/testing": "^4.9.0",
     "happy-dom": "^21.0.1",
     "vitest": "^5.0.4"
   }
