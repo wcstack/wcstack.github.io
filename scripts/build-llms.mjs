@@ -122,6 +122,7 @@ const refs = [
   ["io-node-catalog.md", "Reference: I/O node catalog + signals quick reference"],
   ["islands.md", "Reference: a page wcstack does not own (islands and widgets)"],
   ["forms.md", "Reference: forms (a page that is mostly a form)"],
+  ["long-lists.md", "Reference: long lists (infinite scroll, rows, a window of rows, coming back)"],
 ].map(([f, title]) =>
   `\n\n---\n\n# ${title}\n\n<!-- source: wcstack-skill/skills/wcstack-app/references/${f} -->\n\n`
   + readLf(path.join(skillBase, "references", f)),
@@ -134,8 +135,8 @@ const full = `# wcstack — complete authoring guide for LLMs
 > silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
 > whose content is verified against the wcstack monorepo at ${tag}.
 
-Note: the guide below refers to five reference files (references/state-binding.md,
-router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md). All five are included
+Note: the guide below refers to six reference files (references/state-binding.md,
+router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md). All six are included
 IN THIS FILE after the main guide — no external fetches are needed.
 
 ---
