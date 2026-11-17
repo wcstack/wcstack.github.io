@@ -1,12 +1,12 @@
 # wcstack — complete authoring guide for LLMs
 
-> Everything needed to generate correct wcstack (v4.24.2) apps: workflow, exact data-wcs
+> Everything needed to generate correct wcstack (v4.25.0) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
 > silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
-> whose content is verified against the wcstack monorepo at v4.24.2.
+> whose content is verified against the wcstack monorepo at v4.25.0.
 
-Note: the guide below refers to six reference files (references/state-binding.md,
-router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md). All six are included
+Note: the guide below refers to seven reference files (references/state-binding.md,
+router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md, device-apis.md). All seven are included
 IN THIS FILE after the main guide — no external fetches are needed.
 
 ---
@@ -18,7 +18,7 @@ IN THIS FILE after the main guide — no external fetches are needed.
 
 wcstack is a family of "standards-first, zero-config, buildless" Web Components packages. An app is correctly a **single HTML file + one-line CDN loads** — do not introduce bundlers, build steps, or npm install unless the user explicitly asks for them.
 
-Content verified against **wcstack v4.24.2** (READMEs, examples, and source as of 2026-11). **The rules here are for wcstack 4.0**, which replaced the `@wcstack/state` engine behind the same markup (`<wcs-state>`, `data-wcs`, `{{ }}`, `for` / `if`, path getters, the `$` APIs, `bind-component`, `mount=`, the package entries). What a 4.0 author writes differently:
+Content verified against **wcstack v4.25.0** (READMEs, examples, and source as of 2026-11). **The rules here are for wcstack 4.0**, which replaced the `@wcstack/state` engine behind the same markup (`<wcs-state>`, `data-wcs`, `{{ }}`, `for` / `if`, path getters, the `$` APIs, `bind-component`, `mount=`, the package entries). What a 4.0 author writes differently:
 
 - **Configuration is split.** `bootstrapState()` takes only how the page spells the markup (`bindAttributeName`, `tagNames`, the anchor-comment prefixes) plus `locale` and `enableContractAnalyzer`; behaviour switches live in each root state as `$behavior: { enableMustache, sameValueGuard, enableDirectionalInitialSync }`. **Every package's `bootstrapXxx(config)` throws on an option it does not have** (`/auto` passes none).
 - **Bubbling `on*:` events are delegated to the root** — `event.currentTarget` is the root, not the element. `on*#direct:` keeps a listener on the element.
@@ -40,6 +40,7 @@ Generated-code accuracy lives in the exact syntax. **This file holds only the wo
 | `references/islands.md` | adding wcstack to a page it does not own — a server-rendered site with htmx or Turbo — or writing a widget for other sites' pages |
 | `references/forms.md` | building a page that is mostly a form — an application, an entry sheet, a wizard: text typed with an IME, fields that format what is typed, autofill, a reset, rows of inputs, form controls of your own |
 | `references/long-lists.md` | building a page with a long list — infinite scroll, a feed, a table of thousands of rows, a list the user comes back to |
+| `references/device-apis.md` | building a page that uses what the device has — fullscreen, Picture-in-Picture, the pointer lock, the screen's orientation, the phone's orientation and motion sensors, the share sheet, the contact picker, saved passwords, the eye dropper |
 
 ## Workflow
 
@@ -76,9 +77,9 @@ Generated-code accuracy lives in the exact syntax. **This file holds only the wo
 - **`<wcs-outlet>` goes right after its `<wcs-router>`** — the router renders only into the element right after it and otherwise creates its own outlet there. To render inside `<main>`, put the router inside `<main>` too, right before the outlet (lint: `wcs/router-outlet-misplaced`).
 - **Always set `<html lang>`** — it is the default locale for the locale-dependent filters (`locale` / `date` / `time` / `datetime`), read when `@wcstack/state` is evaluated (an explicit `bootstrapState({ locale })` still wins). Changing the locale later re-renders nothing, so the language must be in the markup (or set by a synchronous `<head>` script) before state loads.
 - The bare-name `wcstack` npm package is the **SPA-core bundle**: `wcstack/auto` = state + router + fetch + storage + autoloader pre-linked into one self-contained file (one request, one SRI hash). Use it when the app uses the SPA core anyway; per-package `/auto` tags stay the default (they fetch in parallel — no waterfall) and pay only for what the page uses. Loading both from the same release is safe (first evaluated copy wins; the other is inert); a second copy of a package at another version warns since 4.11 (`[wcs/package-twice]`) — an old line placed first runs the old version — so load each package once, every wcstack line at one version. **Never merge files yourself via jsDelivr `/combine/`** — concatenated minified ESM does not even parse (top-level identifier collisions), and jsDelivr itself forbids SRI on it.
-- **`esm.run/@wcstack/<pkg>/auto` follows the npm `latest` release.** The rules in this skill are 4.0's; a page that must stay on 3.x pins the major on every wcstack line (`https://esm.run/@wcstack/state@3/auto`, likewise `wcstack@3/auto`) and follows the 3.x documentation instead (§16 of `references/state-binding.md` lists what differs). To stay on a 4.x release, pin it on every wcstack line — `https://esm.run/@wcstack/state@4.24.2/auto`, every package at the same version — and keep `@wcstack/lint` at that version too (an older lint reports newer syntax as an error; since 4.11 it warns `wcs/lint-version-behind`).
+- **`esm.run/@wcstack/<pkg>/auto` follows the npm `latest` release.** The rules in this skill are 4.0's; a page that must stay on 3.x pins the major on every wcstack line (`https://esm.run/@wcstack/state@3/auto`, likewise `wcstack@3/auto`) and follows the 3.x documentation instead (§16 of `references/state-binding.md` lists what differs). To stay on a 4.x release, pin it on every wcstack line — `https://esm.run/@wcstack/state@4.25.0/auto`, every package at the same version — and keep `@wcstack/lint` at that version too (an older lint reports newer syntax as an error; since 4.11 it warns `wcs/lint-version-behind`).
 - **`@wcstack/state/core` + `features/*`, or the split auto entry `dist/split/auto.js`, is an opt-in for byte-conscious pages, not the default** — `/auto` carries every feature. Use it only when the user asks, from version-pinned **plain jsDelivr file paths**, **never `esm.run`** (`+esm` re-bundles each entry with its own copy of the engine, so features install into a copy the core never sees). The split auto entry needs no import map: one `<script type="module" src="…/@wcstack/state@<version>/dist/split/auto.js">`, the root `<wcs-state features="scopes diagnostics">` for what must exist before any state starts (and dev aids), and `$features: ["temporal", "formats"]` in each state for what that state needs. Without `features/diagnostics`, messages print as a code and a number (`[wcs/filter-unknown] #501 "uc"`) — keep it while developing. Recipe and entry table: `references/state-binding.md` §1.
-- **Production / CSP** — only when the user asks for hardening; `esm.run` stays the default for demos and prototypes. Pin the version and use the direct jsDelivr path so `integrity` works: `<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/auto.min.js" integrity="sha384-…">`. `dist/auto.min.js` has zero static imports, so one hash covers the whole runtime; digests ship in the GitHub Release (`sri.json`), never taken from the CDN's own API. `esm.run` cannot be hashed (it redirects to a re-bundling `+esm` endpoint) and costs two CSP hosts. **The one CSP fact that silently breaks a working page: the inline `<script type="module">` inside `<wcs-state>` is imported through a `blob:` URL, which a strict policy refuses unless the `<script>` that loads state carries the page nonce (`<script type="module" nonce="{RANDOM}" src="…/dist/auto.min.js">` — the `blob:` import inherits it) or the policy opens `script-src blob:`. Where no nonce can be issued (static hosting), move the state to `src="./state.js"` — the preferred form under a strict CSP anyway.** The browser also evaluates that inner module itself, so its top-level code can run twice: keep side effects out of it (`references/state-binding.md` §2). Route guards go through `blob:` too and have no `src=` form: the nonce on the router's `<script>` admits them; without one they need `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). Under Trusted Types enforcement, `html:` / `innerHTML:` bindings and `<wcs-fetch target>` need a sanitizing policy you install; `<wcs-layout>` / `<wcs-worker>` need `trusted-types wcstack`. Details in `references/state-binding.md` §1–2.
+- **Production / CSP** — only when the user asks for hardening; `esm.run` stays the default for demos and prototypes. Pin the version and use the direct jsDelivr path so `integrity` works: `<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/auto.min.js" integrity="sha384-…">`. `dist/auto.min.js` has zero static imports, so one hash covers the whole runtime; digests ship in the GitHub Release (`sri.json`), never taken from the CDN's own API. `esm.run` cannot be hashed (it redirects to a re-bundling `+esm` endpoint) and costs two CSP hosts. **The one CSP fact that silently breaks a working page: the inline `<script type="module">` inside `<wcs-state>` is imported through a `blob:` URL, which a strict policy refuses unless the `<script>` that loads state carries the page nonce (`<script type="module" nonce="{RANDOM}" src="…/dist/auto.min.js">` — the `blob:` import inherits it) or the policy opens `script-src blob:`. Where no nonce can be issued (static hosting), move the state to `src="./state.js"` — the preferred form under a strict CSP anyway.** The browser also evaluates that inner module itself, so its top-level code can run twice: keep side effects out of it (`references/state-binding.md` §2). Route guards go through `blob:` too and have no `src=` form: the nonce on the router's `<script>` admits them; without one they need `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). Under Trusted Types enforcement, `html:` / `innerHTML:` bindings and `<wcs-fetch target>` need a sanitizing policy you install; `<wcs-layout>` / `<wcs-worker>` need `trusted-types wcstack`. Details in `references/state-binding.md` §1–2.
 
 ### 3. State design (state family)
 
@@ -361,6 +362,14 @@ Run `npx @wcstack/lint` without `--errors-only` first (§5), fix or explain ever
 | `<button type="reset">` / `form.reset()` on a form bound to state | On a page pinned to 4.22 or earlier the fields go blank and state keeps everything (a reload brings it back). Since 4.23 state takes the reset values | A `clear()` method that assigns to state where the defaults are state's, not the markup's — `references/forms.md` §4 |
 | A form control of your own (`static formAssociated`) with `value` in `properties` only, or with no `wcBindable` | Output only: its empty value replaces state's at the first sync — a saved draft is lost as the page loads; no declaration: what the user enters never reaches state. Since 4.23 the diagnostics warn `[wcs/form-control-one-way]` | `value` in both `properties` (with its event) and `inputs` — `references/forms.md` §7 |
 | `this.$command.post.emit()` right after `this.payload = …` (`command.fetch:`), or the same JSON string written to `body` again for a retry | A command runs before the bindings of the same update: the request carries the previous body, or none. The same string is no change, so a retry has no body (`[wcs/fetch-body-gone]` since 4.23) | `data-wcs="body: payload; trigger: sending"` in that order; `this.payload = { ...entry }; this.sending = true` — `references/forms.md` §8 |
+| A command that needs a tap emitted late: from a `$watch`, when a response arrives, after an `await` in the handler (`const file = await this.makePicture(); this.$command.share.emit({ files: [file] })`) | The browser refuses (`errorInfo.code` `not-allowed`). Chromium keeps a tap's activation about five seconds, so it works on a fast network and fails on a slow one | Emit in the tap's handler before anything is awaited; prepare what the command needs beforehand — `references/device-apis.md` §1 |
+| An I/O node with none of its failure outputs bound (`<wcs-fullscreen data-wcs="active: fs; command.requestFullscreen: $command.go">`) | The elements never throw: a refused request, a missing API, a `target` that names nothing end in `error` / `errorInfo`, and the button did nothing — silently up to 4.24. Since 4.25 the diagnostics add-on warns `[wcs/io-error-unobserved]` | Bind `errorInfo` and show it; `cancelled` (a closed share sheet or picker) is not a failure — `references/device-apis.md` §2 |
+| A button for fullscreen, Picture-in-Picture, the share sheet, the eye dropper, the contact picker, saved passwords offered without asking whether the page can use it | An iPhone has no element fullscreen, Firefox no Picture-in-Picture, most desktops no share sheet: the tap ends as `capability-missing` | Since 4.25 `supported` on each element: `hidden: fsSupported\|not`; `<wcs-permission>`'s `unsupportedReason: "policy-blocked"` = forbidden by the page it is embedded in — `references/device-apis.md` §3 |
+| `onclick: $command.share` — a token wired straight to a command that takes data (`share`, `lock`, `select`, `get`, `sendMessage`, `speak`) | The event becomes the data: the browser's `TypeError` in `error`, and `<wcs-credential>`'s `get(event)` resolves `null` without a word; lint `wcs/command-event-argument` (warning, 4.25) | Emit from a state method with the data. Wired straight is fine for commands with no data, and for `<wcs-fetch>`'s `fetch`, `<wcs-ws>`'s `close`, `<wcs-idle>`'s `start` (the last two since 4.25) |
+| Orientation / motion sensors started when the page opens; `<wcs-tilt>`'s `alpha` used as a compass; `permissionState: "denied"` after a call that was not a tap read as "the user refused" | On an iPhone no reading arrives until the question is answered, and it is shown only from a tap; `alpha` is relative on both phone platforms; up to 4.24 a refusal to ask said `"denied"` | One button emits `requestPermission` and `start` in the tap; north is `heading` (4.25); since 4.25 `<wcs-accelerometer>` / `<wcs-gyroscope>` read `devicemotion` on an iPhone — `references/device-apis.md` §4 |
+| "Is it fullscreen" kept as a flag of the page's own; `this.isFullscreen = true` to go fullscreen; `target="viewer"` for `id="viewer"`; the fullscreen viewer or a Picture-in-Picture `<video>` inside a route's content | The user leaves with Escape and the flag does not know; an output written from a script reaches no element (lint `wcs/output-path-written`); `target` is a selector (lint `wcs/target-selector`); leaving the route ends fullscreen and takes the video out of the document | Bind `active`, ask with the command, `target="#viewer"`, and keep what must go on across pages outside the router — `references/device-apis.md` §5 |
+| `<wcs-contacts data-wcs="value: members">` — a picker's `value` bound into a list the page keeps; signing out without telling the browser | `value` is an output: at bind the element's `null` replaces the list, and after a pick it holds the picker's shape (`name: ["山田"]`); the next visit's silent `get` signs the user back in | A slot of its own and a `$watch` that makes records; `preventSilentAccess` on sign-out (4.25) — `references/device-apis.md` §7 |
+| `<wcs-storage manual data-wcs="value: settings; trigger: settingsChanged">` with `get settingsChanged() { …; return true; }` (the storage README's "Saving on demand" up to 4.24) | `[wcs/path-readonly]` on every change (the element writes `trigger` back), and `manual` loads nothing: the saved settings never come back; lint `wcs/path-readonly` (error, 4.25) | A slot the page assigns when it chooses: `value#init=element: saved` with `saved: null`, `save() { this.saved = { ...this.settings }; }`, and a `$watch` on `saved` that copies it into `settings` |
 | `<wcs-upload>` / `<wcs-fetch>` in a `for:` row that is reordered | Up to 4.22 the move aborted the request without a word (`loading` false, `status` 0). Since 4.23 it goes on where the browser has `moveBefore()` — not Safari | Do not reorder while a row's request is in flight, or keep the I/O elements in a list that does not move |
 | `import { x } from "./guards.js"` in a `<wcs-guard-handler>` script | A guard is evaluated from a `blob:` URL: the import fails, and the route closes (every navigation into it is redirected) | `await import(new URL("/js/guards.js", location.href).href)` inside the function, or an import-map name — `references/router-and-scaffold.md` §4 |
 
@@ -399,7 +408,7 @@ For a full SPA with fetch wiring and layouts, start from the router-spa skeleton
 
 # @wcstack/state Reference
 
-Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/migration-v4.md`, `docs/state-errors.md` (message numbers) and the 4.0.0 CHANGELOG entry — plus what 4.0 keeps from the 3.x documentation: `packages/state/README.ja.md`, `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/timing-and-firing-contract.md`. All verified against real code at v4.24.2, and the 4.0 rules against the 4.0 engine source. **The rules are 4.0's.** A form from 3.x code and what replaced it: §16.
+Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/migration-v4.md`, `docs/state-errors.md` (message numbers) and the 4.0.0 CHANGELOG entry — plus what 4.0 keeps from the 3.x documentation: `packages/state/README.ja.md`, `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/timing-and-firing-contract.md`. All verified against real code at v4.25.0, and the 4.0 rules against the 4.0 engine source. **The rules are 4.0's.** A form from 3.x code and what replaced it: §16.
 
 ## 1. CDN Loading
 
@@ -420,7 +429,7 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
@@ -438,7 +447,7 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 **The split auto entry** — one tag, no import map:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/split/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/split/auto.js"></script>
 <wcs-state features="scopes diagnostics">          <!-- the document's root <wcs-state> -->
   <script type="module">
     export default {
@@ -462,9 +471,9 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 <script type="importmap">
 {
   "imports": {
-    "@wcstack/state/core": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/split/core.js",
-    "@wcstack/state/features/temporal": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/split/features/temporal.js",
-    "@wcstack/state/features/formats": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/split/features/formats.js"
+    "@wcstack/state/core": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/split/core.js",
+    "@wcstack/state/features/temporal": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/split/features/temporal.js",
+    "@wcstack/state/features/formats": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/split/features/formats.js"
   }
 }
 </script>
@@ -542,7 +551,7 @@ A source that cannot load fails the element (§11): `state="<id>"` reads only a 
 | `src="./data.json"` | `fetch(url)` | `connect-src <origin>` |
 | inner `<script type="module">` (method 5 — the default in every example) | text is extracted and imported through a **`blob:` URL** | **the page nonce on the `<script>` that loads state**, or **`script-src blob:`** |
 
-**The page's nonce rescues method 5 — on the `<script>` that loads state, not on the inner one.** A module's `import()` inherits the nonce of the `<script>` that loaded that module, so `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.24.2/dist/auto.min.js">` admits the `blob:` import under a policy without `blob:` (the browser's rule, not a wcstack feature — checked on Chromium, Firefox and WebKit). A hash cannot do this: a `blob:` module is fetched as an external script, so no inline hash ever matches it. Where no nonce can be issued (static hosting), it is `src="./state.js"` or `script-src blob:`, and opening `script-src blob:` means "allow all dynamically generated scripts", which gives away most of the reason for having a CSP. **Under a strict CSP, `src="./state.js"` stays the preferred form** — it needs neither `blob:` nor the nonce hand-off, and the double run below does not happen. Other consequences worth knowing before you write the policy:
+**The page's nonce rescues method 5 — on the `<script>` that loads state, not on the inner one.** A module's `import()` inherits the nonce of the `<script>` that loaded that module, so `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.25.0/dist/auto.min.js">` admits the `blob:` import under a policy without `blob:` (the browser's rule, not a wcstack feature — checked on Chromium, Firefox and WebKit). A hash cannot do this: a `blob:` module is fetched as an external script, so no inline hash ever matches it. Where no nonce can be issued (static hosting), it is `src="./state.js"` or `script-src blob:`, and opening `script-src blob:` means "allow all dynamically generated scripts", which gives away most of the reason for having a CSP. **Under a strict CSP, `src="./state.js"` stays the preferred form** — it needs neither `blob:` nor the nonce hand-off, and the double run below does not happen. Other consequences worth knowing before you write the policy:
 
 - **The browser evaluates the inner `<script type="module">` too.** Being a child of `<wcs-state>` does not stop it (only a `<template>` does). Its export goes nowhere, so state is unaffected, but with no CSP — or with the nonce on that inner `<script>` as well — **its top-level code runs twice**: once by the browser, once through state's `blob:` import. Under a CSP without a nonce on it, the browser's run is refused and the console shows one violation; state still loads. Either way, **keep side effects out of the top level** (no `fetch`, logging or assignments to globals next to `export default { … }`); do that work in methods or `$connectedCallback`.
 - **`<wcs-guard-handler>` goes through `blob:` too, and has no `src=` form.** The nonce on the `<script>` that loads router admits it the same way. Without a nonce, using guards forces `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source) — control access on the route-content side instead if the policy must stay strict.
@@ -1588,7 +1597,7 @@ What a 3.x page shows that a 4.0 one does not: `[wcs/v4-migration]` console warn
 
 # wcstack router / autoloader / app scaffold reference
 
-Sources: `packages/router/README.md` / `README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md` and, for what `@wcstack/state` 4.0 changes on routes, `docs/migration-v4.md` §3.9 and `packages/state/src/dom/mount.ts`. All verified against the actual files at v4.24.2. The router behaviour 4.0 relies on arrived with router 3.5: a route carries its whole range out and back in (§1), a parameter-only navigation reconnects the route content once (§2), layouts bind on the first navigation (§3). What changes with `@wcstack/state` 4.0 is what state renders inside a route (§1), and `bootstrapRouter(options)` / `bootstrapAutoloader(options)` throw on an option they do not have (§1, §6).
+Sources: `packages/router/README.md` / `README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md` and, for what `@wcstack/state` 4.0 changes on routes, `docs/migration-v4.md` §3.9 and `packages/state/src/dom/mount.ts`. All verified against the actual files at v4.25.0. The router behaviour 4.0 relies on arrived with router 3.5: a route carries its whole range out and back in (§1), a parameter-only navigation reconnects the route content once (§2), layouts bind on the first navigation (§3). What changes with `@wcstack/state` 4.0 is what state renders inside a route (§1), and `bootstrapRouter(options)` / `bootstrapAutoloader(options)` throw on an option they do not have (§1, §6).
 
 ## 1. Minimal SPA scaffold
 
@@ -1610,7 +1619,7 @@ Swap each `esm.run` line for a version-pinned direct path with an `integrity` at
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.24.2/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.25.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
@@ -1835,7 +1844,7 @@ The third argument is a frozen `{ params, typedParams, searchParams, routeName }
 
 **A guard that takes time and redirects a page load**: on a page pinned to 4.22 or earlier, the route it redirects to is not bound (`[wcs/inserted-unbound]` a second later) — a guard that answers at once is fine. Fixed in 4.23.
 
-**Under a CSP, guards need the page nonce on the `<script>` that loads router, or `script-src blob:`.** The handler is evaluated through a `blob:` URL, and that import inherits the nonce of the tag that loaded the router bundle — `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.24.2/dist/auto.min.js">` runs guards under a policy without `blob:`. Unlike `<wcs-state>` there is **no `src=` form to escape to** — this asymmetry is known and unimplemented — so where no nonce can be issued (static hosting), guards force `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). If that policy must stay strict, drop guards and gate on the route-content side (a `<template data-wcs="if: isAuthed">` swap) instead. A CSP-blocked guard is reported as CSP (on Firefox too), and the message names the nonce fix.
+**Under a CSP, guards need the page nonce on the `<script>` that loads router, or `script-src blob:`.** The handler is evaluated through a `blob:` URL, and that import inherits the nonce of the tag that loaded the router bundle — `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.25.0/dist/auto.min.js">` runs guards under a policy without `blob:`. Unlike `<wcs-state>` there is **no `src=` form to escape to** — this asymmetry is known and unimplemented — so where no nonce can be issued (static hosting), guards force `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). If that policy must stay strict, drop guards and gate on the route-content side (a `<template data-wcs="if: isAuthed">` swap) instead. A CSP-blocked guard is reported as CSP (on Firefox too), and the message names the nonce fix.
 
 ### basename
 
@@ -2125,7 +2134,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 
 # wcstack I/O Node Catalog + signals Quick Reference
 
-Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, `docs/timing-and-firing-contract.md`, and `examples/signals-live-search`. Tag surface verified at v4.24.2: **53 tags**, attribute spellings, properties, commands and the timing notes below source-verified. **4.0 changes no I/O node tag, property or command.** Two things an author sees: every package's `bootstrapXxx(config)` **throws** on an option it does not have, a value of another type, an unknown `tagNames` key or a non-string tag name (`[@wcstack/fetch] bootstrapFetch: "tagName" is not one of its options, or not of the option's type.` — `/auto` passes none, so a CDN page is unaffected), and `@wcstack/state` 4.0 delegates `on*:` handlers of bubbling events to the root (`state-binding.md` §8) — I/O-node wiring through property / `command.` / `eventToken.` / spread bindings is unchanged.
+Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, `docs/timing-and-firing-contract.md`, and `examples/signals-live-search`. Tag surface verified at v4.25.0: **53 tags**, attribute spellings, properties, commands and the timing notes below source-verified. **4.0 changes no I/O node tag, property or command.** Two things an author sees: every package's `bootstrapXxx(config)` **throws** on an option it does not have, a value of another type, an unknown `tagNames` key or a non-string tag name (`[@wcstack/fetch] bootstrapFetch: "tagName" is not one of its options, or not of the option's type.` — `/auto` passes none, so a CDN page is unaffected), and `@wcstack/state` 4.0 delegates `on*:` handlers of bubbling events to the root (`state-binding.md` §8) — I/O-node wiring through property / `command.` / `eventToken.` / spread bindings is unchanged.
 
 History, for reading older pages: `mountNode` and the normative headless Cores arrived in 1.23, observation semantics (§0) in 1.24, `@wcstack/audio` / `@wcstack/midi` in 1.25, scoped-registry support in 1.31, `<wcs-view-transition>` in 1.32, `<wcs-media-query>` in 2.2; no tag, property or command name has changed since it was added. Two wiring shapes needed a minimum `@wcstack/state` on 3.x — the dotted property form (`.once:`) and `class.` / `attr.` / `style.` on a wc-bindable tag from 3.3, I/O nodes inside `for:` rows from 3.4 — and all of them work in 4.0.
 
@@ -2187,7 +2196,7 @@ History, for reading older pages: `mountNode` and the normative headless Cores a
 | **debounce** | `<wcs-debounce>` / `<wcs-throttle>` (`wcs-throttle:*` events) | `source` (value-surface input; NO same-value guard — every write restarts the wait, and the initial bind write starts a cycle: throttle emits `value` immediately at startup) `wait` `max-wait` `leading`(debounce: opt-in attr, default off; throttle: default on, opt-out `no-leading`) `trailing`(default on; opt-out `no-trailing` — a bare `trailing` attribute is inert) | `value`(settled value) `fired` `pending` | `trigger` `cancel` `flush` (commands — no momentary trigger property here) |
 | **clipboard** | `<wcs-clipboard>` | `monitor` | `text` `items` `loading` `readPermission` `writePermission` `monitoring` `copied` `cut` (both carry the document selection text, not the clipboard payload) `pasted` | `writeText` `write` `readText` `read` `startMonitor` `stopMonitor` (write requires a user gesture) |
 | **geolocation** | `<wcs-geo>` | `high-accuracy` `timeout` `maximum-age` `watch` `manual` `trigger` (attributes are read at connect time) | `position` `latitude` `longitude` `accuracy` `coords` `timestamp` `watching` `loading` `permission` | `getCurrentPosition` `watchPosition` `clearWatch` |
-| **permission** | `<wcs-permission>` | `name` (one tag, one permission) `user-visible-only` `sysex` | `state`(granted/denied/prompt/unsupported) `granted` `denied` `prompt` `unsupported` | none (monitor-only) |
+| **permission** | `<wcs-permission>` | `name` (one tag, one permission) `user-visible-only` `sysex` | `state`(granted/denied/prompt/unsupported) `granted` `denied` `prompt` `unsupported` `unsupportedReason` (4.25: why it is `unsupported` — `policy-blocked` = the page it is embedded in forbids it, `insecure-context`, `no-permissions-api`, `unknown-name` = the browser cannot say; `null` otherwise) | none (monitor-only) |
 | **notification** | `<wcs-notify>` | `notice` (reactive display; guarded vs the LAST SHOWN text — first non-empty bind fires; the `notify` command bypasses the guard) `mode`(auto/constructor/sw) `body` `icon` `badge` `tag` `lang` `dir` `require-interaction` `silent` `renotify` `manual`(mutes reactive `notice`; `notify` still works) | `permission` `granted` `denied` `prompt` `unsupported` `clicked` `closed` `shown` | `request` `notify(title, options)` `close` `closeAll` — without `granted`, `notice`/`notify` silently no-op into `error`: call `request` first (for SW use, `wireNotificationClicks()` from `@wcstack/notification/sw`) |
 | **intersection** | `<wcs-intersect>` | `target` (default = first child / selector / `self`; non-matching selector → silent no-op, `observing` false) `root` `root-margin` `threshold` (live — but ALL attribute changes are ignored while `manual`) `once` `manual` `trigger`(re-runs `observe`) | `entry` `intersecting` `ratio` `visible` (latched on first intersection) `observing` `trigger` | `observe` `reobserve` `unobserve` `disconnect` `reset` (after `once` fires the observer is disconnected — `reset` alone can't re-latch `visible`, use `reobserve`) |
 | **resize** | `<wcs-resize>` | `target` `box` `round` (live — but ignored while `manual`; selector no-match = silent no-op) `once`(fires on the INITIAL size delivery = measure-once) `manual` `trigger`(re-runs `observe`) | `entry` `width` `height` `observing` `trigger` | `observe` `unobserve` `disconnect` |
@@ -2197,22 +2206,22 @@ History, for reading older pages: `mountNode` and the normative headless Cores a
 | **speech** | `<wcs-speak>` (TTS) | `say` (reactive speech; guarded vs the LAST SPOKEN text — first non-empty bind speaks) `rate` `pitch` `volume` `voice` `lang` `manual`(mutes reactive `say` — bind it to the listening flag to break the listen→speak echo loop) | `voices` `speaking` `paused` `pending` `charIndex` `spokenWord` `unsupported` | `speak` (imperative; fires even on same value) `cancel` `pause` `resume` |
 | **speech** | `<wcs-listen>` (STT) | `lang` `continuous` `interim` `max-restarts`(`continuous` alone still ends at the first silence — set `max-restarts` > 0 to keep the session alive) `manual` `trigger` (options frozen while listening) | `interimTranscript` `finalTranscript` `result` `listening` `permission` `unsupported` `trigger` | `start` `stop` `abort` |
 | **defined** | `<wcs-defined>` | `tags` `mode` `timeout` (timeout detects load failure; ALL inputs frozen at connect; empty `tags` → `error`, `defined` stays false) | `defined` `pending` `missing` `count` `total` `error` (invariant: total=count+pending+missing) | none (event-token only; monotonic; terminal) |
-| **fullscreen** | `<wcs-fullscreen>` | `target` | `active` | `requestFullscreen` `exitFullscreen` |
-| **picture-in-picture** | `<wcs-pip>` | `target` (must resolve to a `<video>` — otherwise `error`) | `active` | `requestPictureInPicture` `exitPictureInPicture` |
-| **pointer-lock** | `<wcs-pointer-lock>` | `target` | `active` | `requestPointerLock` `exitPointerLock` |
-| **screen-orientation** | `<wcs-screen-orientation>` | (no inputs) | `type` `angle` `portrait` `landscape` (the initial snapshot fires before bindings attach — read the starting orientation in `$connectedCallback`; bound outputs update from the next change) | `lock` `unlock` |
+| **fullscreen** | `<wcs-fullscreen>` | `target` (a CSS selector — `"#viewer"`, not `"viewer"`; `"self"`; omitted = first child) | `active` (bind it; do not keep a flag of your own. 4.25: goes `false` when the element leaves the document — up to 4.24 it stayed `true`) `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) — `false` on an iPhone | `requestFullscreen` `exitFullscreen` (need a tap; lock the orientation from a `$watch` on `active` — `references/device-apis.md` §5) |
+| **picture-in-picture** | `<wcs-pip>` | `target` (must resolve to a `<video>` — otherwise `error`) | `active` (4.25: `false` when the element leaves the document) `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) — `false` in Firefox | `requestPictureInPicture` `exitPictureInPicture` (need a tap; keep the video and its `<wcs-pip>` outside the router to play on across pages) |
+| **pointer-lock** | `<wcs-pointer-lock>` | `target` | `active` (4.25: `false` when the element leaves the document) `error` (4.25: also set for a refusal Firefox reports as an event) `errorInfo` `supported` (4.25: this page can use it — offer the button only then) | `requestPointerLock` `exitPointerLock` (need a tap; the movement is read from `mousemove`'s `movementX` / `movementY` by the page) |
+| **screen-orientation** | `<wcs-screen-orientation>` | (no inputs) | `type` `angle` `portrait` `landscape` (output-only: read when the binding attaches) `error` `errorInfo` `supported` (4.25: the orientation can be watched — it does not say a `lock` will hold) | `lock` (takes the orientation — emit from a state method, never `onclick: $command.lock`; holds only while the document is fullscreen; Safari has none) `unlock` |
 | **idle** | `<wcs-idle>` | `threshold`(default 60000; read at `start` only) | `userState` `screenState` `active` (`false` before `start()` — show "away" from `userState === "idle"`, which is `null` until then) | `requestPermission`(needs a user gesture) `start` `stop` |
 | **network** | `<wcs-network>` | (no inputs) | `effectiveType` `downlink` `rtt` `saveData` `supported` (Firefox/Safari: `supported` false, data fields `null` — bindings must handle null) `offline` (4.1: `!navigator.onLine` with the window events, every browser — `disabled: offline`; not `online`, because a name starting with `on` is an event binding) | none (monitor-only) |
 | **media-query** | `<wcs-media-query>` | `query` (the one input, mirrored from the attribute; **live** — changing it while connected tears down the old `MediaQueryList` subscription and subscribes to the new one, generation-guarded; removing it = watch nothing → `matched` false; an invalid query does not throw — `media: "not all"`, `matched: false`). No secure-context or permission requirement | `matched` `media` `supported` — all `state`, all derived from one `wcs-media-query:change` snapshot, so a query change that flips `media` and `matched` together arrives as one update. `matched` is a strict boolean (never `null`; `false` whenever there is no live list), `media` the browser-normalized string (`""` with no list), `supported` = `typeof matchMedia === "function"` resolved per subscription (Node/SSR: `false`). **The output is `matched`, not `matches`** — `Element.prototype.matches()` exists on every element. `:state(matched)` / `:state(supported)` are reflected for CSS | none (monitor-only) |
-| **share** | `<wcs-share>` | (no inputs) | `value` `loading` `cancelled` (`value` is written only on success — stale after a cancel/failure, check `cancelled`) | `share` (invoking while `loading` is a silent no-op) |
-| **contacts** | `<wcs-contacts>` | (no inputs) | `value` `loading` `cancelled` (same no-op-while-loading / stale-`value` rules as share) | `select` |
-| **credential** | `<wcs-credential>` | (no inputs) | `value` `loading` `cancelled` (user cancel surfaces as `NotAllowedError`, not `AbortError`) | `get` `store` (they share one in-flight lane — a concurrent call supersedes and silently drops the first) |
-| **eyedropper** | `<wcs-eyedropper>` | (no inputs) | `value` `loading` `cancelled` | `open` (a second `open` aborts the prior pick into `cancelled`) `abort` |
-| **tilt** | `<wcs-tilt>` | (no inputs) | `alpha` `beta` `gamma` `absolute` `permissionState` | `requestPermission` `start` `stop` (iOS: `start` before `requestPermission` is silently dead — no events, no error) |
-| **accelerometer** | `<wcs-accelerometer>` | `frequency` | `x` `y` `z` | `start` `stop` |
-| **gyroscope** | `<wcs-gyroscope>` | `frequency` | `x` `y` `z` | `start` `stop` |
-| **magnetometer** | `<wcs-magnetometer>` | `frequency` | `x` `y` `z` | `start` `stop` |
-| **ambient-light-sensor** | `<wcs-ambient-light-sensor>` | `frequency` | `illuminance` | `start` `stop` |
+| **share** | `<wcs-share>` | (no inputs) | `value` `loading` `cancelled` (`value` is written only on success — stale after a cancel/failure, check `cancelled`) `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) | `share` (takes the data — emit from a state method, in the tap; invoking while `loading` is a silent no-op; `canShare(data)` is a method of the element, for files) |
+| **contacts** | `<wcs-contacts>` | (no inputs) | `value` (an array of contacts whose members are arrays — `name: ["山田"]`; give it a slot of its own) `loading` `cancelled` (4.25: a picker closed without a choice — up to 4.24 that wrote `value: []` and `cancelled` never came) `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) — Android Chrome, top-level pages only | `select` (takes the properties — emit from a state method, in the tap) |
+| **credential** | `<wcs-credential>` | (no inputs) | `value` (carries the password — bind it only where that is meant) `loading` `cancelled` (user cancel surfaces as `NotAllowedError`, not `AbortError`) `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) — password credentials: Chromium only (4.25: `capability-missing` elsewhere; it was `credential-failed`) | `get` `store` (they share one in-flight lane — a concurrent call supersedes and silently drops the first; 4.25: `store({ id, password })` builds the `PasswordCredential`; store only after the server accepted the pair) `preventSilentAccess` (4.25: on sign-out, or the next visit signs the user back in) |
+| **eyedropper** | `<wcs-eyedropper>` | (no inputs) | `value` `loading` `cancelled` `error` `errorInfo` `supported` (4.25: this page can use it — offer the button only then) — Chromium on a desktop | `open` (a second `open` aborts the prior pick into `cancelled`) `abort` |
+| **tilt** | `<wcs-tilt>` | (no inputs) | `alpha` `beta` `gamma` `absolute` (`alpha` is relative on both phone platforms — not a compass) `heading` (4.25: degrees clockwise from north, `null` until known) `permissionState` (`"denied"` = the user's answer; 4.25: a call that was not a tap leaves it as it was, with `errorInfo` `not-allowed`) `error` `errorInfo` `supported` (4.25; says nothing about a sensor being there) | `requestPermission` `start` `stop` (iOS: `start` before `requestPermission` is silently dead — no events, no error; emit both in one tap) |
+| **accelerometer** | `<wcs-accelerometer>` | `frequency` (a positive number of Hz; 4.25: anything else warns `[wcs/frequency-invalid]` and means the default rate) | `x` `y` `z` (m/s², one event for the three — `eventToken.x`'s `event.detail` is `{ x, y, z }`) `permissionState` (4.25) `error` (sticky) `errorInfo` `supported` (4.25) | `start` `stop` `requestPermission` (4.25: the iPhone's motion question — where the browser has no `Accelerometer` class the element reads `devicemotion`; up to 4.24 it was `capability-missing` on an iPhone) |
+| **gyroscope** | `<wcs-gyroscope>` | `frequency` | `x` `y` `z` (rad/s) `permissionState` (4.25) `error` (sticky) `errorInfo` `supported` (4.25) | `start` `stop` `requestPermission` (4.25; as accelerometer) |
+| **magnetometer** | `<wcs-magnetometer>` | `frequency` | `x` `y` `z` `error` (sticky) `errorInfo` `supported` (4.25; `false` on an iPhone and wherever the class is behind a flag — no fallback) | `start` `stop` |
+| **ambient-light-sensor** | `<wcs-ambient-light-sensor>` | `frequency` | `illuminance` `error` (sticky) `errorInfo` `supported` (4.25; rarely `true` — fall back to `prefers-color-scheme`) | `start` `stop` |
 | **midi** | `<wcs-midi>` | `input`(omitted = every input port; else port id or case-insensitive name prefix) `output`(omitted = first output port) `channel`(1-16; omitted = all — system messages always pass) `sysex`(a separate, more restricted grant — leave off) `auto`(connect + request on connect). `input`/`output`/`channel` are live: they **re-hook the existing access**, never re-request, so no second permission prompt | `message` `type` `channel` `note` `velocity`(**normalized 0-1**) `control`(raw 0-127) `value`(raw 0-127, but **-1..1 for pitch bend**) `devices` `connected` `permission` `granted` `denied` `unsupported` `error` `errorInfo` | `request` `close` `send` |
 | **audio** | `<wcs-audio>` — the patch root | `volume`(0-1, clamped since 4.17) `limiter`(on by default: compression from -18 dBFS and, since 4.17, a hard ceiling at -6 dBFS — up to 4.16 the README's own patch clipped at +5 dBFS; `limiter="off"` to measure real amplitudes) `resume-on-gesture`(default on; `"off"` = drive it yourself with `command.resume`). Bound from state as booleans (`limiter: on`), the setter writes `"on"` / `"off"` | `state`(running/suspended/unsupported) `running` `suspended` `unsupported` `voices` `noteOn` `noteOff` `warnings` `error` `errorInfo` | `resume` `suspend` `noteOn(note, velocity)` `noteOff(note)` `allNotesOff` |
 | **audio** | node tags `<wcs-osc>`(`type` `frequency` `detune` `glide` `transpose`) `<wcs-noise>` `<wcs-biquad>`(`type` `frequency` `q` `gain` `detune`) `<wcs-gain>`(`gain`) `<wcs-delay>`(`time` `feedback` `mix`) `<wcs-shaper>`(`amount`) `<wcs-env>`(`attack` `decay` `sustain` `release` `depth`) `<wcs-lfo>`(`type` `rate` `depth`) | every numeric attribute above is a bindable input and is **live**; the routing attributes `id` / `out` / `param` / `note` / `master` and `<wcs-voice poly>` are **structural** (a change rebuilds the graph) and are deliberately NOT bindable | none — a node tag is a pure input surface (everything observable belongs to `<wcs-audio>`) | none |
@@ -2421,7 +2430,7 @@ Bind only the numeric params (§1.1) — writing a structural attribute from sta
 <script type="importmap">
 { "imports": { "@wcstack/signals/dom": "https://esm.run/@wcstack/signals/dom" } }
 </script>
-<!-- pinned: the version goes before the sub-path — https://esm.run/@wcstack/signals@4.24.2/dom -->
+<!-- pinned: the version goes before the sub-path — https://esm.run/@wcstack/signals@4.25.0/dom -->
 <script type="module">
   import { signal, computed, effect, selector, delegateEvents, h, render, For, bindNode, mountNode } from "@wcstack/signals/dom";
 </script>
@@ -2549,7 +2558,7 @@ The core (signal/computed/effect/createRoot/onCleanup/flushSync) and resource/st
 
 # wcstack on a page it does not own — islands and widgets
 
-Sources: `docs/islands.md` (+ `.ja.md`), `packages/state/README.md` "Inserting markup yourself" and "Mounting Additional State", `docs/binder-protocol-design.md` §10, `docs/scoped-custom-element-registries.md`, `packages/state/src/features/release.ts`, `packages/state/src/features/diagnostics.ts`, and the `community-hall` seam app in `docs/seam-apps.md` (a CMS site with htmx 2, five islands, a widget on a Turbo site that runs wcstack 4.17). All verified against the actual files at v4.24.2; the htmx and Turbo frame snippets below were run in Chromium.
+Sources: `docs/islands.md` (+ `.ja.md`), `packages/state/README.md` "Inserting markup yourself" and "Mounting Additional State", `docs/binder-protocol-design.md` §10, `docs/scoped-custom-element-registries.md`, `packages/state/src/features/release.ts`, `packages/state/src/features/diagnostics.ts`, and the `community-hall` seam app in `docs/seam-apps.md` (a CMS site with htmx 2, five islands, a widget on a Turbo site that runs wcstack 4.17). All verified against the actual files at v4.25.0; the htmx and Turbo frame snippets below were run in Chromium.
 
 Read this before adding wcstack to a server-rendered site whose pages come from another template language and are swapped by htmx or Turbo, or before writing a widget that other sites paste into their pages. Everything else in this skill still applies inside the island.
 
@@ -2610,8 +2619,8 @@ htmx's history snapshot and Turbo's snapshot cache restore a page **as drawn**: 
 A page defines `<wcs-state>` once: the first copy of `@wcstack/state` it evaluates defines it, a second copy does nothing (`[wcs/package-twice]`). A widget that loads `/auto` on a page that runs wcstack therefore runs on the page's copy, of whatever version. Give the widget a shadow root with a scoped registry and define wcstack's tags into it — every package's `bootstrapXxx(config, registry)` takes the registry:
 
 ```js
-import { bootstrapState } from "https://esm.run/@wcstack/state@4.24.2";
-import { bootstrapSse } from "https://esm.run/@wcstack/sse@4.24.2";
+import { bootstrapState } from "https://esm.run/@wcstack/state@4.25.0";
+import { bootstrapSse } from "https://esm.run/@wcstack/sse@4.25.0";
 
 let registry = null;
 function widgetRegistry() {
@@ -2653,7 +2662,7 @@ customElements.define("partner-widget", PartnerWidget);
 
 # Forms — a page that is mostly a form
 
-Sources: `docs/forms.md` (+ `.ja.md`), `packages/state/README.md` "Forms: what happens outside the `input` event" and "Two-Way Binding", `packages/state/src/features/forms.ts`, `docs/timing-and-firing-contract.md` §25, `packages/fetch/README.md`, `docs/seam-apps.md` (ekiden-entry). Verified against wcstack 4.24.2; every snippet here was run in Chromium.
+Sources: `docs/forms.md` (+ `.ja.md`), `packages/state/README.md` "Forms: what happens outside the `input` event" and "Two-Way Binding", `packages/state/src/features/forms.ts`, `docs/timing-and-firing-contract.md` §25, `packages/fetch/README.md`, `docs/seam-apps.md` (ekiden-entry). Verified against wcstack 4.25.0; every snippet here was run in Chromium.
 
 Read this before building an application form, an entry sheet or a wizard: text typed with an IME (Japanese, Chinese, Korean), fields that format what is typed, autofill, a reset button, rows of inputs that move, form controls of your own.
 
@@ -2804,7 +2813,7 @@ send(e) {
 
 # Long lists
 
-A page with a long list: infinite scroll, a feed, a table of thousands of rows, a list the user comes back to. Sources: `docs/long-lists.md` (+ `.ja.md`), `packages/fetch/README.md` §5, `packages/intersection/README.md`, `docs/timing-and-firing-contract.md` §26, the router README "Where route content lives", `docs/seam-apps.md` (town-archive). Verified against wcstack 4.24.2; the infinite-scroll example, the abort on a filter change and the link back to a row's fragment were run in Chromium, Firefox and WebKit. What says 4.24 needs that release; on 4.23 see the notes.
+A page with a long list: infinite scroll, a feed, a table of thousands of rows, a list the user comes back to. Sources: `docs/long-lists.md` (+ `.ja.md`), `packages/fetch/README.md` §5, `packages/intersection/README.md`, `docs/timing-and-firing-contract.md` §26, the router README "Where route content lives", `docs/seam-apps.md` (town-archive). Verified against wcstack 4.25.0; the infinite-scroll example, the abort on a filter change and the link back to a row's fragment were run in Chromium, Firefox and WebKit. What says 4.24 needs that release; on 4.23 see the notes.
 
 ## 1. What costs
 
@@ -2867,3 +2876,99 @@ For thousands of rows on screen. Row heights known without the document (fixed, 
 ## 5. Coming back
 
 Back restores the position by itself when the list still holds its rows. A link of your own back to a row: navigate to its fragment — `this.navigateUrl = "/#photo-" + id` — not `scrollIntoView()` from a `$watch` (`references/router-and-scaffold.md`). A reload is the page's: keep the filter and the first row on screen in `<wcs-storage type="session">`.
+
+
+---
+
+# Reference: screen and sensor APIs (a tap, is it there, the iPhone, fullscreen, pickers)
+
+<!-- source: wcstack-skill/skills/wcstack-app/references/device-apis.md -->
+
+# Screen and sensor APIs
+
+A page that uses what the device has: fullscreen, a small video window (Picture-in-Picture), the pointer lock, the screen's orientation, which way the phone points and how it moves, the share sheet, the contact picker, saved passwords, the eye dropper. Sources: `docs/device-apis.md` (+ `.ja.md`), the READMEs of `fullscreen`, `picture-in-picture`, `pointer-lock`, `screen-orientation`, `tilt`, `accelerometer`, `gyroscope`, `magnetometer`, `ambient-light-sensor`, `share`, `contacts`, `credential`, `eyedropper`, `permission`, `docs/timing-and-firing-contract.md` §8, §9, §16, §27. Written from the `stamp-rally` seam app. Verified against wcstack 4.25.0: the examples were run in Chromium, Firefox and WebKit; what is said about a phone was checked with stand-ins, not on a phone.
+
+Three things hold for all of them: every one is missing on some device, every one that acts wants a tap, and none of them throws — a refusal is a value in `error` / `errorInfo`.
+
+## 1. A tap
+
+Fullscreen, Picture-in-Picture, the pointer lock, the share sheet, the pickers and the iPhone's sensor question are given only while the page handles a tap, a click or a key press. Chromium keeps a tap's activation about five seconds — so a page that emits late works on a fast network and fails on a slow one.
+
+- Emit in the tap's handler, before anything is awaited. `onclick: $command.x` and a state method that emits synchronously are both inside the event.
+- Do not emit from a `$watch`, when a response arrives, or after an `await`. Prepare what the command needs beforehand (make the picture when the card is shown, not in the tap) and disable the button until it is ready.
+- A command for an element the same update renders has nothing to act on yet (a `<wcs-fullscreen>` whose `target` is in an `if:` the handler just opened): emit after the render.
+- **A command that takes data is emitted from a state method.** `onclick: $command.share` passes the event as the data: `share(event)`, `select(event)`, `lock(event)` end in the browser's `TypeError`, `<wcs-credential>`'s `get(event)` resolves `null` without a word (lint `wcs/command-event-argument`, 4.25). Commands with no data — `requestFullscreen`, `start`, `open` — and `<wcs-fetch>`'s `fetch`, `<wcs-ws>`'s `close`, `<wcs-idle>`'s `start` (4.25) can be wired straight.
+
+```js
+$commandTokens: ["share"],
+shareCard() {                               // in the tap
+  this.$command.share.emit({ files: [this.cardFile], text: "…" });
+},
+```
+
+## 2. Failures
+
+Bind `errorInfo` on every element whose command the user triggers, and show something for it. `errorInfo.code`: `capability-missing` (the API is not there — offer the fallback), `not-allowed` (refused: no tap, a policy, a permission), `invalid-argument` (a `target` that names nothing), and the element's own code. `cancelled` is separate: the user closing the share sheet, the eye dropper or the contact picker is not a failure — show nothing.
+
+```html
+<wcs-share data-wcs="command.share: $command.share; cancelled: shareCancelled; errorInfo: shareError"></wcs-share>
+<p role="alert" data-wcs="hidden: shareError|not">共有できませんでした。</p>
+```
+
+Since 4.25 the `diagnostics` add-on (in `/auto`) warns `[wcs/io-error-unobserved]` when an element reports a failure and its `data-wcs` reads none of `error`, `errorInfo`, `status`, `connected` and has no event token. Up to 4.24 such a failure was silent.
+
+## 3. Is it there?
+
+Since 4.25 each of the thirteen elements has a `supported` output: this page can use the feature — the API is there and no `Permissions-Policy` or `<iframe>` forbids it. Offer the button only when it is true (`hidden: fsSupported|not`). It is read when the binding attaches, so the first paint is right. On a page pinned to 4.24 or earlier there is no `supported`: detect by hand (`document.fullscreenEnabled`, `typeof EyeDropper`).
+
+Where it is `false`: fullscreen on an iPhone (no element fullscreen), Picture-in-Picture in Firefox, the share sheet on most desktops, the eye dropper and saved passwords outside Chromium, the contact picker outside Android and in any frame, the Generic Sensor classes with no `devicemotion` beside them.
+
+It does **not** say the user will allow it, that an orientation lock will hold (known only by trying, in fullscreen), or that the device has a sensor (a desktop has the events and never a reading: treat "no reading a moment after `start`" as "not here").
+
+`<wcs-permission>` says `unsupported` for both "the browser cannot say" and "the page is forbidden"; since 4.25 `unsupportedReason` tells them apart: `policy-blocked` (tell the user to open the page itself in a new tab), `insecure-context`, `no-permissions-api`, `unknown-name` (Firefox and Safari reject the sensor names — it does not mean the feature is absent).
+
+## 4. The iPhone's sensors
+
+Safari on iOS gives no orientation or motion reading until the user allowed it, asks only from a tap, and asks separately for orientation (`<wcs-tilt>`) and motion (`<wcs-accelerometer>` / `<wcs-gyroscope>`, which read `devicemotion` there since 4.25). One token asks every question and one starts every sensor:
+
+```html
+<wcs-tilt data-wcs="permissionState: tiltPermission; heading: heading; errorInfo: tiltError;
+                    command.requestPermission: $command.ask; command.start: $command.start"></wcs-tilt>
+<wcs-accelerometer data-wcs="errorInfo: motionError; eventToken.x: moved;
+                    command.requestPermission: $command.ask; command.start: $command.start"></wcs-accelerometer>
+<button data-wcs="onclick: allow">許可する</button>
+```
+
+```js
+$commandTokens: ["ask", "start"],
+$eventTokens: ["moved"],
+allow() { this.$command.ask.emit(); this.$command.start.emit(); },   // both in the tap, nothing awaited
+```
+
+- Never start the sensors at page load with nothing for the question: on an iPhone no reading ever arrives, and nothing says why.
+- A question asked outside a tap is refused without being shown: `errorInfo.code` `not-allowed`, `recoverable: true`, and since 4.25 `permissionState` stays as it was (up to 4.24 it said `"denied"` — do not tell the user they refused). `"denied"` is the user's answer; Safari then does not ask again.
+- After a reload `permissionState` is `"unknown"` again; a page that wants to remember keeps its own note.
+- **North** is `<wcs-tilt>`'s `heading` (4.25; degrees clockwise from north, `null` until known). `alpha` is relative on both phone platforms — never turn a compass by it. Show the direction as text while `heading` is `null`.
+- On a page pinned to 4.24 or earlier: `<wcs-accelerometer>` / `<wcs-gyroscope>` are `capability-missing` on an iPhone and there is no `heading` — a hand-written `devicemotion` / `deviceorientationabsolute` listener is needed there.
+
+## 5. Fullscreen, the lock, the small window
+
+- Bind `active`. Do not keep "is it fullscreen" as a flag the buttons flip: the user leaves with Escape, a swipe or the window's ×, and the flag does not know.
+- Never assign the bound path (`this.isFullscreen = true` fills no screen — lint `wcs/output-path-written`): ask the element with its command.
+- `target` is a CSS selector: `target="#viewer"`, not `target="viewer"` (lint `wcs/target-selector`).
+- Hold the screen in landscape from a `$watch` on the path bound to `active` — `true` → emit `lock` with `"landscape"`, `false` → emit `unlock` — never in the handler that requests fullscreen (it is not active yet).
+- **What must go on across pages lives outside the router.** A route's content is taken out of the document on leaving: the browser ends fullscreen and the pointer lock, and a video in Picture-in-Picture belongs outside the routes with its `<wcs-pip>`, hidden with a class where it is not shown (Chromium keeps a removed video playing, so the mistake does not show there). Since 4.25 the element reports `active: false` as it leaves; up to 4.24 state kept `true`.
+
+## 6. Sensors that keep running
+
+No sensor element starts on connect, a disconnect stops it, and nothing starts it again when its route comes back: emit `start` when the page that needs it is shown and `stop` when it is not (a `$watch` on the route), and stop on a hidden tab (no element reports visibility — `docs/long-lived-pages.md`). Do not bind every reading into state and draw a list from it: take the readings in an event-token handler (`event.detail` is the whole reading, `{ x, y, z }`) and write a path only when what is shown changes. `frequency` is a positive number of Hz (`"60hz"` means the default rate; lint `wcs/frequency-invalid`).
+
+## 7. Pickers and saved passwords
+
+- **contacts**: every member of a result is an array (`name: ["山田 花子"]`, possibly empty). Give `value` a slot of its own and make your own records from it in a `$watch` — never bind it into a list the page keeps (`value` is an output: at bind the element's `null` replaces what the path had). A picker closed without a choice is `cancelled` (4.25; up to 4.24 it wrote `value: []`).
+- **credential**: store the pair only after the server accepted it (`store({ id, password })`, 4.25; before, build `new PasswordCredential(…)` behind a `typeof` check). On sign-out emit `preventSilentAccess` (4.25; before, call `navigator.credentials.preventSilentAccess()` by hand) or the next visit signs the user back in. Keep the plain form in a shape a password manager fills.
+- **share**: ask `canShare({ files })` (a method of the element) before handing over a file; fall back to the text and the link, then to copying the link.
+
+## 8. Testing
+
+Stand-ins: Chromium's DevTools protocol for sensor readings (`Emulation.setSensorOverrideEnabled` / `setSensorOverrideReadings`); `page.addInitScript` scripts for the iPhone's question, the share sheet and the pickers, which answer only with `navigator.userActivation.isActive`. A call that is "not a tap" must come from the page's own timer on a page the test has not touched: Playwright's clicks, `page.evaluate()` and the polling behind `expect(locator)` all count as user activation. Headless Chromium's `screen.orientation.lock()` resolves and changes nothing; Escape does not leave fullscreen there.
