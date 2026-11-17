@@ -88,7 +88,7 @@ ${TOOLING.filter((d) => pkgs.has(d)).map(pkgLine).join("\n")}
 
 ## Optional
 
-- [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, silent-failure matrix) in one file — use this when generating wcstack apps
+- [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, the silent failures and each area's pitfalls) in one file — use this when generating wcstack apps
 - [wcstack-app skill](https://github.com/wcstack/wcstack-skill): the same content as an installable Claude Code Agent Skill (\`/plugin marketplace add wcstack/wcstack-skill\`)
 - Validate generated HTML with \`npx @wcstack/lint index.html\` and iterate until exit code 0
 - [AGENTS.md](${raw("AGENTS.md")}): guidance for AI agents working inside the wcstack monorepo itself
@@ -101,14 +101,16 @@ const skillBase = path.join(skillDir, "skills", "wcstack-app");
 const readLf = (p) => readFileSync(p, "utf8").replace(/\r\n/g, "\n");
 const stripFrontmatter = (s) => s.replace(/^---\n[\s\S]*?\n---\n/, "");
 
-const skillMd = stripFrontmatter(readLf(path.join(skillBase, "SKILL.md")));
+const skillRaw = readLf(path.join(skillBase, "SKILL.md"));
+const skillMd = stripFrontmatter(skillRaw);
 
 // skill の検証スタンプが monorepo の版に追いついているかを確認する。
 // 遅れている間は llms-full.txt が旧版の記述をそのまま配ることになるので、黙って通さない。
 // （リリースごとの差分を build 側の overlay で埋めるのは v1.23.0 で一度やったが、
 //   skill が追いついた後に overlay が黙って無効化される事故を招いたため、警告に一本化した。）
-const stamp = `verified against **wcstack ${tag}**`;
-if (!skillMd.includes(stamp)) {
+// the stamp is the frontmatter's metadata.wcstack-version (the skill's README: the plugin version and it move together)
+const stamp = `wcstack-version: "${version}"`;
+if (!skillRaw.includes(stamp)) {
   console.warn(
     `[build-llms] WARNING: wcstack-skill is not stamped for ${tag} (looked for "${stamp}").\n`
     + `  llms-full.txt may describe an older release. Update wcstack-skill first, or confirm\n`
@@ -124,6 +126,9 @@ const refs = [
   ["forms.md", "Reference: forms (a page that is mostly a form)"],
   ["long-lists.md", "Reference: long lists (infinite scroll, rows, a window of rows, coming back)"],
   ["device-apis.md", "Reference: screen and sensor APIs (a tap, is it there, the iPhone, fullscreen, pickers)"],
+  ["frameworks.md", "Reference: wcs-* elements inside a React / Vue / Svelte / Solid app"],
+  ["verification.md", "Reference: verifying a page (the lint, wcs-schema / wcs-tsc, the console, DevTools, tests, SSR)"],
+  ["versions.md", "Reference: a page pinned to an older 4.x release"],
 ].map(([f, title]) =>
   `\n\n---\n\n# ${title}\n\n<!-- source: wcstack-skill/skills/wcstack-app/references/${f} -->\n\n`
   + readLf(path.join(skillBase, "references", f)),
@@ -133,11 +138,12 @@ const full = `# wcstack — complete authoring guide for LLMs
 
 > Everything needed to generate correct wcstack (${tag}) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
-> silent-failure matrix. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
+> silent failures with each area's pitfalls. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
 > whose content is verified against the wcstack monorepo at ${tag}.
 
-Note: the guide below refers to seven reference files (references/state-binding.md,
-router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md, device-apis.md). All seven are included
+Note: the guide below refers to ten reference files (references/state-binding.md,
+router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md, device-apis.md,
+frameworks.md, verification.md, versions.md). All ten are included
 IN THIS FILE after the main guide — no external fetches are needed.
 
 ---

@@ -85,7 +85,7 @@ The unscoped `wcstack` package is documentation-only: read it with
 
 ## Optional
 
-- [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, silent-failure matrix) in one file — use this when generating wcstack apps
+- [llms-full.txt](https://wcstack.github.io/llms-full.txt): complete authoring guide (workflow, full data-wcs syntax, I/O node catalog with timing notes, the silent failures and each area's pitfalls) in one file — use this when generating wcstack apps
 - [wcstack-app skill](https://github.com/wcstack/wcstack-skill): the same content as an installable Claude Code Agent Skill (`/plugin marketplace add wcstack/wcstack-skill`)
 - Validate generated HTML with `npx @wcstack/lint index.html` and iterate until exit code 0
 - [AGENTS.md](https://raw.githubusercontent.com/wcstack/wcstack/v4.25.0/AGENTS.md): guidance for AI agents working inside the wcstack monorepo itself
