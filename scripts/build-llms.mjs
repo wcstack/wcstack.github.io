@@ -72,6 +72,7 @@ ${CORE.map(pkgLine).join("\n")}
 - [Timing and firing contract](${raw("docs/timing-and-firing-contract.md")}): when bindings attach, when writes fire, initial-sync authority
 - [Sidecar manifest schema](${raw("docs/wcstack-manifest-schema.md")}): wcstack.manifest.json format for declaring custom tag contracts to the wcs-validate linter and IDE
 - [Framework adapter integration](${raw("docs/framework-adapter-integration.md")}): using \`<wcs-*>\` from React / Vue / Svelte / Solid / Angular — definition gating, object inputs as properties, raw values across the structured-clone boundary
+- [Coming from React](${raw("docs/coming-from-react.md")}): where each React construct goes in wcstack, which habits bite and who says so — from a React app moved over with its e2e suite unchanged
 
 ## I/O node packages (wcs-* tags)
 
@@ -127,6 +128,7 @@ const refs = [
   ["long-lists.md", "Reference: long lists (infinite scroll, rows, a window of rows, coming back)"],
   ["device-apis.md", "Reference: screen and sensor APIs (a tap, is it there, the iPhone, fullscreen, pickers)"],
   ["frameworks.md", "Reference: wcs-* elements inside a React / Vue / Svelte / Solid app"],
+  ["coming-from-react.md", "Reference: coming from React (where each construct goes, which habits bite and who says so)"],
   ["verification.md", "Reference: verifying a page (the lint, wcs-schema / wcs-tsc, the console, DevTools, tests, SSR)"],
   ["versions.md", "Reference: a page pinned to an older 4.x release"],
 ].map(([f, title]) =>
@@ -141,9 +143,9 @@ const full = `# wcstack — complete authoring guide for LLMs
 > silent failures with each area's pitfalls. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
 > whose content is verified against the wcstack monorepo at ${tag}.
 
-Note: the guide below refers to ten reference files (references/state-binding.md,
+Note: the guide below refers to eleven reference files (references/state-binding.md,
 router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md, device-apis.md,
-frameworks.md, verification.md, versions.md). All ten are included
+frameworks.md, coming-from-react.md, verification.md, versions.md). All eleven are included
 IN THIS FILE after the main guide — no external fetches are needed.
 
 ---
