@@ -1,9 +1,9 @@
 # wcstack — complete authoring guide for LLMs
 
-> Everything needed to generate correct wcstack (v4.30.0) apps: workflow, exact data-wcs
+> Everything needed to generate correct wcstack (v4.31.0) apps: workflow, exact data-wcs
 > syntax, the full wcs-* I/O node catalog with source-verified timing notes, and the
 > silent failures with each area's pitfalls. Generated from the wcstack-app skill (github.com/wcstack/wcstack-skill),
-> whose content is verified against the wcstack monorepo at v4.30.0.
+> whose content is verified against the wcstack monorepo at v4.31.0.
 
 Note: the guide below refers to eleven reference files (references/state-binding.md,
 router-and-scaffold.md, io-node-catalog.md, islands.md, forms.md, long-lists.md, device-apis.md,
@@ -19,7 +19,7 @@ IN THIS FILE after the main guide — no external fetches are needed.
 
 wcstack is a family of "standards-first, zero-config, buildless" Web Components packages. An app is correctly a **single HTML file + one-line CDN loads** — do not introduce bundlers, build steps, or npm install unless the user explicitly asks for them. A request for TypeScript or a production build is such a request: keep the state in a `.ts` file and build with Vite and `@wcstack/typescript/vite` (`references/verification.md` §2).
 
-**This skill describes wcstack 4.30.0** (the `wcstack-version` above): every rule here is that release's. A page pinned to an older 4.x release: `references/versions.md`. 3.x code: `references/state-binding.md` §16 and `docs/migration-v4.md` in the wcstack repo. Upgrading a 4.x app: `docs/upgrading-4x.md` in the wcstack repo. If the installed / CDN version is newer than this skill, spot-check syntax against the package READMEs.
+**This skill describes wcstack 4.31.0** (the `wcstack-version` above): every rule here is that release's. A page pinned to an older 4.x release: `references/versions.md`. 3.x code: `references/state-binding.md` §16 and `docs/migration-v4.md` in the wcstack repo. Upgrading a 4.x app: `docs/upgrading-4x.md` in the wcstack repo. If the installed / CDN version is newer than this skill, spot-check syntax against the package READMEs.
 
 What 4.0 changed from 3.x — write the 4.0 form even if you remember the 3.x one:
 
@@ -68,7 +68,7 @@ What 4.0 changed from 3.x — write the 4.0 form even if you remember the 3.x on
 - An SPA **must have `<base href="/">`** (or the basename, `/ja/`) in `<head>`, and **`<wcs-outlet>` right after its `<wcs-router>`** — to render inside `<main>`, put both there.
 - **Always set `<html lang>`** — the locale of the `locale` / `date` / `time` / `datetime` filters, read when state loads.
 - **One copy of each package, every wcstack line at one version.** `wcstack/auto` bundles state + router + fetch + storage + autoloader in one file — use it when the app uses that core anyway. Never merge files with jsDelivr `/combine/`.
-- `esm.run/@wcstack/<pkg>/auto` follows npm `latest`. To stay on a release, pin it on every line (`@wcstack/state@4.30.0/auto`) and keep `@wcstack/lint` at that version.
+- `esm.run/@wcstack/<pkg>/auto` follows npm `latest`. To stay on a release, pin it on every line (`@wcstack/state@4.31.0/auto`) and keep `@wcstack/lint` at that version.
 - **Production hardening, CSP, SRI and the split entries — only when the user asks**: `references/state-binding.md` §1–2. The one CSP fact that silently breaks a working page: the inline `<script type="module">` inside `<wcs-state>` is imported through a `blob:` URL, so under a strict policy the `<script>` that loads state needs the page nonce — or move the state to `src="./state.js"`.
 
 ### 3. State design
@@ -233,7 +233,7 @@ For a full SPA with fetch wiring and layouts, start from the router-spa skeleton
 
 # @wcstack/state Reference
 
-Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/migration-v4.md`, `docs/state-errors.md` (message numbers) and the 4.0.0 CHANGELOG entry — plus what 4.0 keeps from the 3.x documentation: `packages/state/README.ja.md`, `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/timing-and-firing-contract.md`. All verified against real code at v4.30.0, and the 4.0 rules against the 4.0 engine source. **The rules are 4.0's.** A form from 3.x code and what replaced it: §16.
+Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/migration-v4.md`, `docs/state-errors.md` (message numbers) and the 4.0.0 CHANGELOG entry — plus what 4.0 keeps from the 3.x documentation: `packages/state/README.ja.md`, `packages/state/examples/*`, `packages/fetch/examples/users-crud`, `docs/csp.md` / `docs/sri.md` / `docs/state-list-key-design.md` / `docs/state-watch-hook-design.md` / `docs/timing-and-firing-contract.md`. All verified against real code at v4.31.0, and the 4.0 rules against the 4.0 engine source. **The rules are 4.0's.** A form from 3.x code and what replaced it: §16.
 
 ## 1. CDN Loading
 
@@ -254,7 +254,7 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
@@ -272,7 +272,7 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 **The split auto entry** — one tag, no import map:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/split/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/split/auto.js"></script>
 <wcs-state features="scopes diagnostics">          <!-- the document's root <wcs-state> -->
   <script type="module">
     export default {
@@ -296,9 +296,9 @@ Sources: the 4.0 engine — wcstack `packages/state/src` and its README, `docs/m
 <script type="importmap">
 {
   "imports": {
-    "@wcstack/state/core": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/split/core.js",
-    "@wcstack/state/features/temporal": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/split/features/temporal.js",
-    "@wcstack/state/features/formats": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/split/features/formats.js"
+    "@wcstack/state/core": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/split/core.js",
+    "@wcstack/state/features/temporal": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/split/features/temporal.js",
+    "@wcstack/state/features/formats": "https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/split/features/formats.js"
   }
 }
 </script>
@@ -376,7 +376,7 @@ A source that cannot load fails the element (§11): `state="<id>"` reads only a 
 | `src="./data.json"` | `fetch(url)` | `connect-src <origin>` |
 | inner `<script type="module">` (method 5 — the default in every example) | text is extracted and imported through a **`blob:` URL** | **the page nonce on the `<script>` that loads state**, or **`script-src blob:`** |
 
-**The page's nonce rescues method 5 — on the `<script>` that loads state, not on the inner one.** A module's `import()` inherits the nonce of the `<script>` that loaded that module, so `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.30.0/dist/auto.min.js">` admits the `blob:` import under a policy without `blob:` (the browser's rule, not a wcstack feature — checked on Chromium, Firefox and WebKit). A hash cannot do this: a `blob:` module is fetched as an external script, so no inline hash ever matches it. Where no nonce can be issued (static hosting), it is `src="./state.js"` or `script-src blob:`, and opening `script-src blob:` means "allow all dynamically generated scripts", which gives away most of the reason for having a CSP. **Under a strict CSP, `src="./state.js"` stays the preferred form** — it needs neither `blob:` nor the nonce hand-off, and the double run below does not happen. Other consequences worth knowing before you write the policy:
+**The page's nonce rescues method 5 — on the `<script>` that loads state, not on the inner one.** A module's `import()` inherits the nonce of the `<script>` that loaded that module, so `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/state@4.31.0/dist/auto.min.js">` admits the `blob:` import under a policy without `blob:` (the browser's rule, not a wcstack feature — checked on Chromium, Firefox and WebKit). A hash cannot do this: a `blob:` module is fetched as an external script, so no inline hash ever matches it. Where no nonce can be issued (static hosting), it is `src="./state.js"` or `script-src blob:`, and opening `script-src blob:` means "allow all dynamically generated scripts", which gives away most of the reason for having a CSP. **Under a strict CSP, `src="./state.js"` stays the preferred form** — it needs neither `blob:` nor the nonce hand-off, and the double run below does not happen. Other consequences worth knowing before you write the policy:
 
 - **The browser evaluates the inner `<script type="module">` too.** Being a child of `<wcs-state>` does not stop it (only a `<template>` does). Its export goes nowhere, so state is unaffected, but with no CSP — or with the nonce on that inner `<script>` as well — **its top-level code runs twice**: once by the browser, once through state's `blob:` import. Under a CSP without a nonce on it, the browser's run is refused and the console shows one violation; state still loads. Either way, **keep side effects out of the top level** (no `fetch`, logging or assignments to globals next to `export default { … }`); do that work in methods or `$connectedCallback`.
 - **`<wcs-guard-handler>` goes through `blob:` too, and has no `src=` form.** The nonce on the `<script>` that loads router admits it the same way. Without a nonce, using guards forces `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source) — control access on the route-content side instead if the policy must stay strict.
@@ -559,7 +559,7 @@ this.items = await (await fetch("/api/items")).json();
 - **Opt-in and per-path.** Undeclared lists behave exactly as before at zero extra cost. Nesting is opt-in too — only declared paths are key-matched.
 - **An unchanged refresh is free**: no field writes, no DOM work. A keyed refresh fires `$watch` only for the fields that changed, with a real `prev` (§10).
 - **The assignment reaches whatever reads the list** (4.30): a getter over it — `get done() { return this.cards.filter((c) => c.status === "done"); }` — is evaluated again after a refresh that changed a row's field. Up to 4.29 it was told only when rows were added, removed or moved: a card whose `status` changed left its column and entered no other (`versions.md`).
-- **A write to one row's field is not an assignment of the list** — with or without `$listKeys`: `this["cards.1.status"] = v`, or a two-way `checked: .done` in a row, does not re-evaluate a getter that reads the field from the row object (`c.status`; a to-do list's `remaining` stays). Assign the list (`this.cards = this.cards.map(…)`), or read the fields through `this.$getAll("cards.*.status", [])`, which the write does reach.
+- **A write to one row's field is not an assignment of the list** — with or without `$listKeys`: `this["cards.1.status"] = v`, or a two-way `checked: .done` in a row, does not re-evaluate a getter that reads the field from the row object (`c.status`; a to-do list's `remaining` stays). Assign the list (`this.cards = this.cards.map(…)`), or read the fields through `this.$getAll("cards.*.status", [])`, which the write does reach. The same for a total: `this.incomes.reduce((t, row) => t + row.amount, 0)` follows rows added and removed and keeps its value when an amount is edited — `this.$getAll("incomes.*.amount", [])` is the total that follows. The lint reports the row-object form (`wcs/getter-untracked-read`) when the field is written by path: an error when a binding on the page writes it, a warning when the script or a custom element without a contract does.
 - **Rows must be plain objects**, and keys must exist and be unique. A duplicate, missing, or class-instance key is an immediate error. The declaration is validated when the state is installed: empty paths, empty segments, a trailing `*` (declare `items`, not `items.*`), non-flat key field names (no `.`/`*`), and `Object.prototype` names are rejected.
 - **A field that disappears from a row is cleared to `null`** — `null` is this package's explicit "clear" vocabulary, while `undefined` means "no value" and skips the write.
 - **The stored array is rebuilt from the matched row objects**, so after assignment `this.items !== theArrayYouAssigned`.
@@ -1154,7 +1154,7 @@ await settle();
 app.unmount();
 ```
 
-`mount(html, { root: "shadow", bootstrap: [async () => (await import("@wcstack/router")).bootstrapRouter()] })` scopes bindings to a fresh shadow root and registers additional packages. The bare recipe (no `@wcstack/testing`): `URL.createObjectURL = undefined` in setup (Node cannot import `blob:` URLs, so this reroutes inline `<script type="module">` state through the `data:` loader — without it an inline state never finishes loading), and `await stateEl.connectedCallbackPromise` then `await getBindingsReady(document)` before asserting. Writes go through `stateEl.createStateAsync("writable", async (state) => {...})`. Dispatch synthetic events with `bubbles: true` (`new Event("input", { bubbles: true })`; `fire()` and `el.click()` do) — a non-bubbling `click` / `input` never reaches a delegated `on*:` handler on the root (two-way bindings listen on the element itself).
+`mount(html, { root: "shadow", bootstrap: [async () => (await import("@wcstack/router")).bootstrapRouter(), async () => (await import("@wcstack/state")).bootstrapState()] })` scopes bindings to a fresh shadow root and registers the packages listed — the list replaces the default `[bootstrapState]`, so a page with a `<wcs-state>` lists it too. The bare recipe (no `@wcstack/testing`): `URL.createObjectURL = undefined` in setup (Node cannot import `blob:` URLs, so this reroutes inline `<script type="module">` state through the `data:` loader — without it an inline state never finishes loading), and `await stateEl.connectedCallbackPromise` then `await getBindingsReady(document)` before asserting. Writes go through `stateEl.createStateAsync("writable", async (state) => {...})`. Dispatch synthetic events with `bubbles: true` (`new Event("input", { bubbles: true })`; `fire()` and `el.click()` do) — a non-bubbling `click` / `input` never reaches a delegated `on*:` handler on the root (two-way bindings listen on the element itself).
 
 - **A state in its own file** (`<wcs-state src="./state.js">`, the strict-CSP form): since 4.9 `mount(html, { resolveModule: (url) => new URL("../public" + url.pathname, import.meta.url) })` loads it from the local file — the same option as `renderToString`, each mount importing it anew (build the URL by concatenation: Vite rewrites `new URL("<literal>", import.meta.url)`). Without it the import fails (`http:` under happy-dom). An inline state cannot `import` a relative module under Node (it is evaluated from a `data:` URL) — move it to a file. A `<wcs-state>` with nothing to load (no `state` / `src` / `json` / inline script) waits for `setInitialState()`, which a test cannot call before `mount()` returns: since 4.9 `mount()` rejects it at once (up to 4.8 the test timed out silently).
 - **A state that fails to initialize fails the test**: `connectedCallbackPromise` rejects with the error, so `mount()`, `renderToString()` and `getBindingsReady(root)` reject with the cause (§11).
@@ -1442,7 +1442,7 @@ What a 3.x page shows that a 4.0 one does not: `[wcs/v4-migration]` console warn
 
 # wcstack router / autoloader / app scaffold reference
 
-Sources: `packages/router/README.md` / `README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md` and, for what `@wcstack/state` 4.0 changes on routes, `docs/migration-v4.md` §3.9 and `packages/state/src/dom/mount.ts`. All verified against the actual files at v4.30.0. The router behaviour 4.0 relies on arrived with router 3.5: a route carries its whole range out and back in (§1), a parameter-only navigation reconnects the route content once (§2), layouts bind on the first navigation (§3). What changes with `@wcstack/state` 4.0 is what state renders inside a route (§1), and `bootstrapRouter(options)` / `bootstrapAutoloader(options)` throw on an option they do not have (§1, §6).
+Sources: `packages/router/README.md` / `README.ja.md`, `packages/autoloader/README.ja.md`, root `README.md`, `examples/README.ja.md`, `examples/router-spa/` (index.html / server.js / README.ja.md), `packages/router/src/`, plus `docs/csp.md` / `docs/sri.md` and, for what `@wcstack/state` 4.0 changes on routes, `docs/migration-v4.md` §3.9 and `packages/state/src/dom/mount.ts`. All verified against the actual files at v4.31.0. The router behaviour 4.0 relies on arrived with router 3.5: a route carries its whole range out and back in (§1), a parameter-only navigation reconnects the route content once (§2), layouts bind on the first navigation (§3). What changes with `@wcstack/state` 4.0 is what state renders inside a route (§1), and `bootstrapRouter(options)` / `bootstrapAutoloader(options)` throw on an option they do not have (§1, §6).
 
 ## 1. Minimal SPA scaffold
 
@@ -1464,7 +1464,7 @@ Swap each `esm.run` line for a version-pinned direct path with an `integrity` at
 
 ```html
 <script type="module"
-        src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.30.0/dist/auto.min.js"
+        src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.31.0/dist/auto.min.js"
         integrity="sha384-…"></script>
 ```
 
@@ -1690,7 +1690,7 @@ The third argument is a frozen `{ params, typedParams, searchParams, routeName }
 
 **A guard that takes time and redirects a page load**: on a page pinned to 4.22 or earlier, the route it redirects to is not bound (`[wcs/inserted-unbound]` a second later) — a guard that answers at once is fine. Fixed in 4.23.
 
-**Under a CSP, guards need the page nonce on the `<script>` that loads router, or `script-src blob:`.** The handler is evaluated through a `blob:` URL, and that import inherits the nonce of the tag that loaded the router bundle — `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.30.0/dist/auto.min.js">` runs guards under a policy without `blob:`. Unlike `<wcs-state>` there is **no `src=` form to escape to** — this asymmetry is known and unimplemented — so where no nonce can be issued (static hosting), guards force `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). If that policy must stay strict, drop guards and gate on the route-content side (a `<template data-wcs="if: isAuthed">` swap) instead. A CSP-blocked guard is reported as CSP (on Firefox too), and the message names the nonce fix.
+**Under a CSP, guards need the page nonce on the `<script>` that loads router, or `script-src blob:`.** The handler is evaluated through a `blob:` URL, and that import inherits the nonce of the tag that loaded the router bundle — `<script type="module" nonce="{RANDOM}" src="https://cdn.jsdelivr.net/npm/@wcstack/router@4.31.0/dist/auto.min.js">` runs guards under a policy without `blob:`. Unlike `<wcs-state>` there is **no `src=` form to escape to** — this asymmetry is known and unimplemented — so where no nonce can be issued (static hosting), guards force `script-src blob:` (router also retries through a `data:` URL, so `script-src data:` would pass too — do not open it; it is the riskier source). If that policy must stay strict, drop guards and gate on the route-content side (a `<template data-wcs="if: isAuthed">` swap) instead. A CSP-blocked guard is reported as CSP (on Firefox too), and the message names the nonce fix.
 
 ### basename
 
@@ -1989,7 +1989,7 @@ if (!url.pathname.startsWith("/api/") && extname(url.pathname) === "") {
 
 # wcstack I/O Node Catalog + signals Quick Reference
 
-Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, `docs/timing-and-firing-contract.md`, and `examples/signals-live-search`. Tag surface verified at v4.30.0: **53 tags**, attribute spellings, properties, commands and the timing notes below source-verified. **4.0 changes no I/O node tag, property or command.** Two things an author sees: every package's `bootstrapXxx(config)` **throws** on an option it does not have, a value of another type, an unknown `tagNames` key or a non-string tag name (`[@wcstack/fetch] bootstrapFetch: "tagName" is not one of its options, or not of the option's type.` — `/auto` passes none, so a CDN page is unaffected), and `@wcstack/state` 4.0 delegates `on*:` handlers of bubbling events to the root (`state-binding.md` §8) — I/O-node wiring through property / `command.` / `eventToken.` / spread bindings is unchanged.
+Sources: each package's README (ja preferred) plus the `static wcBindable` / `static observedAttributes` declarations in src, `packages/signals/README.ja.md`, `docs/signals-definition-timing.md`, `docs/architecture-hardening/12-wc-bindable-observable-inventory.md`, `docs/audio-tag-design.md`, `docs/midi-tag-design.md`, `docs/timing-and-firing-contract.md`, and `examples/signals-live-search`. Tag surface verified at v4.31.0: **53 tags**, attribute spellings, properties, commands and the timing notes below source-verified. **4.0 changes no I/O node tag, property or command.** Two things an author sees: every package's `bootstrapXxx(config)` **throws** on an option it does not have, a value of another type, an unknown `tagNames` key or a non-string tag name (`[@wcstack/fetch] bootstrapFetch: "tagName" is not one of its options, or not of the option's type.` — `/auto` passes none, so a CDN page is unaffected), and `@wcstack/state` 4.0 delegates `on*:` handlers of bubbling events to the root (`state-binding.md` §8) — I/O-node wiring through property / `command.` / `eventToken.` / spread bindings is unchanged.
 
 History, for reading older pages: `mountNode` and the normative headless Cores arrived in 1.23, observation semantics (§0) in 1.24, `@wcstack/audio` / `@wcstack/midi` in 1.25, scoped-registry support in 1.31, `<wcs-view-transition>` in 1.32, `<wcs-media-query>` in 2.2; no tag, property or command name has changed since it was added. Two wiring shapes needed a minimum `@wcstack/state` on 3.x — the dotted property form (`.once:`) and `class.` / `attr.` / `style.` on a wc-bindable tag from 3.3, I/O nodes inside `for:` rows from 3.4 — and all of them work in 4.0.
 
@@ -2297,7 +2297,7 @@ Bind only the numeric params (§1.1) — writing a structural attribute from sta
 <script type="importmap">
 { "imports": { "@wcstack/signals/dom": "https://esm.run/@wcstack/signals/dom" } }
 </script>
-<!-- pinned: the version goes before the sub-path — https://esm.run/@wcstack/signals@4.30.0/dom -->
+<!-- pinned: the version goes before the sub-path — https://esm.run/@wcstack/signals@4.31.0/dom -->
 <script type="module">
   import { signal, computed, effect, selector, delegateEvents, h, render, For, bindNode, mountNode } from "@wcstack/signals/dom";
 </script>
@@ -2425,7 +2425,7 @@ The core (signal/computed/effect/createRoot/onCleanup/flushSync) and resource/st
 
 # wcstack on a page it does not own — islands and widgets
 
-Sources: `docs/islands.md` (+ `.ja.md`), `packages/state/README.md` "Inserting markup yourself" and "Mounting Additional State", `docs/binder-protocol-design.md` §10, `docs/scoped-custom-element-registries.md`, `packages/state/src/features/release.ts`, `packages/state/src/features/diagnostics.ts`, and the `community-hall` seam app in `docs/seam-apps.md` (a CMS site with htmx 2, five islands, a widget on a Turbo site that runs wcstack 4.17). All verified against the actual files at v4.30.0; the htmx and Turbo frame snippets below were run in Chromium.
+Sources: `docs/islands.md` (+ `.ja.md`), `packages/state/README.md` "Inserting markup yourself" and "Mounting Additional State", `docs/binder-protocol-design.md` §10, `docs/scoped-custom-element-registries.md`, `packages/state/src/features/release.ts`, `packages/state/src/features/diagnostics.ts`, and the `community-hall` seam app in `docs/seam-apps.md` (a CMS site with htmx 2, five islands, a widget on a Turbo site that runs wcstack 4.17). All verified against the actual files at v4.31.0; the htmx and Turbo frame snippets below were run in Chromium.
 
 Read this before adding wcstack to a server-rendered site whose pages come from another template language and are swapped by htmx or Turbo, or before writing a widget that other sites paste into their pages. Everything else in this skill still applies inside the island.
 
@@ -2486,8 +2486,8 @@ htmx's history snapshot and Turbo's snapshot cache restore a page **as drawn**: 
 A page defines `<wcs-state>` once: the first copy of `@wcstack/state` it evaluates defines it, a second copy does nothing (`[wcs/package-twice]`). A widget that loads `/auto` on a page that runs wcstack therefore runs on the page's copy, of whatever version. Give the widget a shadow root with a scoped registry and define wcstack's tags into it — every package's `bootstrapXxx(config, registry)` takes the registry:
 
 ```js
-import { bootstrapState } from "https://esm.run/@wcstack/state@4.30.0";
-import { bootstrapSse } from "https://esm.run/@wcstack/sse@4.30.0";
+import { bootstrapState } from "https://esm.run/@wcstack/state@4.31.0";
+import { bootstrapSse } from "https://esm.run/@wcstack/sse@4.31.0";
 
 let registry = null;
 function widgetRegistry() {
@@ -2529,7 +2529,7 @@ customElements.define("partner-widget", PartnerWidget);
 
 # Forms — a page that is mostly a form
 
-Sources: `docs/forms.md` (+ `.ja.md`), `packages/state/README.md` "Forms: what happens outside the `input` event" and "Two-Way Binding", `packages/state/src/features/forms.ts`, `docs/timing-and-firing-contract.md` §25, `packages/fetch/README.md`, `docs/seam-apps.md` (ekiden-entry). Verified against wcstack 4.30.0; every snippet here was run in Chromium.
+Sources: `docs/forms.md` (+ `.ja.md`), `packages/state/README.md` "Forms: what happens outside the `input` event" and "Two-Way Binding", `packages/state/src/features/forms.ts`, `docs/timing-and-firing-contract.md` §25, `packages/fetch/README.md`, `docs/seam-apps.md` (ekiden-entry). Verified against wcstack 4.31.0; every snippet here was run in Chromium.
 
 Read this before building an application form, an entry sheet or a wizard: text typed with an IME (Japanese, Chinese, Korean), fields that format what is typed, autofill, a reset button, rows of inputs that move, form controls of your own.
 
@@ -2687,7 +2687,7 @@ send(e) {
 
 # Long lists
 
-A page with a long list: infinite scroll, a feed, a table of thousands of rows, a list the user comes back to. Sources: `docs/long-lists.md` (+ `.ja.md`), `packages/fetch/README.md` §5, `packages/intersection/README.md`, `docs/timing-and-firing-contract.md` §26, the router README "Where route content lives", `docs/seam-apps.md` (town-archive). Verified against wcstack 4.30.0; the infinite-scroll example, the abort on a filter change and the link back to a row's fragment were run in Chromium, Firefox and WebKit. What says 4.24 needs that release; on 4.23 see the notes.
+A page with a long list: infinite scroll, a feed, a table of thousands of rows, a list the user comes back to. Sources: `docs/long-lists.md` (+ `.ja.md`), `packages/fetch/README.md` §5, `packages/intersection/README.md`, `docs/timing-and-firing-contract.md` §26, the router README "Where route content lives", `docs/seam-apps.md` (town-archive). Verified against wcstack 4.31.0; the infinite-scroll example, the abort on a filter change and the link back to a row's fragment were run in Chromium, Firefox and WebKit. What says 4.24 needs that release; on 4.23 see the notes.
 
 ## 1. What costs
 
@@ -2760,7 +2760,7 @@ Back restores the position by itself when the list still holds its rows. A link 
 
 # Screen and sensor APIs
 
-A page that uses what the device has: fullscreen, a small video window (Picture-in-Picture), the pointer lock, the screen's orientation, which way the phone points and how it moves, the share sheet, the contact picker, saved passwords, the eye dropper. Sources: `docs/device-apis.md` (+ `.ja.md`), the READMEs of `fullscreen`, `picture-in-picture`, `pointer-lock`, `screen-orientation`, `tilt`, `accelerometer`, `gyroscope`, `magnetometer`, `ambient-light-sensor`, `share`, `contacts`, `credential`, `eyedropper`, `permission`, `docs/timing-and-firing-contract.md` §8, §9, §16, §27. Written from the `stamp-rally` seam app. Verified against wcstack 4.30.0: the examples were run in Chromium, Firefox and WebKit; what is said about a phone was checked with stand-ins, not on a phone.
+A page that uses what the device has: fullscreen, a small video window (Picture-in-Picture), the pointer lock, the screen's orientation, which way the phone points and how it moves, the share sheet, the contact picker, saved passwords, the eye dropper. Sources: `docs/device-apis.md` (+ `.ja.md`), the READMEs of `fullscreen`, `picture-in-picture`, `pointer-lock`, `screen-orientation`, `tilt`, `accelerometer`, `gyroscope`, `magnetometer`, `ambient-light-sensor`, `share`, `contacts`, `credential`, `eyedropper`, `permission`, `docs/timing-and-firing-contract.md` §8, §9, §16, §27. Written from the `stamp-rally` seam app. Verified against wcstack 4.31.0: the examples were run in Chromium, Firefox and WebKit; what is said about a phone was checked with stand-ins, not on a phone.
 
 Three things hold for all of them: every one is missing on some device, every one that acts wants a tap, and none of them throws — a refusal is a value in `error` / `errorInfo`.
 
@@ -3041,7 +3041,7 @@ npx @wcstack/lint --errors-only index.html   # the final gate, once every warnin
 
 ## 2. TypeScript
 
-- **`wcs-schema` — check paths against the real types.** When the state is a TypeScript file (`<wcs-state src="./state.ts">`, or a build that emits `state.js` from it): `npx wcs-schema emit src/state.ts` (from `@wcstack/typescript`) writes `wcstack.manifest.json`, which the lint and the VS Code extension discover (the nearest one walking up from the HTML — do not pass it as an argument unless it should replace discovery). With a `stateSchema`, a path the type lacks is `wcs/path-nonexistent` (**error**) and `for:` on a non-array is `wcs/path-type-mismatch`; paths under a `Date` / `Map` / `Record<string, T>` stay silent. Gate CI with `npx wcs-schema check src/state.ts && npx wcs-validate --strict index.html`, and re-run `emit --merge` after changing the type (`--merge` replaces the named state wholesale; keep hand-written `stateSchema`s only for states you do not generate). A `state.js` works too — `wcs-schema` reads its JSDoc types. The regex analyzer cannot read `users: [] as { name: string }[]` without the schema. `emit` records the state file as `stateSource`, and the schema applies only to the pages whose root `<wcs-state src>` is that file: keep one `wcstack.manifest.json` at the root even when another page has an inline state of its own. A schema whose top-level keys differ from the script's is `wcs/drift-state-key` — regenerate it. Annotate getters' return types (`get total(): number {`); the lint reads them, and methods and `$watch` handlers may carry `: void`.
+- **`wcs-schema` — check paths against the real types.** When the state is a TypeScript file (`<wcs-state src="./state.ts">`, or a build that emits `state.js` from it): `npx wcs-schema emit src/state.ts` (from `@wcstack/typescript`) writes `wcstack.manifest.json`, which the lint and the VS Code extension discover (the nearest one walking up from the HTML — do not pass it as an argument unless it should replace discovery). With a `stateSchema`, a path the type lacks is `wcs/path-nonexistent` (**error**) and `for:` on a non-array is `wcs/path-type-mismatch`. Where the schema says nothing — a bare `{}`: a `Date`, a `Map`, a `Record<string, T>`, `any`, and a list that starts empty with no type (`items: []` gives `items: {}`) — a path is checked as without a schema, a warning at most; adding the schema never weakens the check. `emit` names each list whose rows have no type: give it one (`/** @type {{ id: number, name: string }[]} */ items: []`) and a typo under it becomes an error. `emit` writes an `enum` in a fixed order, and `check` ignores the order of `enum` and `anyOf`. Gate CI with `npx wcs-schema check src/state.ts && npx wcs-validate --strict index.html`, and re-run `emit --merge` after changing the type (`--merge` replaces the named state wholesale; keep hand-written `stateSchema`s only for states you do not generate). A `state.js` works too — `wcs-schema` reads its JSDoc types. The regex analyzer cannot read `users: [] as { name: string }[]` without the schema. `emit` records the state file as `stateSource`, and the schema applies only to the pages whose root `<wcs-state src>` is that file: keep one `wcstack.manifest.json` at the root even when another page has an inline state of its own. A schema whose top-level keys differ from the script's is `wcs/drift-state-key` — regenerate it. Annotate getters' return types (`get total(): number {`); the lint reads them, and methods and `$watch` handlers may carry `: void`.
 - **`wcs-tsc` — type-check the inline `<script type="module">` inside `<wcs-state>`** (npm + tsc projects): `npx wcs-tsc --noEmit` (optional peers `@volar/typescript@~2.4.0` + `@volar/language-core@~2.4.0`). The language plugin the VS Code extension uses gives `this` its type, wraps a bare `export default {}` in `defineState` and strips `@wcstack/state` imports, so `this.coutn++` fails as `index.html(9,14): error TS2551 … Did you mean 'count'?` — the write typo that would otherwise create a new key. The script is checked as JavaScript, as the browser runs it: type an inline state with JSDoc (`/** @type {Item[]} */ items: []`, `/** @typedef {import("./api").Item} Item */`), and TypeScript syntax (`const n: number`, `as`, `!`, `import type`) is an error — it would throw in the browser. A `$on` handler's parameters are typed (`state`, `event`, the indexes; `this` is an error) and `this.$command` has exactly the names in `$commandTokens`, in a `.ts` state through `defineState` too. The tsconfig must reach the pages (`include` covering them) and target ES2015+; use `strict`. `wcs-tsc` prints `wcs-tsc: warning: …` about what is missing — pages left out of the program included — and `--wcs-defaults` adds it to a temporary config. Other CDN imports are `any` (`--url-imports=error` to forbid). It checks the script side; the lint checks the HTML side — run both.
 - **Building a `.ts` state (Vite).** `<wcs-state src="./src/state.ts">` works on the dev server, but `vite build` emits no state file without `wcstack()` from `@wcstack/typescript/vite` in `plugins`: production 404s the state. The plugin also keeps the inline scripts of `<wcs-state>` and `<wcs-guard-handler>` in the page (Vite takes them out). Without a bundler, compile with `tsc` and point `src` at the `.js`.
 - **Both need `typescript` 5 or 6** (the peer is `>=5.0 <7`): install `typescript@6` — a bare `typescript` installs 7, which publishes no JavaScript compiler API.
@@ -3063,7 +3063,7 @@ When wiring is silent and the lint is clean, load `@wcstack/devtools/auto` (befo
 
 A wcstack page is plain DOM: it tests under vitest + happy-dom with no browser, no test-only API and no build.
 
-- **`@wcstack/testing`** (peers `@wcstack/state`, `@wcstack/server`): `const app = await mount(html)` registers the elements and waits for every element and binding (a `<wcs-router>`'s first route too — add `bootstrap: [async () => (await import("@wcstack/router")).bootstrapRouter()]`); a state in its own file mounts with `mount(html, { resolveModule })`. Then `app.state().write(s => …)` / `app.state().read(s => …)` (`app.state<typeof appState>()` types `s`), `fire(el, "click")`, `await settle()`, `app.unmount()`. It shims inline-script state loading, `textContent = 0` rendering as `""`, and happy-dom's parser moving a `<template>` out of a table (insert such markup yourself with `@wcstack/server`'s `setInnerHTML`, not `innerHTML`). Example suite: `examples/state-testing-todo/`.
+- **`@wcstack/testing`** (peers `@wcstack/state`, `@wcstack/server`): `const app = await mount(html)` registers the elements and waits for every element and binding (a `<wcs-router>`'s first route too). A `bootstrap` list replaces the default `[bootstrapState]`, so a page with the router lists both: `bootstrap: [async () => (await import("@wcstack/router")).bootstrapRouter(), async () => (await import("@wcstack/state")).bootstrapState()]` — `mount()` rejects a page with a `<wcs-state>` whose tag the list leaves undefined, naming the fix; a state in its own file mounts with `mount(html, { resolveModule })`. Then `app.state().write(s => …)` / `app.state().read(s => …)` (`app.state<typeof appState>()` types `s`), `fire(el, "click")`, `await settle()`, `app.unmount()`. It shims inline-script state loading, `textContent = 0` rendering as `""`, and happy-dom's parser moving a `<template>` out of a table (insert such markup yourself with `@wcstack/server`'s `setInnerHTML`, not `innerHTML`). Example suite: `examples/state-testing-todo/`.
 - **Without the package**: setup file `bootstrapState(); URL.createObjectURL = undefined as any;` (routes the inline state through the `data:` loader — without it the state never finishes loading under Node). Test: `document.body.innerHTML = html` → `await stateEl.connectedCallbackPromise` → `await getBindingsReady(document)` → assert → `await stateEl.createStateAsync("writable", async (s) => { s.count = 42; })` (or `button.click()`) → `await new Promise(r => setTimeout(r, 0))` → assert. Write arrays reactively (`s.items = [...s.items, x]`). Bare Node: `installGlobals()` from `@wcstack/server`, then dynamic-import `@wcstack/state` after it. Details: `state-binding.md` §13.
 - `renderToString()` from `@wcstack/server` gives a snapshot test.
 
@@ -3101,6 +3101,8 @@ Each row applies to every release up to and including the one named. The workaro
 
 | Pinned at or below | What differs | Write instead |
 |---|---|---|
+| 4.30 | `mount()` (`@wcstack/testing`) resolves with nothing bound when its `bootstrap` list leaves out `bootstrapState`; under happy-dom a `<wcs-link>` written before the `<wcs-router>` fails `mount()` (`wcs-link is not connected to a router.`), and one written after it gets an empty `<a>` and an `href` without the basename | List `bootstrapState` too; in a page tested with `mount()`, put the links after the router and find them by `wcs-link[to="…"] + a` |
+| 4.30 | With a `stateSchema`, the lint says nothing under a list whose rows have no type (`items: {}`), does not report a getter that reads a list's rows (`this.items.reduce(…)`) while the page writes a row's field, and offers a did-you-mean for a row's field only; `wcs-schema` leaves out an accessor declared for several paths and writes an `enum` in TypeScript's order, which `check` calls drift after an unrelated edit | Type each list that starts empty; read row fields through `$getAll`; re-run `emit` when `check` reports only a reordered `enum` |
 | 4.29 | With `$listKeys`, a refresh that changes only fields of the rows does not reach a getter that reads the list: a card whose `status` changed leaves its column and enters no other | Read the fields through `this.$getAll("cards.*.status", [])` in the getter, or do not declare `$listKeys` on a list that derived lists filter |
 | 4.29 | An expression in a binding is "Path … does not exist" (`Did you mean "loading"?` for `!loading`) and a lint path warning — or nothing; `{{ }}` in an attribute, `if:` / `for:` on an element, `style:` with an object, a `Set` changed in place, a fixed `id` in a row, `onSubmit:`, `key:`, a relative `import` in an inline state are silent in the lint (the first three at run time too) | Check them by eye (`state-binding.md` pitfalls 64–66) |
 | 4.29 | `wcs-validate --strict` exits 0 with a state unread (a `src` from `/` without `--root`, a `...spread` at the top of the state) | Read the info lines too: `wcs/state-src-unread`, `wcs/path-dynamic-unknown` |
