@@ -1,0 +1,428 @@
+{
+  "schemaVersion": 2,
+  "kind": "application",
+  "manifestExtensions": {
+    "wcstack.application": {
+      "version": 2,
+      "stateSchema": {
+        "type": "object",
+        "properties": {
+          "yearLabel": {
+            "type": "string"
+          },
+          "routeName": {
+            "type": "string"
+          },
+          "navigateUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stepIndex": {
+            "type": "number"
+          },
+          "isFirstStep": {
+            "type": "boolean"
+          },
+          "isLastStep": {
+            "type": "boolean"
+          },
+          "filingType": {
+            "type": "string"
+          },
+          "incomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "draft": {
+                  "type": "string"
+                },
+                "share": {
+                  "type": "number"
+                },
+                "name": {},
+                "amountName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "amount",
+                "draft"
+              ]
+            }
+          },
+          "expenses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "draft": {
+                  "type": "string"
+                },
+                "share": {
+                  "type": "number"
+                },
+                "name": {},
+                "amountName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "label",
+                "amount",
+                "draft"
+              ]
+            }
+          },
+          "dependents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "income": {
+                  "type": "number"
+                },
+                "draft": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "dependent",
+                        "familyEmployee",
+                        "noDeduction",
+                        "overIncome",
+                        "specificRelative",
+                        "unknown"
+                      ]
+                    },
+                    "amount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "amount"
+                  ]
+                },
+                "deduction": {},
+                "note": {
+                  "type": "string"
+                },
+                "hasIncome": {
+                  "type": "boolean"
+                },
+                "incomeName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "income",
+                "draft"
+              ]
+            }
+          },
+          "socialInsurance": {
+            "type": "number"
+          },
+          "hasSpouse": {
+            "type": "boolean"
+          },
+          "spouseIncome": {
+            "type": "number"
+          },
+          "spouseElderly": {
+            "type": "boolean"
+          },
+          "withholding": {
+            "type": "number"
+          },
+          "drafts": {
+            "type": "object",
+            "properties": {
+              "socialInsurance": {
+                "type": "string"
+              },
+              "spouseIncome": {
+                "type": "string"
+              },
+              "withholding": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "socialInsurance",
+              "spouseIncome",
+              "withholding"
+            ]
+          },
+          "incomeTotal": {},
+          "expenseTotal": {},
+          "profit": {
+            "type": "number"
+          },
+          "blueDeduction": {
+            "type": "number"
+          },
+          "businessIncome": {
+            "type": "number"
+          },
+          "isLoss": {
+            "type": "boolean"
+          },
+          "dependentsDeduction": {},
+          "totalIncome": {
+            "type": "number"
+          },
+          "basicDeduction": {},
+          "spouseStatus": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "special",
+                  "spouse"
+                ]
+              },
+              "amount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "amount"
+            ]
+          },
+          "spouseDeduction": {
+            "type": "number"
+          },
+          "spouseNote": {
+            "type": "string",
+            "enum": [
+              "対象外",
+              "配偶者控除",
+              "配偶者特別控除"
+            ]
+          },
+          "deductionTotal": {},
+          "taxableIncome": {
+            "type": "number"
+          },
+          "taxRateLabel": {
+            "type": "string"
+          },
+          "incomeTax": {
+            "type": "number"
+          },
+          "reconstructionTax": {
+            "type": "number"
+          },
+          "totalTax": {
+            "type": "number"
+          },
+          "settlement": {
+            "type": "object",
+            "properties": {
+              "declaredTax": {
+                "type": "number"
+              },
+              "balance": {
+                "type": "number"
+              },
+              "isRefund": {
+                "type": "boolean"
+              },
+              "payment": {
+                "type": "number"
+              },
+              "refund": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "declaredTax",
+              "balance",
+              "isRefund",
+              "payment",
+              "refund"
+            ]
+          },
+          "isRefund": {
+            "type": "boolean"
+          },
+          "paymentAmount": {
+            "type": "number"
+          },
+          "refundAmount": {
+            "type": "number"
+          },
+          "pendingInputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasPendingInputs": {
+            "type": "boolean"
+          },
+          "pendingInputsText": {
+            "type": "string"
+          },
+          "resultQualifier": {
+            "type": "string",
+            "enum": [
+              "（未確定）",
+              "（概算）"
+            ]
+          },
+          "settlementQualifier": {
+            "type": "string",
+            "enum": [
+              "",
+              "（未確定）"
+            ]
+          },
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "filingType": {
+                "type": "string"
+              },
+              "incomes": {},
+              "expenses": {},
+              "dependents": {},
+              "socialInsurance": {
+                "type": "number"
+              },
+              "hasSpouse": {
+                "type": "boolean"
+              },
+              "spouseIncome": {
+                "type": "number"
+              },
+              "spouseElderly": {
+                "type": "boolean"
+              },
+              "withholding": {
+                "type": "number"
+              },
+              "drafts": {
+                "type": "object",
+                "properties": {
+                  "socialInsurance": {},
+                  "spouseIncome": {},
+                  "withholding": {}
+                },
+                "required": [
+                  "socialInsurance",
+                  "spouseIncome",
+                  "withholding"
+                ]
+              }
+            },
+            "required": [
+              "filingType",
+              "incomes",
+              "expenses",
+              "dependents",
+              "socialInsurance",
+              "hasSpouse",
+              "spouseIncome",
+              "spouseElderly",
+              "withholding",
+              "drafts"
+            ]
+          },
+          "storageError": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hasStorageError": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "yearLabel",
+          "routeName",
+          "navigateUrl",
+          "stepIndex",
+          "isFirstStep",
+          "isLastStep",
+          "filingType",
+          "incomes",
+          "expenses",
+          "dependents",
+          "socialInsurance",
+          "hasSpouse",
+          "spouseIncome",
+          "spouseElderly",
+          "withholding",
+          "drafts",
+          "incomeTotal",
+          "expenseTotal",
+          "profit",
+          "blueDeduction",
+          "businessIncome",
+          "isLoss",
+          "dependentsDeduction",
+          "totalIncome",
+          "basicDeduction",
+          "spouseStatus",
+          "spouseDeduction",
+          "spouseNote",
+          "deductionTotal",
+          "taxableIncome",
+          "taxRateLabel",
+          "incomeTax",
+          "reconstructionTax",
+          "totalTax",
+          "settlement",
+          "isRefund",
+          "paymentAmount",
+          "refundAmount",
+          "pendingInputs",
+          "hasPendingInputs",
+          "pendingInputsText",
+          "resultQualifier",
+          "settlementQualifier",
+          "snapshot",
+          "storageError",
+          "hasStorageError"
+        ]
+      },
+      "stateSource": "state.js"
+    }
+  }
+}

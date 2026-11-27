@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>wcstackで作る、ビルドレス確定申告下書きツールの25日間 — デモ</title>
+  <link rel="stylesheet" href="tax.css">
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>wcstackで作る、ビルドレス確定申告下書きツールの25日間</h1>
+    <p class="note">wcstack Advent Calendar 2026 の連載で作っているツールの、日ごとの版です。どの版もビルドしていないので、ブラウザの「ページのソースを表示」でコードを読めます。</p>
+    <p class="note">事業所得だけがある人の令和8年分（2026年分）の所得税を概算する下書きツールです。申告書に転記する前に、e-Taxの確定申告書等作成コーナーで再計算してください。</p>
+  </header>
+  <ul>
+    <li><a href="day00/">出発点</a> 静的な収支表</li>
+    <li><a href="day01/">1日目</a> HTMLにwcstackを読み込む</li>
+    <li><a href="day02/">2日目</a> data-wcsで表示を切り替える</li>
+    <li><a href="day03/">3日目</a> 金額の入力を双方向につなぐ</li>
+    <li><a href="day04/">4日目</a> 収入と経費の行を繰り返し表示する</li>
+    <li><a href="day05/">5日目</a> HTMLとJavaScriptをパスでつなぎ、編集できる収支表を作る</li>
+    <li><a href="day06/">6日目</a> DevToolsで状態の変更を追う</li>
+    <li><a href="day07/">7日目</a> パスgetterで行ごとの構成比を計算する</li>
+    <li><a href="day08/">8日目</a> getterをつないで所得税まで計算する</li>
+    <li><a href="day09/">9日目</a> 納付と還付を出し分ける</li>
+    <li><a href="day10/">10日目</a> 青色申告特別控除を追加する</li>
+    <li><a href="day11/">11日目</a> wcs-storageで入力を自動保存する</li>
+    <li><a href="day12/">12日目</a> 金額欄をWeb Componentにする</li>
+    <li><a href="day13/">13日目</a> 入力中にカンマで区切り、キャレットを保つ</li>
+    <li><a href="day14/">14日目</a> 正しくない入力を黙って別の金額にしない</li>
+    <li><a href="day15/">15日目</a> 採用していない入力を状態に持たせ、結果を「未確定」と示す</li>
+    <li><a href="day16/">16日目</a> 貼り付けとIMEで入ってくる金額を確かめる</li>
+    <li><a href="day17/">17日目</a> 金額欄をブラウザなしでテストする</li>
+    <li><a href="day18/">18日目</a> 扶養親族の行ごとに控除を判定する</li>
+    <li><a href="day19/">19日目</a> 入力をステップ画面に分ける</li>
+    <li><a href="day20/">20日目</a> 入力から納める税金までをテストする</li>
+    <li><a href="day21/">21日目</a> lintでパスの綴り間違いを見つける</li>
+    <li><a href="day22/">22日目</a> 状態の型から、バインド先を検証する</li>
+    <li><a href="day23/">23日目</a> CSPとSRIで、読み込むスクリプトを固定する</li>
+    <li><a href="day24/">24日目</a> AIが実装した配偶者控除を検証する</li>
+    <li><a href="day25/">25日目</a> 完成版を公開し、状態パスで組む設計を振り返る</li>
+  </ul>
+</div>
+</body>
+</html>

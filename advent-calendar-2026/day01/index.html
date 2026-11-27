@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>収支</title>
+  <script type="module" src="https://esm.run/@wcstack/state@4.31.0/auto"></script>
+  <style>
+    body { margin: 24px; font-family: system-ui, sans-serif; }
+    table { border-collapse: collapse; }
+    th, td { padding: 8px 16px; border-bottom: 1px solid #ccc; }
+    th { text-align: left; font-weight: normal; }
+    td { text-align: right; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+<wcs-state>
+  <script type="module">
+    export default {
+      profit: 3800000,
+    };
+  </script>
+</wcs-state>
+
+<h1>収支</h1>
+
+<table>
+  <tbody>
+    <tr><th scope="row">収入金額</th><td>5,000,000 円</td></tr>
+    <tr><th scope="row">必要経費</th><td>1,200,000 円</td></tr>
+    <tr><th scope="row">差引金額</th><td><span data-wcs="textContent: profit"></span> 円</td></tr>
+  </tbody>
+</table>
+
+<p>事業の差引金額は <strong data-wcs="textContent: profit"></strong> 円です。</p>
+
+</body>
+</html>

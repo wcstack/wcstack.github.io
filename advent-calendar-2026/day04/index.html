@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>収支</title>
+  <link rel="stylesheet" href="../tax.css">
+  <script type="module" src="https://esm.run/@wcstack/state@4.31.0/auto"></script>
+</head>
+<body>
+
+<wcs-state>
+  <script type="module">
+    export default {
+      incomes: [
+        { label: "売上（Web制作）", amount: 4200000 },
+        { label: "売上（原稿料）", amount: 800000 },
+      ],
+      expenses: [
+        { label: "外注費", amount: 600000 },
+        { label: "地代家賃", amount: 420000 },
+        { label: "通信費", amount: 180000 },
+      ],
+
+      // 行の追加と削除。新しい配列をパスに代入する
+      addIncome() {
+        this.incomes = this.incomes.concat({ label: "", amount: 0 });
+      },
+      removeIncome(event, index) {
+        this.incomes = this.incomes.toSpliced(index, 1);
+      },
+      addExpense() {
+        this.expenses = this.expenses.concat({ label: "", amount: 0 });
+      },
+      removeExpense(event, index) {
+        this.expenses = this.expenses.toSpliced(index, 1);
+      },
+    };
+  </script>
+</wcs-state>
+
+<div class="page">
+  <header>
+    <h1>収支</h1>
+  </header>
+
+  <div class="layout">
+    <main>
+      <section class="card">
+        <h2>収入金額</h2>
+        <div class="table-scroll">
+          <table class="rows" id="incomes">
+            <thead>
+              <tr>
+                <th scope="col">科目</th>
+                <th scope="col" class="num">金額（円）</th>
+                <th scope="col"><span class="visually-hidden">操作</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template data-wcs="for: incomes">
+                <tr>
+                  <td><input type="text" aria-label="収入の科目" data-wcs="value: .label"></td>
+                  <td class="num"><input type="number" min="0" step="1" aria-label="収入の金額" data-wcs="value|number: .amount"></td>
+                  <td><button type="button" data-wcs="onclick: removeIncome">削除</button></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="add-row" data-wcs="onclick: addIncome">収入の行を追加</button>
+      </section>
+
+      <section class="card">
+        <h2>必要経費</h2>
+        <div class="table-scroll">
+          <table class="rows" id="expenses">
+            <thead>
+              <tr>
+                <th scope="col">科目</th>
+                <th scope="col" class="num">金額（円）</th>
+                <th scope="col"><span class="visually-hidden">操作</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template data-wcs="for: expenses">
+                <tr>
+                  <td><input type="text" aria-label="経費の科目" data-wcs="value: .label"></td>
+                  <td class="num"><input type="number" min="0" step="1" aria-label="経費の金額" data-wcs="value|number: .amount"></td>
+                  <td><button type="button" data-wcs="onclick: removeExpense">削除</button></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="add-row" data-wcs="onclick: addExpense">経費の行を追加</button>
+      </section>
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

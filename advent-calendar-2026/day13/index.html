@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>確定申告 下書きツール</title>
+  <link rel="stylesheet" href="../tax.css">
+  <!-- I/O の要素（storage）と自作の要素（yen-input）を先に、state を最後に読み込む -->
+  <script type="module" src="https://esm.run/@wcstack/storage@4.31.0/auto"></script>
+  <script type="module" src="./yen-input.js"></script>
+  <script type="module" src="https://esm.run/@wcstack/state@4.31.0/auto"></script>
+</head>
+<body>
+
+<wcs-state src="./state.js"></wcs-state>
+
+<!-- 入力全体を 1 つのキーに保存する。snapshot は保存用の getter と復元用の setter の組。
+     #init=element: 最初の同期では、保存してあった値（要素の側）が勝つ -->
+<wcs-storage key="advent-calendar-2026-day13" type="local"
+  data-wcs="value#init=element: snapshot; error: storageError"></wcs-storage>
+
+<div class="page">
+  <header>
+    <h1>確定申告 下書きツール（事業所得・所得税の概算）</h1>
+    <p class="note">
+      <span data-wcs="textContent: yearLabel"></span>の税率と控除で、事業所得だけがある人の所得税を概算します。
+      申告書に転記する前に、e-Tax の確定申告書等作成コーナーで再計算してください。
+    </p>
+    <p class="note" role="status">
+      <template data-wcs="if: hasStorageError"><span class="loss">保存に失敗しました。</span></template>
+      <template data-wcs="else:">入力はこのブラウザに自動保存されます（サーバーには送信しません）。</template>
+    </p>
+  </header>
+
+  <div class="layout">
+    <main>
+      <section class="card">
+        <h2>申告の種類</h2>
+        <fieldset class="radio-group">
+          <legend class="visually-hidden">申告の種類</legend>
+          <label><input type="radio" name="filingType" value="white" data-wcs="radio: filingType"> 白色申告（特別控除なし）</label>
+          <label><input type="radio" name="filingType" value="blue10" data-wcs="radio: filingType"> 青色申告 10万円控除</label>
+          <label><input type="radio" name="filingType" value="blue55" data-wcs="radio: filingType"> 青色申告 55万円控除</label>
+          <label><input type="radio" name="filingType" value="blue65" data-wcs="radio: filingType"> 青色申告 65万円控除</label>
+        </fieldset>
+      </section>
+
+      <section class="card">
+        <h2>収入金額</h2>
+        <div class="table-scroll">
+          <table class="rows" id="incomes">
+            <thead>
+              <tr>
+                <th scope="col">科目</th>
+                <th scope="col" class="num">金額（円）</th>
+                <th scope="col" class="num">構成比</th>
+                <th scope="col"><span class="visually-hidden">操作</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template data-wcs="for: incomes">
+                <tr>
+                  <td><input type="text" aria-label="収入の科目" data-wcs="value: .label"></td>
+                  <td class="num"><yen-input label="収入の金額" data-wcs="value: .amount"></yen-input></td>
+                  <td class="num" data-wcs="textContent: .share|percent(1)"></td>
+                  <td><button type="button" data-wcs="onclick: removeIncome">削除</button></td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row">合計</th>
+                <td class="num"><span id="income-total" data-wcs="textContent: incomeTotal|locale"></span> 円</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button type="button" class="add-row" data-wcs="onclick: addIncome">収入の行を追加</button>
+      </section>
+
+      <section class="card">
+        <h2>必要経費</h2>
+        <div class="table-scroll">
+          <table class="rows" id="expenses">
+            <thead>
+              <tr>
+                <th scope="col">科目</th>
+                <th scope="col" class="num">金額（円）</th>
+                <th scope="col" class="num">構成比</th>
+                <th scope="col"><span class="visually-hidden">操作</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template data-wcs="for: expenses">
+                <tr>
+                  <td><input type="text" aria-label="経費の科目" data-wcs="value: .label"></td>
+                  <td class="num"><yen-input label="経費の金額" data-wcs="value: .amount"></yen-input></td>
+                  <td class="num" data-wcs="textContent: .share|percent(1)"></td>
+                  <td><button type="button" data-wcs="onclick: removeExpense">削除</button></td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row">合計</th>
+                <td class="num"><span id="expense-total" data-wcs="textContent: expenseTotal|locale"></span> 円</td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button type="button" class="add-row" data-wcs="onclick: addExpense">経費の行を追加</button>
+      </section>
+
+      <section class="card">
+        <h2>所得控除と、すでに納めた税金</h2>
+        <div class="field">
+          <label for="social-insurance">社会保険料控除（円）</label>
+          <yen-input input-id="social-insurance" describedby="social-insurance-hint" data-wcs="value: socialInsurance"></yen-input>
+          <small id="social-insurance-hint">国民年金・国民健康保険などの、1年間に支払った額</small>
+        </div>
+        <div class="field">
+          <label for="withholding">源泉徴収税額（円）</label>
+          <yen-input input-id="withholding" describedby="withholding-hint" data-wcs="value: withholding"></yen-input>
+          <small id="withholding-hint">報酬から差し引かれた所得税と復興特別所得税</small>
+        </div>
+      </section>
+    </main>
+
+    <aside class="card result" aria-labelledby="result-title">
+      <h2 id="result-title">計算結果（概算）</h2>
+      <dl>
+        <dt>収入金額</dt>
+        <dd><span data-wcs="textContent: incomeTotal|locale"></span> 円</dd>
+        <dt>必要経費</dt>
+        <dd><span data-wcs="textContent: expenseTotal|locale"></span> 円</dd>
+        <dt>差引金額</dt>
+        <dd><span id="profit" data-wcs="textContent: profit|locale; class.loss: profit|lt(0)"></span> 円</dd>
+        <dt class="sub">青色申告特別控除</dt>
+        <dd class="sub"><span id="blue-deduction" data-wcs="textContent: blueDeduction|locale"></span> 円</dd>
+        <dt>事業所得</dt>
+        <dd><span id="business-income" data-wcs="textContent: businessIncome|locale; class.loss: isLoss"></span> 円</dd>
+
+        <dt class="group-start">所得控除の合計</dt>
+        <dd class="group-start"><span id="deduction-total" data-wcs="textContent: deductionTotal|locale"></span> 円</dd>
+        <dt class="sub">社会保険料控除</dt>
+        <dd class="sub"><span data-wcs="textContent: socialInsurance|locale"></span> 円</dd>
+        <dt class="sub">基礎控除</dt>
+        <dd class="sub"><span id="basic-deduction" data-wcs="textContent: basicDeduction|locale"></span> 円</dd>
+        <dt>課税される所得金額</dt>
+        <dd><span id="taxable-income" data-wcs="textContent: taxableIncome|locale"></span> 円</dd>
+
+        <dt class="group-start">所得税（税率 <span id="tax-rate" data-wcs="textContent: taxRateLabel"></span>）</dt>
+        <dd class="group-start"><span id="income-tax" data-wcs="textContent: incomeTax|locale"></span> 円</dd>
+        <dt>復興特別所得税</dt>
+        <dd><span id="reconstruction-tax" data-wcs="textContent: reconstructionTax|locale"></span> 円</dd>
+        <dt>所得税と復興特別所得税の合計</dt>
+        <dd><span id="total-tax" data-wcs="textContent: totalTax|locale"></span> 円</dd>
+        <dt>源泉徴収税額</dt>
+        <dd><span data-wcs="textContent: withholding|locale"></span> 円</dd>
+      </dl>
+
+      <div class="settlement" id="settlement">
+        <template data-wcs="if: isRefund">
+          <div class="label">還付される税金</div>
+          <div class="amount refund"><span data-wcs="textContent: refundAmount|locale"></span> 円</div>
+        </template>
+        <template data-wcs="else:">
+          <div class="label">納める税金</div>
+          <div class="amount"><span data-wcs="textContent: paymentAmount|locale"></span> 円</div>
+        </template>
+      </div>
+    </aside>
+  </div>
+</div>
+
+</body>
+</html>
